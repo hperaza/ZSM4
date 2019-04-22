@@ -1,7 +1,8 @@
 ;**********************************************************************;
 ;                                                                      ;
 ;   This file is part of ZSM4, a Z80/Z180/Z280 relocatable macro-      ;
-;   assembler in Z80 assembly. Copyright (C) 2017-2019, Hector Peraza. ;
+;   assembler written in Z80 assembly.                                 ;
+;   Copyright (C) 2017-2019, Hector Peraza.                            ;
 ;                                                                      ;
 ;   This program is free software; you can redistribute it and/or      ;
 ;   modify it under the terms of the GNU General Public License as     ;
