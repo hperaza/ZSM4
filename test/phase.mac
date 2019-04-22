@@ -1,0 +1,95 @@
+; .PHASE/.DEPHASE test
+
+	.z80
+
+	cseg
+
+	extrn	ex
+
+	org	220h
+
+	ld	hl,aa
+	ld	hl,bb
+aa:	.phase	8000h
+bb:	ld	hl,aa
+	ld	hl,bb
+	.dephase
+
+	.phase	6000h
+cc:	dw	aa,bb,cc
+	.phase	9000h		; error
+dd:	dw	aa,bb,cc,dd
+	dseg			; M80 accepts this, but screws up address
+ss:	dw	dd
+	.dephase
+	.dephase		; error
+
+zz	equ	$		; back to cseg (or dseg if M80)
+
+	dseg
+
+ee:	dw	zz
+	dw	dd
+	dw	cc
+	dw	bb
+	dw	aa
+	dw	ee
+	dw	ff
+	dw	gg
+	dw	ss
+
+	.phase	1000h
+ff:	dw	ee
+	cseg			; M80 accepts this, but screws up address
+gg:	dw	ff
+	.dephase
+
+	.phase	aa		; M80 accepts reloc - questionable
+jj:	dw	jj,hh
+	.dephase
+
+	.phase	ee		; M80 accepts reloc - questionable
+ii:	dw	ii,hh,ex
+	.dephase
+
+hh	equ	$
+
+	.phase	ex		; U error
+nn:	dw	hh,nn
+	.dephase
+
+mm	equ	$
+
+	.Z280
+
+	org	1000h
+
+L1	equ	$
+
+	.phase	8000h
+L2:	ld	a,b
+	jr	L2
+	jr	L1
+	ld	a,<L2>
+	ld	a,<L1>
+	jr	$+8
+	jp	$+8
+	jp	<L1>
+	jp	<L2>
+	jp	<L3>
+	.dephase
+
+L3:	ld	a,b
+	jr	L3
+	jr	L2
+	jr	L1
+	ld	a,<L3>
+	ld	a,<L2>
+	ld	a,<L1>
+	jr	$+8
+	jp	$+8
+	jp	<L1>
+	jp	<L2>
+	jp	<L3>
+
+	end

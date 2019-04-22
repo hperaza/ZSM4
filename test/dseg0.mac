@@ -1,0 +1,9 @@
+	cseg
+
+	dw	aa
+
+	dseg
+
+aa:
+
+	end

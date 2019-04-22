@@ -1,0 +1,10 @@
+; label before ENDM
+
+test	macro
+	local	label
+	jp	label
+label:	endm
+
+	test
+
+	end

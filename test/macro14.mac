@@ -1,0 +1,13 @@
+tt	macro
+	db	1
+tt	macro
+	db	2
+	endm
+	endm
+
+	tt
+	tt
+	tt
+	tt
+
+	end

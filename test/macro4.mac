@@ -1,0 +1,8 @@
+	cseg
+test	macro
+	db	1
+	include	incl2.inc
+	db	2
+	endm
+	test
+	end

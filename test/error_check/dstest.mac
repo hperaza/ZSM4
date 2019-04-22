@@ -1,0 +1,9 @@
+; DS test: argument can be only a non-reloc constant
+
+	cseg
+aa:
+	ds	aa	; not allowed
+	extrn	bb
+	ds	bb	; not allowed
+
+	end

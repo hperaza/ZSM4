@@ -1,0 +1,15 @@
+;	if1
+;	db	0
+;	endif
+
+	test
+
+dd:
+ee	equ	$
+ff	equ	dd
+
+test	macro
+	db	1
+	endm
+
+	end

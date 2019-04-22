@@ -1,0 +1,29 @@
+	cseg
+
+L1	equ	$
+
+V1	equ	1
+V2	equ	2
+V3	equ	3
+
+	extrn	E1
+
+test	macro	val
+	db	'&val'
+	endm
+
+test2	macro	val1,val2
+	db	'&val1,&val2'
+	endm
+
+	test	1			; db '1'
+	test	L1			; db 'L1'
+	test	%V1+V2			; db '3'
+	test	%(V1+V2)		; db '3'
+
+	test2	1,2			; db '1,2'
+	test2	L1,V1			; db 'L1,V1'
+	test2	%V1+V2,%V2*V3		; db '3,6'
+	test2	%(V1+V2),%(V3%V2)	; db '3,1'
+
+	end

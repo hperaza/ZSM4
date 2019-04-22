@@ -1,0 +1,13 @@
+; M80 does not pass this test
+
+test	macro	x,y,z,t
+&x	&y	&z
+	db	1
+	&t
+	endm
+
+	test	a1,macro,,endm
+	a1
+	test	,rept,5,endm
+
+	end

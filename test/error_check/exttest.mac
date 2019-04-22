@@ -1,0 +1,15 @@
+	.z80
+	cseg
+	extrn	a1
+	ld	hl,a1
+	dw	a1+5
+	dw	a1
+	dw	a1
+	dw	a1-5
+b1:
+	dw	2*b1
+	dw	b1*2
+	dw	2*a1
+	dw	a1*2
+	end	a1
+

@@ -1,0 +1,21 @@
+; Implicit external test, assemble with /U option
+
+	cseg
+
+test::	ld	de,str
+	ld	c,9
+	call	bdos		; implicit external
+	ld	e,0Dh
+	ld	c,2
+	call	bdos		; implicit external
+	ld	e,lf		; implicit external?
+	ld	c,2
+	call	bdos		; implicit external
+	jp	wboot		; implicit external
+
+	dseg
+
+str:	db	'test$'
+	dw	bdos		; implicit external
+
+	end

@@ -1,0 +1,19 @@
+; COMMON segment switching test
+
+	common	/C1/
+cc:	dw	aa
+aa:	dw	bb		; reference to variable in /C2/
+	dw	cc
+	dw	aa
+	dw	aa
+	dw	bb
+	db	1,2,3,4
+	dw	bb
+	db	1,2,3,4
+	ds	5
+	ds	5
+	db	1,2,3,4
+	dw	bb,bb,bb
+	COMMON	/C2/
+bb:	dw	1234
+	end

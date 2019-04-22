@@ -1,0 +1,28 @@
+pr	macro	a
+	.printx	'&a'
+	endm
+
+	if1
+xx	set	0
+	endif
+
+	test
+	db	10
+dd:
+	pr	%dd
+
+xx	set	xx+dd
+	dw	xx
+
+test	macro
+	if2
+	db	0
+	endif
+	endm
+
+;pr	macro	a
+;	.printx	'&a'
+;	endm
+
+
+	end

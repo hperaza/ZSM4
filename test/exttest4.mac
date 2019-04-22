@@ -1,0 +1,9 @@
+	.z80
+	cseg
+	extrn	a1
+	ld	hl,a1
+	dw	a1+5
+	dw	a1
+	dw	a1-5
+	end	a1
+

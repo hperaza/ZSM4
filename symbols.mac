@@ -1,0 +1,328 @@
+;**********************************************************************;
+;                                                                      ;
+;   This file is part of ZSM4, a Z80/Z180/Z280 relocatable macro-      ;
+;   assembler in Z80 assembly. Copyright (C) 2017-2019, Hector Peraza. ;
+;                                                                      ;
+;   This work is derived from Z80ASM, originally written by Michael    ;
+;   G. Lehman (1977) and with modifications by Ray Halls (1992) and    ;
+;   Neil Harrison (1983).                                              ;
+;                                                                      ;
+;   This program is free software; you can redistribute it and/or      ;
+;   modify it under the terms of the GNU General Public License as     ;
+;   published by the Free Software Foundation; either version 2 of     ;
+;   the License, or (at your option) any later version.                ;
+;                                                                      ;
+;   This program is distributed in the hope that it will be useful,    ;
+;   but WITHOUT ANY WARRANTY; without even the implied warranty of     ;
+;   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      ;
+;   GNU General Public License for more details.                       ;
+;                                                                      ;
+;   You should have received a copy of the GNU General Public License  ;
+;   along with this program; if not, write to the Free Software        ;
+;   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.          ;
+;                                                                      ;
+;**********************************************************************;
+
+	TITLE	Z80/Z180/Z280 Macro-Assembler
+	SUBTTL	Symbol table routines
+
+	.Z80
+
+	include	ZSM.INC
+
+	public	ID,ADDSYM,SYMLUK,FNDOPC,VALID,VALID1,WERROR
+
+	extrn	GNC,PTR1,UCASE,IDBUF,IDLEN,MCHECK,ERRFLG
+	extrn	NEWSYM,SYMTBL,SYMADR,IDADR,VAL,CMNPTR
+	extrn	SYMPTR,SYMMOD,OPCODES,OPLEN,EVFLGS
+;
+;	ID - Collect ID and place in IDBUF
+;	Returns delimiter character in A, symbol length in IDLEN
+;
+ID:	push	hl
+	push	de
+	push	bc		; save regs
+	ld	de,IDBUF
+	ld	b,IDMAX
+	call	GNC		; skip blanks, get char, convert to uppercase
+	call	VALID1
+	jr	c,LERROR	; error if not a valid starting char
+	ld	hl,(PTR1)
+	jr	ID3
+;
+ID2:	ld	a,(hl)
+	call	UCASE		; convert to uppercase
+	call	VALID
+	jr	c,ID4
+	inc	hl
+ID3:	ld	(de),a
+	inc	de
+	djnz	ID2
+ID7:	ld	a,(hl)
+	call	UCASE
+	call	VALID
+	jr	c,ID4
+	inc	hl
+	jr	ID7
+;
+ID4:	ld	(PTR1),hl
+ID6:	ld	c,a
+	ld	a,IDMAX
+	sub	b
+	ld	(IDLEN),a	; store symbol length
+	ld	a,c
+	pop	bc
+	pop	de
+	pop	hl
+	ret
+;
+LERROR:	ld	a,'L'
+	ld	(ERRFLG),a
+	jr	ID6
+;
+VALID:	call	ISDIG
+	ret	nc
+VALID1:	call	ISLETR
+	ret	nc
+	cp	'_'
+	ret	z
+	cp	'$'
+	ret	z
+	cp	'?'
+	ret	z
+	cp	'.'
+	ret	z
+	cp	'@'
+	ret	z
+	scf
+	ret
+;
+ISDIG:	cp	'0'
+	ret	c
+	cp	'9'+1
+	ccf
+	ret
+;
+ISLETR:	cp	'A'
+	ret	c
+	cp	'Z'+1
+	ccf
+	ret
+;
+;	ADDSYM - Add symbol to symbol table, if not already there
+;
+;	Upon entry, IDBUF contains the symbol name and IDLEN its length.
+;
+;	On return, HL and SYMADR point to value low byte in new entry for
+;	possible further update, and IDADR is set to the address of the
+;	length+flags field.
+;
+;	Z=1 if symbol already there, Z=0 otherwise.
+;
+;	Initial flags field is cleared.
+;	Initial value is set to (VAL) and mode to (SYMMOD).
+;
+ADDSYM:	xor	a
+	ld	(NEWSYM),a
+	ld	de,(SYMTBL)	; no conflict with reg names
+	ld	c,5
+	call	SYMLUK		; lookup symbol
+	push	hl		; save table ptr
+	ld	(SYMADR),hl	; save address for EQU
+	ld	(IDADR),de
+	pop	hl		; restore symbol table ptr
+	ret	nc		; return if already there, else continue below
+;
+;	SYMENT - Enter a symbol into the symbol table
+;	Upon entry IDBUF is assumed to contain the name of the symbol
+;	to enter, name length in IDLEN.
+;
+;	Entry format:	flags/length          (each 4 bits)
+;			n a m e ...           (up to 16 bytes)
+;			value                 (2 bytes)
+;			address mode          (1 byte)
+;			pointer to COMMON def (2 bytes)
+;
+;	On return HL points to value low byte in new entry for possible
+;	further update (used by EQU pseudo operator)
+;
+SYMENT:	ld	bc,IDMAX+6+1	; max entry length + end marker
+	call	MCHECK		; check for available memory
+	jr	nc,SYMEN1	; jump if enough
+WERROR:	ld	a,'W'
+	ld	(ERRFLG),a
+	ret
+;
+SYMEN1:	ld	a,(IDLEN)
+	or	a
+	jr	nz,SYMEN2
+	ld	a,'L'
+	ld	(ERRFLG),a
+	scf
+	ret			; else label error
+;
+SYMEN2:	ld	hl,(SYMPTR)
+	ld	(IDADR),hl	; HL = dest ptr
+	ld	c,a
+	ld	b,0
+	ld	(hl),a		; set up length, clear flags
+	inc	hl
+	ex	de,hl		; DE = dst
+	ld	hl,IDBUF	; HL = src
+	ldir			; copy name
+	ld	hl,(VAL)
+	ex	de,hl		; switch registers
+	push	hl
+	ld	(hl),e		; set value
+	inc	hl
+	ld	(hl),d
+	inc	hl
+	ld	a,(SYMMOD)
+	ld	(hl),a		; set mode
+	inc	hl
+	ld	de,(CMNPTR)
+	ld	(hl),e
+	inc	hl
+	ld	(hl),d
+	inc	hl
+	ld	(SYMPTR),hl
+	ld	(hl),0		; set up new pointer and new end marker
+	pop	hl
+	ld	(SYMADR),hl	; save address for EQU
+	or	0FFh		; set Z=0
+	ld	(NEWSYM),a
+	ret
+;
+;	SYMLUK - Look up symbols in table
+;
+;	On entry, DE points to table to search and C contains data field
+;	length. Symbol name in IDBUF and length in IDLEN.
+;
+;	On return, CY set means symbol not found.
+;	Else DE points to start of table entry and HL to value low byte
+;	in table entry.
+;
+SYMLUK:	ld	a,(IDLEN)
+	ld	b,a
+	inc	c		; include flags+length field
+SYML1:	ld	a,(de)
+	or	a
+	scf
+	ret	z		; return if end of table
+	and	0Fh		; get length of symbol
+	cp	b
+	jr	nz,SYML4
+	push	de
+	push	bc
+	inc	de		; skip length
+	ld	hl,IDBUF
+SYML2:	ld	a,(de)
+	cp	(hl)
+	jr	nz,SYML3
+	inc	hl
+	inc	de
+	djnz	SYML2
+SYML3:	pop	bc
+	pop	de
+	jr	z,SYML5		; branch if match
+	ld	a,b
+SYML4:	add	a,c		; get full entry length
+	ld	l,a
+	ld	h,0
+	add	hl,de
+	ex	de,hl
+	jr	SYML1		; advance pointer and continue to loop
+;
+SYML5:	ld	a,(de)
+	ld	b,a
+	and	0F0h
+	ld	(EVFLGS),a	; save for main processor
+	ld	a,b
+	and	0Fh
+	ld	l,a
+	ld	h,0
+	add	hl,de
+	inc	hl
+	xor	a
+	ret			; point to value low and exit
+;
+;	Search opcode table using a binary search
+;
+FNDOPC:	ld	a,(IDLEN)
+	sub	2
+	ret	c
+	cp	8+1-2
+	ccf
+	ret	c
+	ld	c,a
+	ld	b,0
+	ld	hl,OPLEN
+	add	hl,bc
+	ex	de,hl
+	ld	hl,OPCODES
+	add	hl,bc
+	add	hl,bc
+	add	a,4+2
+	ld	c,a		; save item size
+	ld	a,(hl)
+	inc	hl
+	ld	h,(hl)
+	ld	l,a		; get table base address into HL
+	ld	a,(de)
+	ld	b,a		; get number of table items into B
+	ld	d,c		; get item size into D
+
+	; binary search
+
+	ld	e,0FFh		; mark M <> old M
+	ld	c,0		; lower bound = 0
+BNEXT:	ld	a,b
+	add	a,c
+	rra			; middle point = (upper+lower)/2
+	cp	e		; same as last time?
+	scf
+	ret	z		; return error - not found
+
+	ld	e,a		; new middle value
+	push	hl		; table base addr
+	push	de
+	push	bc
+	ld	b,d		; get item size into B and C
+	ld	c,b		;  for loop counting below
+
+	ld	d,0		; DE = middle point
+BADD:	add	hl,de		; index into table (HL += DE times B)
+	djnz	BADD		; count and loop
+
+	push	hl
+	inc	hl		; address of byte to compare
+	ld	de,IDBUF
+	ld	a,c
+	sub	4
+	ld	b,a		; B = string length
+BCMP:	ld	a,(de)
+	cp	(hl)
+	inc	de
+	inc	hl
+	jr	nz,DIFF		; branch if no match
+	djnz	BCMP
+	pop	hl		; match found
+	pop	bc
+	pop	de
+	pop	bc
+	ld	a,e		; return index in A
+	ex	de,hl
+	jp	SYML5
+
+DIFF:	pop	hl
+	pop	bc		; restore bounds
+	pop	de		; restore item size and middle point
+	pop	hl		; restore table base address
+	jr	c,LOWER		; IDBUF is lower
+	ld	c,e		; lower = middle
+	jr	BNEXT		; IDBUF is higher
+
+LOWER:	ld	b,e		; upper = middle
+	jr	BNEXT		; IDBUF is lower
+
+	end

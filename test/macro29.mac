@@ -1,0 +1,26 @@
+	cseg
+
+m	macro	a
+	local	x
+	ifb	<a>
+x:	defs	5
+	endif
+	endm
+
+	.xall
+	m	1
+	m
+
+	.lall
+	m	1
+	m
+
+	.sfcond
+	m	1
+	m
+
+	.xall
+	m	1
+	m
+
+	end

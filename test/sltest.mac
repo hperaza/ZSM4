@@ -1,0 +1,8 @@
+		public	long$symbol$1,long$symbol$2
+
+long$symbol$1:	db	0
+long$symbol$2:	db	0
+long$symbol$3:	db	0
+long$symbol$4:	db	0
+
+		end

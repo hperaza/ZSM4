@@ -1,0 +1,312 @@
+;**********************************************************************;
+;                                                                      ;
+;   This file is part of ZSM4, a Z80/Z180/Z280 relocatable macro-      ;
+;   assembler in Z80 assembly. Copyright (C) 2017-2019, Hector Peraza. ;
+;                                                                      ;
+;   This program is free software; you can redistribute it and/or      ;
+;   modify it under the terms of the GNU General Public License as     ;
+;   published by the Free Software Foundation; either version 2 of     ;
+;   the License, or (at your option) any later version.                ;
+;                                                                      ;
+;   This program is distributed in the hope that it will be useful,    ;
+;   but WITHOUT ANY WARRANTY; without even the implied warranty of     ;
+;   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      ;
+;   GNU General Public License for more details.                       ;
+;                                                                      ;
+;   You should have received a copy of the GNU General Public License  ;
+;   along with this program; if not, write to the Free Software        ;
+;   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.          ;
+;                                                                      ;
+;**********************************************************************;
+
+	TITLE	Z80/Z180/Z280 Macro-Assembler
+	SUBTTL	REL file generation
+
+	.Z80
+
+	include	ZSM.INC
+
+	cseg
+
+	public	WMNAME,WIDENT,WCSIZE,WDSIZE,WLOC,WOBJ,WOBJ16
+	public	WENTRY,WDFENT,WDFEXT,WCMSIZ,WSELCM,WEOFFS,WRQST
+	public	INIOBJ,CLSOBJ
+
+	extrn	OFLAG,CLOSE2,WNB2,NAMLEN
+;
+;	WMNAME - Write module name, HL = name, E = length
+;	This is normally the first item in a REL file
+;
+WMNAME:	ld	c,84h		; 1 00 0010 - special item: program name
+	ld	b,7
+	call	WRBITS
+	jp	WRNAME
+;
+;	WRQST - Write request library search, HL = name, E = length
+;
+WRQST:	ld	c,86h		; 1 00 0011 - special item: request library
+	ld	b,7
+	call	WRBITS
+	jp	WRNAME
+;
+;	WIDENT - Write ident, HL = name, E = length
+;	Used by RSX180
+;
+WIDENT:	ld	c,88h		; 1 00 0100 - special item: extension link
+	ld	b,7
+	call	WRBITS
+	ld	a,e
+	inc	a
+	rrca
+	rrca
+	rrca
+	ld	c,a
+	ld	b,3
+	call	WRBITS		; write length
+	ld	c,'I'
+	call	WR8B		; write type
+	jp	WRN1		; output name
+
+	IF	0
+;
+;	WALIGN - Write segment alignment information, C = seg type,
+;	B = align bits [Not yet implemented]
+;
+WALIGN:	push	bc
+	ld	c,88h		; 1 00 0100 - special item: extension link
+	ld	b,7
+	call	WRBITS
+	ld	c,40h		; 010 - len = 2
+	ld	b,3
+	call	WRBITS		; write length
+	ld	c,'L'
+	call	WR8B		; write type
+	pop	bc
+	ld	a,b
+	and	0Fh
+	or	c
+	ld	c,a
+	jp	WR8B		; write segment and alignment
+
+	ENDIF
+;
+;	WOBJ - Write absolute byte in A
+;
+WOBJ:	push	af
+	ld	c,0
+	call	WRBIT		; 0 - load next 8 bits
+	pop	af
+	ld	c,a
+	jp	WR8B
+;
+;	WBOJ16 - Write relative word in HL, C = seg type.
+;
+WOBJ16:	ld	a,c
+	or	a
+	jr	z,W2X8
+	scf
+	rr	c		; push '1' bit - reloc item
+	ld	b,3
+	call	WRBITS		; output bit and seg type
+	ld	c,l
+	ld	b,h
+	call	WR16B		; output word value
+	ret
+W2X8:	ld	a,l
+	call	WOBJ
+	ld	a,h
+	jp	WOBJ
+;
+;	WCSIZE - Write CSEG size: HL = size
+;
+WCSIZE:	ld	c,9Ah		; 1 00 1101 - special item: define cseg size
+	ld	b,7
+	call	WRBITS
+	ld	c,40h		; program relative value follows
+	ld	b,2
+	call	WRBITS
+	ld	c,l
+	ld	b,h
+	jp	WR16B		; output size
+;
+;	WDSIZE - Write DSEG size: HL = size
+;
+WDSIZE:	ld	c,94h		; 1 00 1010 - special item: define dseg size
+	ld	b,7
+	call	WRBITS
+	ld	c,80h		; data relative value follows
+	ld	b,2
+	call	WRBITS
+	ld	c,l
+	ld	b,h
+	jp	WR16B		; output size
+;
+;	WLOC - Write loc counter: HL = address, E = seg type (40h = CSEG,
+;	80h = DSEG, 0C0h = COMMON)
+;
+WLOC:	ld	c,96h
+WLC1:	ld	b,7
+	call	WRBITS		; 1 00 1011 - special item: set loc counter
+	ld	c,e
+	ld	b,2
+	call	WRBITS		; segment-relative value follows
+	ld	c,l
+	ld	b,h
+	jp	WR16B		; output address
+;
+;	WENTRY - Write entry symbol record: HL = name, E = length
+;
+WENTRY:	ld	c,80h		; 1 00 0000 - special item: entry symbol
+	ld	b,7
+	call	WRBITS
+	jp	WRNAME
+;
+;	WDFENT - Write entry point record: DE = address, C = seg type,
+;	HL = name, B = length
+;
+WDFENT:	push	bc
+	ld	c,8Eh		; 1 00 0111 - special item: define entry point
+WRENT1:	ld	b,7
+	call	WRBITS
+	pop	bc
+	push	bc
+	ld	b,2
+	call	WRBITS		; segment-relative value follows
+	ld	c,e
+	ld	b,d
+	call	WR16B		; output address
+	pop	bc
+	ld	e,b
+	jp	WRNAME
+;
+;	WDFEXT - Write External chain head: DE = address, C = seg type,
+;	HL = name, B = length
+;
+WDFEXT:	push	bc
+	ld	c,8Ch		; 1 00 0110 - special item: chain external
+	jr	WRENT1
+;
+;	WSELCM - Write Select COMMON block: HL = name, B = length
+;
+WSELCM:	ld	c,82h		; 1 00 0001 - special item: program name
+	ld	b,7
+	call	WRBITS
+	jp	WRNAME
+;
+;	WCMSIZ - Write COMMON size record: DE = size, C = seg type,
+;	HL = name, B = length
+;
+WCMSIZ:	push	bc
+	ld	c,8Ah		; 1 00 0101 - special item: define COMMON size
+	jr	WRENT1
+;
+;	WEOFFS - Write External + Offset entry: HL = offset, E = seg type
+;
+WEOFFS:	ld	c,92h		; 1 00 1001
+	jr	WLC1
+;
+;	BPAD - Pad to byte boundary (end of module)
+;
+BPAD:	ld	a,(BITCNT)
+	cp	8
+	ret	z
+	ld	c,0
+	call	WRBIT		; pad to byte boundary
+	jr	BPAD
+;
+;	WRNAME - Write name field (len + chars), HL points to string,
+;	E = length
+;
+WRNAME:	ld	a,(NAMLEN)
+	cp	e
+	jr	nc,WRN0
+	ld	e,a		; truncate to max REL symbol length
+WRN0:	ld	a,e		; length
+	rrca			; shift left 5 (same as shift right 3)
+	rrca
+	rrca
+	ld	c,a
+	ld	b,3
+	call	WRBITS
+WRN1:	ld	c,(hl)
+	inc	hl
+	call	WR8B
+	dec	e
+	jr	nz,WRN1
+	ret
+;
+;	WR16B - Write 16 bits, word in BC
+;
+WR16B:	push	bc
+	call	WR8B
+	pop	bc
+	ld	c,b
+	; fall thru
+;
+;	WR8B - Write 8 bits, byte in C
+;
+WR8B:	ld	b,8
+	; fall thru
+;
+;	WRBITS - Write up to 8 bits, bits in reg C, num of bits in B
+;
+WRBITS:	call	WRBIT
+	djnz	WRBITS
+	ret
+;
+;	WRBIT - Write a single bit, bit is in MSB of C
+;
+WRBIT:	ld	a,(BITCNT)
+	cp	8
+	jr	nz,WB1
+	ld	a,(OFLAG)
+	cp	'O'		; check if REL file specified
+	ld	a,(BYTE)
+	push	bc
+	call	c,WNB2		; write byte to REL file
+	pop	bc
+	xor	a
+WB1:	inc	a
+	ld	(BITCNT),a
+	rl	c
+	ld	a,(BYTE)
+	rla
+	ld	(BYTE),a
+	ret
+
+INIOBJ:	xor	a
+	ld	(BYTE),a
+	ld	(BITCNT),a
+	ret
+;
+;	CLSOBJ - Write end of module record, end of file record, and
+;	close object file.
+;
+CLSOBJ:	ld	a,(OFLAG)
+	cp	'O'
+	ret	nc		; return if no REL file output
+	push	hl
+	push	bc
+	ld	c,9Ch
+	ld	b,7
+	call	WRBITS		; 1 00 1110 - special item: end of module
+	pop	bc
+	ld	b,2
+	call	WRBITS		; segment relative value follows
+	pop	bc
+	call	WR16B		; 0000'
+	call	BPAD		; pad to byte boundary
+	ld	c,9Eh
+	ld	b,7
+	call	WRBITS		; 1 00 1111 - special item: end of file
+	call	BPAD		; pad to byte boundary
+	ld	a,(BYTE)
+	call	WNB2
+	jp	CLOSE2		; close REL file
+
+	DSEG
+
+BITCNT:	ds	1		; bit counter
+BYTE:	ds	1		; bit accumulator
+
+	END

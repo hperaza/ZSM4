@@ -1,0 +1,4119 @@
+	.Z280
+
+VAL	equ	1234h
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	ADC	A,A		; 8F
+	ADC	A,B		; 88
+	ADC	A,C		; 89
+	ADC	A,D		; 8A
+	ADC	A,E		; 8B
+	ADC	A,H		; 8C
+	ADC	A,L		; 8D
+
+	ADC	A,IXH		; DD 8C
+	ADC	A,IXL		; DD 8D
+	ADC	A,IYH		; FD 8C
+	ADC	A,IYL		; FD 8D
+
+	ADC	A,5		; CE n
+
+	ADC	A,(HL)		; 8E
+
+	ADC	A,(ADDR)	; DD 8F addr
+
+	ADC	A,(IX+VAL)	; FD 89  val
+	ADC	A,(IX-VAL)	; FD 89 -val
+	ADC	A,(IY+VAL)	; FD 8A  val
+	ADC	A,(IY-VAL)	; FD 8A -val
+	ADC	A,(HL+VAL)	; FD 8B  val
+	ADC	A,(HL-VAL)	; FD 8B -val
+
+	ADC	A,(IX)		; DD 8E 00
+	ADC	A,(IX+5)	; DD 8E  d
+	ADC	A,(IX-5)	; DD 8E -d
+	ADC	A,(IY)		; FD 8E 00
+	ADC	A,(IY+5)	; FD 8E  d
+	ADC	A,(IY-5)	; FD 8E -d
+
+	ADC	A,<ADDR>	; FD 88 disp
+	ADC	A,(PC+VAL)	; FD 88 addr
+
+	ADC	A,(SP)		; DD 88 0000
+	ADC	A,(SP+VAL)	; DD 88  val
+	ADC	A,(SP-VAL)	; DD 88 -val
+
+	ADC	A,(HL+IX)	; DD 89
+	ADC	A,(IX+HL)	; DD 89
+	ADC	A,(HL+IY)	; DD 8A
+	ADC	A,(IY+HL)	; DD 8A
+	ADC	A,(IX+IY)	; DD 8B
+	ADC	A,(IY+IX)	; DD 8B
+
+	ADC	A,(HL+5)	; FD 8B  val
+	ADC	A,(HL-5)	; FD 8B -val
+	ADC	A,(SP+5)	; DD 88  val
+	ADC	A,(SP-5)	; DD 88 -val
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	ADC	A		; 8F
+	ADC	B		; 88
+	ADC	C		; 89
+	ADC	D		; 8A
+	ADC	E		; 8B
+	ADC	H		; 8C
+	ADC	L		; 8D
+
+	ADC	IXH		; DD 8C
+	ADC	IXL		; DD 8D
+	ADC	IYH		; FD 8C
+	ADC	IYL		; FD 8D
+
+	ADC	5		; CE n
+
+	ADC	(HL)		; 8E
+
+	ADC	(ADDR)		; DD 8F addr
+
+	ADC	(IX+VAL)	; FD 89  val
+	ADC	(IX-VAL)	; FD 89 -val
+	ADC	(IY+VAL)	; FD 8A  val
+	ADC	(IY-VAL)	; FD 8A -val
+	ADC	(HL+VAL)	; FD 8B  val
+	ADC	(HL-VAL)	; FD 8B -val
+
+	ADC	(IX)		; DD 8E 00
+	ADC	(IX+5)		; DD 8E  d
+	ADC	(IX-5)		; DD 8E -d
+	ADC	(IY)		; FD 8E 00
+	ADC	(IY+5)		; FD 8E  d
+	ADC	(IY-5)		; FD 8E -d
+
+	ADC	<ADDR>		; FD 88 disp
+	ADC	(PC+VAL)	; FD 88 addr
+
+	ADC	(SP)		; DD 88 0000
+	ADC	(SP+VAL)	; DD 88  val
+	ADC	(SP-VAL)	; DD 88 -val
+
+	ADC	(HL+IX)		; DD 89
+	ADC	(IX+HL)		; DD 89
+	ADC	(HL+IY)		; DD 8A
+	ADC	(IY+HL)		; DD 8A
+	ADC	(IX+IY)		; DD 8B
+	ADC	(IY+IX)		; DD 8B
+
+	ADC	(HL+5)		; FD 8B  val
+	ADC	(HL-5)		; FD 8B -val
+	ADC	(SP+5)		; DD 88  val
+	ADC	(SP-5)		; DD 88 -val
+
+;-----------------------------------------------------------------------
+
+	ADC	HL,BC		; ED 4A
+	ADC	HL,DE		; ED 5A
+	ADC	HL,HL		; ED 6A
+	ADC	HL,SP		; ED 7A
+
+	ADC	IX,BC		; DD ED 4A
+	ADC	IX,DE		; DD ED 5A
+	ADC	IX,IX		; DD ED 6A
+	ADC	IX,SP		; DD ED 7A
+
+	ADC	IY,BC		; FD ED 4A
+	ADC	IY,DE		; FD ED 5A
+	ADC	IY,IY		; FD ED 6A
+	ADC	IY,SP		; FD ED 7A
+
+;-----------------------------------------------------------------------
+
+	ADD	HL,A		; ED 6D
+
+	ADD	IX,A		; DD ED 6D
+	ADD	IY,A		; FD ED 6D
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	ADD	A,A		; 87
+	ADD	A,B		; 80
+	ADD	A,C		; 81
+	ADD	A,D		; 82
+	ADD	A,E		; 83
+	ADD	A,H		; 84
+	ADD	A,L		; 85
+
+	ADD	A,IXH		; DD 84
+	ADD	A,IXL		; DD 85
+	ADD	A,IYH		; FD 84
+	ADD	A,IYL		; FD 85
+
+	ADD	A,5		; C6 n
+
+	ADD	A,(HL)		; 86
+
+	ADD	A,(ADDR)	; DD 87 addr
+
+	ADD	A,(IX+VAL)	; FD 81  val
+	ADD	A,(IX-VAL)	; FD 81 -val
+	ADD	A,(IY+VAL)	; FD 82  val
+	ADD	A,(IY-VAL)	; FD 82 -val
+	ADD	A,(HL+VAL)	; FD 83  val
+	ADD	A,(HL-VAL)	; FD 83 -val
+
+	ADD	A,(IX)		; DD 86 00
+	ADD	A,(IX+5)	; DD 86  d
+	ADD	A,(IX-5)	; DD 86 -d
+	ADD	A,(IY)		; FD 86 00
+	ADD	A,(IY+5)	; FD 86  d
+	ADD	A,(IY-5)	; FD 86 -d
+
+	ADD	A,<ADDR>	; FD 80 disp
+	ADD	A,(PC+VAL)	; FD 80 addr
+
+	ADD	A,(SP)		; DD 80 0000
+	ADD	A,(SP+VAL)	; DD 80  val
+	ADD	A,(SP-VAL)	; DD 80 -val
+
+	ADD	A,(HL+IX)	; DD 81
+	ADD	A,(IX+HL)	; DD 81
+	ADD	A,(HL+IY)	; DD 82
+	ADD	A,(IY+HL)	; DD 82
+	ADD	A,(IX+IY)	; DD 83
+	ADD	A,(IY+IX)	; DD 83
+
+	ADD	A,(HL+5)	; FD 83  val
+	ADD	A,(HL-5)	; FD 83 -val
+	ADD	A,(SP+5)	; DD 80  val
+	ADD	A,(SP-5)	; DD 80 -val
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	ADD	A		; 87
+	ADD	B		; 80
+	ADD	C		; 81
+	ADD	D		; 82
+	ADD	E		; 83
+	ADD	H		; 84
+	ADD	L		; 85
+
+	ADD	IXH		; DD 84
+	ADD	IXL		; DD 85
+	ADD	IYH		; FD 84
+	ADD	IYL		; FD 85
+
+	ADD	5		; C6 n
+
+	ADD	(HL)		; 86
+
+	ADD	(ADDR)		; DD 87 addr
+
+	ADD	(IX+VAL)	; FD 81  val
+	ADD	(IX-VAL)	; FD 81 -val
+	ADD	(IY+VAL)	; FD 82  val
+	ADD	(IY-VAL)	; FD 82 -val
+	ADD	(HL+VAL)	; FD 83  val
+	ADD	(HL-VAL)	; FD 83 -val
+
+	ADD	(IX)		; DD 86 00
+	ADD	(IX+5)		; DD 86  d
+	ADD	(IX-5)		; DD 86 -d
+	ADD	(IY)		; FD 86 00
+	ADD	(IY+5)		; FD 86  d
+	ADD	(IY-5)		; FD 86 -d
+
+	ADD	<ADDR>		; FD 80 disp
+	ADD	(PC+VAL)	; FD 80 addr
+
+	ADD	(SP)		; DD 80 0000
+	ADD	(SP+VAL)	; DD 80  val
+	ADD	(SP-VAL)	; DD 80 -val
+
+	ADD	(HL+IX)		; DD 81
+	ADD	(IX+HL)		; DD 81
+	ADD	(HL+IY)		; DD 82
+	ADD	(IY+HL)		; DD 82
+	ADD	(IX+IY)		; DD 83
+	ADD	(IY+IX)		; DD 83
+
+	ADD	(HL+5)		; FD 83  val
+	ADD	(HL-5)		; FD 83 -val
+	ADD	(SP+5)		; DD 80  val
+	ADD	(SP-5)		; DD 80 -val
+
+;-----------------------------------------------------------------------
+
+	ADD	HL,BC		; 09
+	ADD	HL,DE		; 19
+	ADD	HL,HL		; 29
+	ADD	HL,SP		; 39
+
+	ADD	IX,BC		; DD 09
+	ADD	IX,DE		; DD 19
+	ADD	IX,IX		; DD 29
+	ADD	IX,SP		; DD 39
+
+	ADD	IY,BC		; FD 09
+	ADD	IY,DE		; FD 19
+	ADD	IY,IY		; FD 29
+	ADD	IY,SP		; FD 39
+
+;-----------------------------------------------------------------------
+
+	; HL is optional
+
+	ADDW	HL,BC		; ED C6
+	ADDW	HL,DE		; ED D6
+	ADDW	HL,HL		; ED E6
+	ADDW	HL,SP		; ED F6
+
+	ADDW	HL,IX		; DD ED E6
+	ADDW	HL,IY		; FD ED E6
+
+	ADDW	HL,VAL		; FD ED F6 val
+
+	ADDW	HL,(ADDR)	; DD ED D6 addr
+
+	ADDW	HL,(IX+VAL)	; FD ED C6  val
+	ADDW	HL,(IX-VAL)	; FD ED C6 -val
+	ADDW	HL,(IY+VAL)	; FD ED D6  val
+	ADDW	HL,(IY-VAL)	; FD ED D6 -val
+
+	ADDW	HL,(IX)		; FD ED C6 0000
+	ADDW	HL,(IX+5)	; FD ED C6  val
+	ADDW	HL,(IX-5)	; FD ED C6 -val
+	ADDW	HL,(IY)		; FD ED D6 0000
+	ADDW	HL,(IY+5)	; FD ED D6  val
+	ADDW	HL,(IY-5)	; FD ED D6 -val
+
+	ADDW	HL,<ADDR>	; DD ED F6 disp
+	ADDW	HL,(PC+VAL)	; DD ED F6 addr
+
+	ADDW	HL,(HL)		; DD ED C6
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	ADDW	BC		; ED C6
+	ADDW	DE		; ED D6
+	ADDW	HL		; ED E6
+	ADDW	SP		; ED F6
+
+	ADDW	IX		; DD ED E6
+	ADDW	IY		; FD ED E6
+
+	ADDW	VAL		; FD ED F6 val
+
+	ADDW	(ADDR)		; DD ED D6 addr
+
+	ADDW	(IX+VAL)	; FD ED C6  val
+	ADDW	(IX-VAL)	; FD ED C6 -val
+	ADDW	(IY+VAL)	; FD ED D6  val
+	ADDW	(IY-VAL)	; FD ED D6 -val
+
+	ADDW	(IX)		; FD ED C6 0000
+	ADDW	(IX+5)		; FD ED C6  val
+	ADDW	(IX-5)		; FD ED C6 -val
+	ADDW	(IY)		; FD ED D6 0000
+	ADDW	(IY+5)		; FD ED D6  val
+	ADDW	(IY-5)		; FD ED D6 -val
+
+	ADDW	<ADDR>		; DD ED F6 disp
+	ADDW	(PC+VAL)	; DD ED F6 addr
+
+	ADDW	(HL)		; DD ED C6
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	AND	A,A		; A7
+	AND	A,B		; A0
+	AND	A,C		; A1
+	AND	A,D		; A2
+	AND	A,E		; A3
+	AND	A,H		; A4
+	AND	A,L		; A5
+
+	AND	A,IXH		; DD A4
+	AND	A,IXL		; DD A5
+	AND	A,IYH		; FD A4
+	AND	A,IYL		; FD A5
+
+	AND	A,5		; E6 n
+
+	AND	A,(HL)		; A6
+
+	AND	A,(ADDR)	; DD A7 addr
+
+	AND	A,(IX+VAL)	; FD A1  val
+	AND	A,(IX-VAL)	; FD A1 -val
+	AND	A,(IY+VAL)	; FD A2  val
+	AND	A,(IY-VAL)	; FD A2 -val
+	AND	A,(HL+VAL)	; FD A3  val
+	AND	A,(HL-VAL)	; FD A3 -val
+
+	AND	A,(IX)		; DD A6 00
+	AND	A,(IX+5)	; DD A6  d
+	AND	A,(IX-5)	; DD A6 -d
+	AND	A,(IY)		; FD A6 00
+	AND	A,(IY+5)	; FD A6  d
+	AND	A,(IY-5)	; FD A6 -d
+
+	AND	A,<ADDR>	; FD A0 disp
+	AND	A,(PC+VAL)	; FD A0 addr
+
+	AND	A,(SP)		; DD A0 0000
+	AND	A,(SP+VAL)	; DD A0  val
+	AND	A,(SP-VAL)	; DD A0 -val
+
+	AND	A,(HL+IX)	; DD A1
+	AND	A,(IX+HL)	; DD A1
+	AND	A,(HL+IY)	; DD A2
+	AND	A,(IY+HL)	; DD A2
+	AND	A,(IX+IY)	; DD A3
+	AND	A,(IY+IX)	; DD A3
+
+	AND	A,(HL+5)	; FD A3  val
+	AND	A,(HL-5)	; FD A3 -val
+	AND	A,(SP+5)	; DD A0  val
+	AND	A,(SP-5)	; DD A0 -val
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	AND	A		; A7
+	AND	B		; A0
+	AND	C		; A1
+	AND	D		; A2
+	AND	E		; A3
+	AND	H		; A4
+	AND	L		; A5
+
+	AND	IXH		; DD A4
+	AND	IXL		; DD A5
+	AND	IYH		; FD A4
+	AND	IYL		; FD A5
+
+	AND	5		; E6 n
+
+	AND	(HL)		; A6
+
+	AND	(ADDR)		; DD A7 addr
+
+	AND	(IX+VAL)	; FD A1  val
+	AND	(IX-VAL)	; FD A1 -val
+	AND	(IY+VAL)	; FD A2  val
+	AND	(IY-VAL)	; FD A2 -val
+	AND	(HL+VAL)	; FD A3  val
+	AND	(HL-VAL)	; FD A3 -val
+
+	AND	(IX)		; DD A6 00
+	AND	(IX+5)		; DD A6  d
+	AND	(IX-5)		; DD A6 -d
+	AND	(IY)		; FD A6 00
+	AND	(IY+5)		; FD A6  d
+	AND	(IY-5)		; FD A6 -d
+
+	AND	<ADDR>		; FD A0 disp
+	AND	(PC+VAL)	; FD A0 addr
+
+	AND	(SP)		; DD A0 0000
+	AND	(SP+VAL)	; DD A0  val
+	AND	(SP-VAL)	; DD A0 -val
+
+	AND	(HL+IX)		; DD A1
+	AND	(IX+HL)		; DD A1
+	AND	(HL+IY)		; DD A2
+	AND	(IY+HL)		; DD A2
+	AND	(IX+IY)		; DD A3
+	AND	(IY+IX)		; DD A3
+
+	AND	(HL+5)		; FD A3  val
+	AND	(HL-5)		; FD A3 -val
+	AND	(SP+5)		; DD A0  val
+	AND	(SP-5)		; DD A0 -val
+
+;-----------------------------------------------------------------------
+
+	BIT	0,A		; CB 47
+	BIT	0,B		; CB 40
+	BIT	0,C		; CB 41
+	BIT	0,D		; CB 42
+	BIT	0,E		; CB 43
+	BIT	0,H		; CB 44
+	BIT	0,L		; CB 45
+	BIT	0,(HL)		; CB 46
+
+	BIT	1,A		; CB 4F
+	BIT	1,B		; CB 48
+	BIT	1,C		; CB 49
+	BIT	1,D		; CB 4A
+	BIT	1,E		; CB 4B
+	BIT	1,H		; CB 4C
+	BIT	1,L		; CB 4D
+	BIT	1,(HL)		; CB 4E
+
+	BIT	2,A		; CB 57
+	BIT	2,B		; CB 50
+	BIT	2,C		; CB 51
+	BIT	2,D		; CB 52
+	BIT	2,E		; CB 53
+	BIT	2,H		; CB 54
+	BIT	2,L		; CB 55
+	BIT	2,(HL)		; CB 56
+
+	BIT	3,A		; CB 5F
+	BIT	3,B		; CB 58
+	BIT	3,C		; CB 59
+	BIT	3,D		; CB 5A
+	BIT	3,E		; CB 5B
+	BIT	3,H		; CB 5C
+	BIT	3,L		; CB 5D
+	BIT	3,(HL)		; CB 5E
+
+	BIT	4,A		; CB 67
+	BIT	4,B		; CB 60
+	BIT	4,C		; CB 61
+	BIT	4,D		; CB 62
+	BIT	4,E		; CB 63
+	BIT	4,H		; CB 64
+	BIT	4,L		; CB 65
+	BIT	4,(HL)		; CB 66
+
+	BIT	5,A		; CB 6F
+	BIT	5,B		; CB 68
+	BIT	5,C		; CB 69
+	BIT	5,D		; CB 6A
+	BIT	5,E		; CB 6B
+	BIT	5,H		; CB 6C
+	BIT	5,L		; CB 6D
+	BIT	5,(HL)		; CB 6E
+
+	BIT	6,A		; CB 77
+	BIT	6,B		; CB 70
+	BIT	6,C		; CB 71
+	BIT	6,D		; CB 72
+	BIT	6,E		; CB 73
+	BIT	6,H		; CB 74
+	BIT	6,L		; CB 75
+	BIT	6,(HL)		; CB 76
+
+	BIT	7,A		; CB 7F
+	BIT	7,B		; CB 78
+	BIT	7,C		; CB 79
+	BIT	7,D		; CB 7A
+	BIT	7,E		; CB 7B
+	BIT	7,H		; CB 7C
+	BIT	7,L		; CB 7D
+	BIT	7,(HL)		; CB 7E
+
+	BIT	0,(IX)		; DD CB 00 46
+	BIT	0,(IX+5)	; DD CB  d 46
+	BIT	0,(IX-5)	; DD CB -d 46
+	BIT	0,(IY)		; FD CB 00 46
+	BIT	0,(IY+5)	; FD CB  d 46
+	BIT	0,(IY-5)	; FD CB -d 46
+
+	BIT	1,(IX)		; DD CB 00 4E
+	BIT	1,(IX+5)	; DD CB  d 4E
+	BIT	1,(IX-5)	; DD CB -d 4E
+	BIT	1,(IY)		; FD CB 00 4E
+	BIT	1,(IY+5)	; FD CB  d 4E
+	BIT	1,(IY-5)	; FD CB -d 4E
+
+	BIT	2,(IX)		; DD CB 00 56
+	BIT	2,(IX+5)	; DD CB  d 56
+	BIT	2,(IX-5)	; DD CB -d 56
+	BIT	2,(IY)		; FD CB 00 56
+	BIT	2,(IY+5)	; FD CB  d 56
+	BIT	2,(IY-5)	; FD CB -d 56
+
+	BIT	3,(IX)		; DD CB 00 5E
+	BIT	3,(IX+5)	; DD CB  d 5E
+	BIT	3,(IX-5)	; DD CB -d 5E
+	BIT	3,(IY)		; FD CB 00 5E
+	BIT	3,(IY+5)	; FD CB  d 5E
+	BIT	3,(IY-5)	; FD CB -d 5E
+
+	BIT	4,(IX)		; DD CB 00 66
+	BIT	4,(IX+5)	; DD CB  d 66
+	BIT	4,(IX-5)	; DD CB -d 66
+	BIT	4,(IY)		; FD CB 00 66
+	BIT	4,(IY+5)	; FD CB  d 66
+	BIT	4,(IY-5)	; FD CB -d 66
+
+	BIT	5,(IX)		; DD CB 00 6E
+	BIT	5,(IX+5)	; DD CB  d 6E
+	BIT	5,(IX-5)	; DD CB -d 6E
+	BIT	5,(IY)		; FD CB 00 6E
+	BIT	5,(IY+5)	; FD CB  d 6E
+	BIT	5,(IY-5)	; FD CB -d 6E
+
+	BIT	6,(IX)		; DD CB 00 76
+	BIT	6,(IX+5)	; DD CB  d 76
+	BIT	6,(IX-5)	; DD CB -d 76
+	BIT	6,(IY)		; FD CB 00 76
+	BIT	6,(IY+5)	; FD CB  d 76
+	BIT	6,(IY-5)	; FD CB -d 76
+
+	BIT	7,(IX)		; DD CB 00 7E
+	BIT	7,(IX+5)	; DD CB  d 7E
+	BIT	7,(IX-5)	; DD CB -d 7E
+	BIT	7,(IY)		; FD CB 00 7E
+	BIT	7,(IY+5)	; FD CB  d 7E
+	BIT	7,(IY-5)	; FD CB -d 7E
+
+;-----------------------------------------------------------------------
+
+	CALL	NZ,(HL)		; DD C4
+	CALL	Z,(HL)		; DD CC
+	CALL	NC,(HL)		; DD D4
+	CALL	C,(HL)		; DD DC
+	CALL	PO,(HL)		; DD E4
+	CALL	PE,(HL)		; DD EC
+	CALL	NV,(HL)		; DD E4
+	CALL	V,(HL)		; DD EC
+	CALL	P,(HL)		; DD F4
+	CALL	M,(HL)		; DD FC
+	CALL	NS,(HL)		; DD F4
+	CALL	S,(HL)		; DD FC
+
+	CALL	(HL)		; DD CD
+
+	CALL	NZ,ADDR		; C4 addr
+	CALL	Z,ADDR		; CC addr
+	CALL	NC,ADDR		; D4 addr
+	CALL	C,ADDR		; DC addr
+	CALL	PO,ADDR		; E4 addr
+	CALL	PE,ADDR		; EC addr
+	CALL	NV,ADDR		; E4 addr
+	CALL	V,ADDR		; EC addr
+	CALL	P,ADDR		; F4 addr
+	CALL	M,ADDR		; FC addr
+	CALL	NS,ADDR		; F4 addr
+	CALL	S,ADDR		; FC addr
+
+	CALL	ADDR		; CD addr
+
+	CALL	NZ,<ADDR>	; FD C4 disp
+	CALL	Z,<ADDR>	; FD CC disp
+	CALL	NC,<ADDR>	; FD D4 disp
+	CALL	C,<ADDR>	; FD DC disp
+	CALL	PO,<ADDR>	; FD E4 disp
+	CALL	PE,<ADDR>	; FD EC disp
+	CALL	NV,<ADDR>	; FD E4 disp
+	CALL	V,<ADDR>	; FD EC disp
+	CALL	P,<ADDR>	; FD F4 disp
+	CALL	M,<ADDR>	; FD FC disp
+	CALL	NS,<ADDR>	; FD F4 disp
+	CALL	S,<ADDR>	; FD FC disp
+
+	CALL	<ADDR>		; FD CD disp
+
+	CALL	NZ,(PC+VAL)	; FD C4 addr
+	CALL	Z,(PC+VAL)	; FD CC addr
+	CALL	NC,(PC+VAL)	; FD D4 addr
+	CALL	C,(PC+VAL)	; FD DC addr
+	CALL	PO,(PC+VAL)	; FD E4 addr
+	CALL	PE,(PC+VAL)	; FD EC addr
+	CALL	NV,(PC+VAL)	; FD E4 addr
+	CALL	V,(PC+VAL)	; FD EC addr
+	CALL	P,(PC+VAL)	; FD F4 addr
+	CALL	M,(PC+VAL)	; FD FC addr
+	CALL	NS,(PC+VAL)	; FD F4 addr
+	CALL	S,(PC+VAL)	; FD FC addr
+
+	CALL	(PC+VAL)	; FD CD addr
+
+;-----------------------------------------------------------------------
+
+	CCF			; 3F
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	CP	A,A		; BF
+	CP	A,B		; B8
+	CP	A,C		; B9
+	CP	A,D		; BA
+	CP	A,E		; BB
+	CP	A,H		; BC
+	CP	A,L		; BD
+
+	CP	A,IXH		; DD BC
+	CP	A,IXL		; DD BD
+	CP	A,IYH		; FD BC
+	CP	A,IYL		; FD BD
+
+	CP	A,5		; FE n
+
+	CP	A,(HL)		; BE
+
+	CP	A,(ADDR)	; DD BF addr
+
+	CP	A,(IX+VAL)	; FD B9  val
+	CP	A,(IX-VAL)	; FD B9 -val
+	CP	A,(IY+VAL)	; FD BA  val
+	CP	A,(IY-VAL)	; FD BA -val
+	CP	A,(HL+VAL)	; FD BB  val
+	CP	A,(HL-VAL)	; FD BB -val
+
+	CP	A,(IX)		; DD BE 00
+	CP	A,(IX+5)	; DD BE  d
+	CP	A,(IX-5)	; DD BE -d
+	CP	A,(IY)		; FD BE 00
+	CP	A,(IY+5)	; FD BE  d
+	CP	A,(IY-5)	; FD BE -d
+
+	CP	A,<ADDR>	; FD B8 disp
+	CP	A,(PC+VAL)	; FD B8 addr
+
+	CP	A,(SP)		; DD B8 0000
+	CP	A,(SP+VAL)	; DD B8  val
+	CP	A,(SP-VAL)	; DD B8 -val
+
+	CP	A,(HL+IX)	; DD B9
+	CP	A,(IX+HL)	; DD B9
+	CP	A,(HL+IY)	; DD BA
+	CP	A,(IY+HL)	; DD BA
+	CP	A,(IX+IY)	; DD BB
+	CP	A,(IY+IX)	; DD BB
+
+	CP	A,(HL+5)	; FD BB  val
+	CP	A,(HL-5)	; FD BB -val
+	CP	A,(SP+5)	; DD B8  val
+	CP	A,(SP-5)	; DD B8 -val
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	CP	A		; BF
+	CP	B		; B8
+	CP	C		; B9
+	CP	D		; BA
+	CP	E		; BB
+	CP	H		; BC
+	CP	L		; BD
+
+	CP	IXH		; DD BC
+	CP	IXL		; DD BD
+	CP	IYH		; FD BC
+	CP	IYL		; FD BD
+
+	CP	5		; FE n
+
+	CP	(HL)		; BE
+
+	CP	(ADDR)		; DD BF addr
+
+	CP	(IX+VAL)	; FD B9  val
+	CP	(IX-VAL)	; FD B9 -val
+	CP	(IY+VAL)	; FD BA  val
+	CP	(IY-VAL)	; FD BA -val
+	CP	(HL+VAL)	; FD BB  val
+	CP	(HL-VAL)	; FD BB -val
+
+	CP	(IX)		; DD BE 00
+	CP	(IX+5)		; DD BE  d
+	CP	(IX-5)		; DD BE -d
+	CP	(IY)		; FD BE 00
+	CP	(IY+5)		; FD BE  d
+	CP	(IY-5)		; FD BE -d
+
+	CP	<ADDR>		; FD B8 disp
+	CP	(PC+VAL)	; FD B8 addr
+
+	CP	(SP)		; DD B8 0000
+	CP	(SP+VAL)	; DD B8  val
+	CP	(SP-VAL)	; DD B8 -val
+
+	CP	(HL+IX)		; DD B9
+	CP	(IX+HL)		; DD B9
+	CP	(HL+IY)		; DD BA
+	CP	(IY+HL)		; DD BA
+	CP	(IX+IY)		; DD BB
+	CP	(IY+IX)		; DD BB
+
+	CP	(HL+5)		; FD BB  val
+	CP	(HL-5)		; FD BB -val
+	CP	(SP+5)		; DD B8  val
+	CP	(SP-5)		; DD B8 -val
+
+;-----------------------------------------------------------------------
+
+	CPD			; ED A9
+	CPDR			; ED B9
+
+	CPI			; ED A1
+	CPIR			; ED B1
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	CPL	A		; 2F
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	CPL			; 2F
+
+;-----------------------------------------------------------------------
+
+	; HL is optional
+
+	CPW	HL,BC		; ED C7
+	CPW	HL,DE		; ED D7
+	CPW	HL,HL		; ED E7
+	CPW	HL,SP		; ED F7
+
+	CPW	HL,IX		; DD ED E7
+	CPW	HL,IY		; FD ED E7
+
+	CPW	HL,VAL		; FD ED F7 val
+
+	CPW	HL,(ADDR)	; DD ED D7 addr
+
+	CPW	HL,(IX+VAL)	; FD ED C7  val
+	CPW	HL,(IX-VAL)	; FD ED C7 -val
+	CPW	HL,(IY+VAL)	; FD ED D7  val
+	CPW	HL,(IY-VAL)	; FD ED D7 -val
+
+	CPW	HL,(IX)		; FD ED C7 0000
+	CPW	HL,(IX+5)	; FD ED C7  val
+	CPW	HL,(IX-5)	; FD ED C7 -val
+	CPW	HL,(IY)		; FD ED D7 0000
+	CPW	HL,(IY+5)	; FD ED D7  val
+	CPW	HL,(IY-5)	; FD ED D7 -val
+
+	CPW	HL,<ADDR>	; DD ED F7 disp
+	CPW	HL,(PC+VAL)	; DD ED F7 addr
+
+	CPW	HL,(HL)		; DD ED C7
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	CPW	BC		; ED C7
+	CPW	DE		; ED D7
+	CPW	HL		; ED E7
+	CPW	SP		; ED F7
+
+	CPW	IX		; DD ED E7
+	CPW	IY		; FD ED E7
+
+	CPW	VAL		; FD ED F7 val
+
+	CPW	(ADDR)		; DD ED D7 addr
+
+	CPW	(IX+VAL)	; FD ED C7  val
+	CPW	(IX-VAL)	; FD ED C7 -val
+	CPW	(IY+VAL)	; FD ED D7  val
+	CPW	(IY-VAL)	; FD ED D7 -val
+
+	CPW	(IX)		; FD ED C7 0000
+	CPW	(IX+5)		; FD ED C7  val
+	CPW	(IX-5)		; FD ED C7 -val
+	CPW	(IY)		; FD ED D7 0000
+	CPW	(IY+5)		; FD ED D7  val
+	CPW	(IY-5)		; FD ED D7 -val
+
+	CPW	<ADDR>		; DD ED F7 disp
+	CPW	(PC+VAL)	; DD ED F7 addr
+
+	CPW	(HL)		; DD ED C7
+
+;-----------------------------------------------------------------------
+
+	DAA			; 27
+
+;-----------------------------------------------------------------------
+
+	DEC	A		; 3D
+	DEC	B		; 05
+	DEC	C		; 0D
+	DEC	D		; 15
+	DEC	E		; 1D
+	DEC	H		; 25
+	DEC	L		; 2D
+
+	DEC	IXH		; DD 25
+	DEC	IXL		; DD 2D
+	DEC	IYH		; FD 25
+	DEC	IYL		; FD 2D
+
+	DEC	(HL)		; 35
+
+	DEC	(ADDR)		; DD 3D addr
+
+	DEC	(IX+VAL)	; FD 0D  val
+	DEC	(IX-VAL)	; FD 0D -val
+	DEC	(IY+VAL)	; FD 15  val
+	DEC	(IY-VAL)	; FD 15 -val
+	DEC	(HL+VAL)	; FD 1D  val
+	DEC	(HL-VAL)	; FD 1D -val
+
+	DEC	(IX)		; DD 35 00
+	DEC	(IX+5)		; DD 35  d
+	DEC	(IX-5)		; DD 35 -d
+	DEC	(IY)		; FD 35 00
+	DEC	(IY+5)		; FD 35  d
+	DEC	(IY-5)		; FD 35 -d
+
+	DEC	<ADDR>		; FD 05 disp
+	DEC	(PC+VAL)	; FD 05 addr
+
+	DEC	(SP)		; DD 05 0000
+	DEC	(SP+VAL)	; DD 05  val
+	DEC	(SP-VAL)	; DD 05 -val
+
+	DEC	(HL+IX)		; DD 0D
+	DEC	(IX+HL)		; DD 0D
+	DEC	(HL+IY)		; DD 15
+	DEC	(IY+HL)		; DD 15
+	DEC	(IX+IY)		; DD 1D
+	DEC	(IY+IX)		; DD 1D
+
+	DEC	(HL+5)		; FD 1D  val
+	DEC	(HL-5)		; FD 1D -val
+	DEC	(SP+5)		; DD 05  val
+	DEC	(SP-5)		; DD 05 -val
+
+;-----------------------------------------------------------------------
+
+	; DEC form also allowed for register pairs
+
+	DECW	BC		; 0B
+	DECW	DE		; 1B
+	DECW	HL		; 2B
+	DECW	SP		; 3B
+
+	DEC	BC		; 0B
+	DEC	DE		; 1B
+	DEC	HL		; 2B
+	DEC	SP		; 3B
+
+	DECW	IX		; DD 2B
+	DECW	IY		; FD 2B
+
+	DEC	IX		; DD 2B
+	DEC	IY		; FD 2B
+
+	DECW	(HL)		; DD 0B
+
+	DECW	(ADDR)		; DD 1B addr
+
+	DECW	(IX+VAL)	; FD 0B  val
+	DECW	(IX-VAL)	; FD 0B -val
+	DECW	(IY+VAL)	; FD 1B  val
+	DECW	(IY-VAL)	; FD 1B -val
+
+	DECW	(IX)		; FD 0B  val
+	DECW	(IX+5)		; FD 0B  val
+	DECW	(IX-5)		; FD 0B -val
+	DECW	(IY)		; FD 1B  val
+	DECW	(IY+5)		; FD 1B  val
+	DECW	(IY-5)		; FD 1B -val
+
+	DECW	<ADDR>		; DD 3B disp
+	DECW	(PC+VAL)	; DD 3B addr
+
+;-----------------------------------------------------------------------
+
+	DI			; F3
+	DI	55h		; ED 77 mask
+
+;-----------------------------------------------------------------------
+
+	; HL is optional
+
+	DIV	HL,A		; ED FC
+	DIV	HL,B		; ED C4
+	DIV	HL,C		; ED CC
+	DIV	HL,D		; ED D4
+	DIV	HL,E		; ED DC
+	DIV	HL,H		; ED E4
+	DIV	HL,L		; ED EC
+
+	DIV	HL,IXH		; DD ED E4
+	DIV	HL,IXL		; DD ED EC
+	DIV	HL,IYH		; FD ED E4
+	DIV	HL,IYL		; FD ED EC
+
+	DIV	HL,(HL)		; ED F4
+
+	DIV	HL,5		; FD ED FC n
+
+	DIV	HL,(ADDR)	; DD ED FC addr
+
+	DIV	HL,(IX+VAL)	; FD ED CC  val
+	DIV	HL,(IX-VAL)	; FD ED CC -val
+	DIV	HL,(IY+VAL)	; FD ED D4  val
+	DIV	HL,(IY-VAL)	; FD ED D4 -val
+	DIV	HL,(HL+VAL)	; FD ED DC  val
+	DIV	HL,(HL-VAL)	; FD ED DC -val
+
+	DIV	HL,(IX)		; DD ED F4 00
+	DIV	HL,(IX+5)	; DD ED F4  d
+	DIV	HL,(IX-5)	; DD ED F4 -d
+	DIV	HL,(IY)		; FD ED F4 00
+	DIV	HL,(IY+5)	; FD ED F4  d
+	DIV	HL,(IY-5)	; FD ED F4 -d
+
+	DIV	HL,<ADDR>	; FD ED C4 disp
+	DIV	HL,(PC+VAL)	; FD ED C4 addr
+
+	DIV	HL,(SP)		; DD ED C4 0000
+	DIV	HL,(SP+VAL)	; DD ED C4  val
+	DIV	HL,(SP-VAL)	; DD ED C4 -val
+
+	DIV	HL,(HL+IX)	; DD ED CC
+	DIV	HL,(IX+HL)	; DD ED CC
+	DIV	HL,(HL+IY)	; DD ED D4
+	DIV	HL,(IY+HL)	; DD ED D4
+	DIV	HL,(IX+IY)	; DD ED DC
+	DIV	HL,(IY+IX)	; DD ED DC
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	DIV	A		; ED FC
+	DIV	B		; ED C4
+	DIV	C		; ED CC
+	DIV	D		; ED D4
+	DIV	E		; ED DC
+	DIV	H		; ED E4
+	DIV	L		; ED EC
+
+	DIV	IXH		; DD ED E4
+	DIV	IXL		; DD ED EC
+	DIV	IYH		; FD ED E4
+	DIV	IYL		; FD ED EC
+
+	DIV	(HL)		; ED F4
+
+	DIV	5		; FD ED FC n
+
+	DIV	(ADDR)		; DD ED FC addr
+
+	DIV	(IX+VAL)	; FD ED CC  val
+	DIV	(IX-VAL)	; FD ED CC -val
+	DIV	(IY+VAL)	; FD ED D4  val
+	DIV	(IY-VAL)	; FD ED D4 -val
+	DIV	(HL+VAL)	; FD ED DC  val
+	DIV	(HL-VAL)	; FD ED DC -val
+
+	DIV	(IX)		; DD ED F4 00
+	DIV	(IX+5)		; DD ED F4  d
+	DIV	(IX-5)		; DD ED F4 -d
+	DIV	(IY)		; FD ED F4 00
+	DIV	(IY+5)		; FD ED F4  d
+	DIV	(IY-5)		; FD ED F4 -d
+
+	DIV	<ADDR>		; FD ED C4 disp
+	DIV	(PC+VAL)	; FD ED C4 addr
+
+	DIV	(SP)		; DD ED C4 0000
+	DIV	(SP+VAL)	; DD ED C4  val
+	DIV	(SP-VAL)	; DD ED C4 -val
+
+	DIV	(HL+IX)		; DD ED CC
+	DIV	(IX+HL)		; DD ED CC
+	DIV	(HL+IY)		; DD ED D4
+	DIV	(IY+HL)		; DD ED D4
+	DIV	(IX+IY)		; DD ED DC
+	DIV	(IY+IX)		; DD ED DC
+
+;-----------------------------------------------------------------------
+
+	; HL is optional
+
+	DIVU	HL,A		; ED FD
+	DIVU	HL,B		; ED C5
+	DIVU	HL,C		; ED CD
+	DIVU	HL,D		; ED D5
+	DIVU	HL,E		; ED DD
+	DIVU	HL,H		; ED E5
+	DIVU	HL,L		; ED ED
+
+	DIVU	HL,IXH		; DD ED E5
+	DIVU	HL,IXL		; DD ED ED
+	DIVU	HL,IYH		; FD ED E5
+	DIVU	HL,IYL		; FD ED ED
+
+	DIVU	HL,(HL)		; ED F5
+
+	DIVU	HL,5		; FD ED FD n
+
+	DIVU	HL,(ADDR)	; DD ED FD addr
+
+	DIVU	HL,(IX+VAL)	; FD ED CD  val
+	DIVU	HL,(IX-VAL)	; FD ED CD -val
+	DIVU	HL,(IY+VAL)	; FD ED D5  val
+	DIVU	HL,(IY-VAL)	; FD ED D5 -val
+	DIVU	HL,(HL+VAL)	; FD ED DD  val
+	DIVU	HL,(HL-VAL)	; FD ED DD -val
+
+	DIVU	HL,(IX)		; DD ED F5 00
+	DIVU	HL,(IX+5)	; DD ED F5  d
+	DIVU	HL,(IX-5)	; DD ED F5 -d
+	DIVU	HL,(IY)		; FD ED F5 00
+	DIVU	HL,(IY+5)	; FD ED F5  d
+	DIVU	HL,(IY-5)	; FD ED F5 -d
+
+	DIVU	HL,<ADDR>	; FD ED C5 disp
+	DIVU	HL,(PC+VAL)	; FD ED C5 addr
+
+	DIVU	HL,(SP)		; DD ED C5 0000
+	DIVU	HL,(SP+VAL)	; DD ED C5  val
+	DIVU	HL,(SP-VAL)	; DD ED C5 -val
+
+	DIVU	HL,(HL+IX)	; DD ED CD
+	DIVU	HL,(IX+HL)	; DD ED CD
+	DIVU	HL,(HL+IY)	; DD ED D5
+	DIVU	HL,(IY+HL)	; DD ED D5
+	DIVU	HL,(IX+IY)	; DD ED DD
+	DIVU	HL,(IY+IX)	; DD ED DD
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	DIVU	A		; ED FD
+	DIVU	B		; ED C5
+	DIVU	C		; ED CD
+	DIVU	D		; ED D5
+	DIVU	E		; ED DD
+	DIVU	H		; ED E5
+	DIVU	L		; ED ED
+
+	DIVU	IXH		; DD ED E5
+	DIVU	IXL		; DD ED ED
+	DIVU	IYH		; FD ED E5
+	DIVU	IYL		; FD ED ED
+
+	DIVU	(HL)		; ED F5
+
+	DIVU	5		; FD ED FD n
+
+	DIVU	(ADDR)		; DD ED FD addr
+
+	DIVU	(IX+VAL)	; FD ED CD  val
+	DIVU	(IX-VAL)	; FD ED CD -val
+	DIVU	(IY+VAL)	; FD ED D5  val
+	DIVU	(IY-VAL)	; FD ED D5 -val
+	DIVU	(HL+VAL)	; FD ED DD  val
+	DIVU	(HL-VAL)	; FD ED DD -val
+
+	DIVU	(IX)		; DD ED F5 00
+	DIVU	(IX+5)		; DD ED F5  d
+	DIVU	(IX-5)		; DD ED F5 -d
+	DIVU	(IY)		; FD ED F5 00
+	DIVU	(IY+5)		; FD ED F5  d
+	DIVU	(IY-5)		; FD ED F5 -d
+
+	DIVU	<ADDR>		; FD ED C5 disp
+	DIVU	(PC+VAL)	; FD ED C5 addr
+
+	DIVU	(SP)		; DD ED C5 0000
+	DIVU	(SP+VAL)	; DD ED C5  val
+	DIVU	(SP-VAL)	; DD ED C5 -val
+
+	DIVU	(HL+IX)		; DD ED CD
+	DIVU	(IX+HL)		; DD ED CD
+	DIVU	(HL+IY)		; DD ED D5
+	DIVU	(IY+HL)		; DD ED D5
+	DIVU	(IX+IY)		; DD ED DD
+	DIVU	(IY+IX)		; DD ED DD
+
+;-----------------------------------------------------------------------
+
+	; DEHL is optional
+
+	DIVUW	DEHL,BC		; ED CB
+	DIVUW	DEHL,DE		; ED DB
+	DIVUW	DEHL,HL		; ED EB
+	DIVUW	DEHL,SP		; ED FB
+
+	DIVUW	DEHL,IX		; DD ED EB
+	DIVUW	DEHL,IY		; FD ED EB
+
+	DIVUW	DEHL,VAL	; FD ED FB val
+
+	DIVUW	DEHL,(ADDR)	; DD ED DB addr
+
+	DIVUW	DEHL,(IX+VAL)	; FD ED CB  val
+	DIVUW	DEHL,(IX-VAL)	; FD ED CB -val
+	DIVUW	DEHL,(IY+VAL)	; FD ED DB  val
+	DIVUW	DEHL,(IY-VAL)	; FD ED DB -val
+
+	DIVUW	DEHL,<ADDR>	; DD ED FB disp
+	DIVUW	DEHL,(PC+VAL)	; DD ED FB addr
+
+	DIVUW	DEHL,(HL)	; DD ED CB
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	DIVUW	BC		; ED CB
+	DIVUW	DE		; ED DB
+	DIVUW	HL		; ED EB
+	DIVUW	SP		; ED FB
+
+	DIVUW	IX		; DD ED EB
+	DIVUW	IY		; FD ED EB
+
+	DIVUW	VAL		; FD ED FB val
+
+	DIVUW	(ADDR)		; DD ED DB addr
+
+	DIVUW	(IX+VAL)	; FD ED CB  val
+	DIVUW	(IX-VAL)	; FD ED CB -val
+	DIVUW	(IY+VAL)	; FD ED DB  val
+	DIVUW	(IY-VAL)	; FD ED DB -val
+
+	DIVUW	<ADDR>		; DD ED FB disp
+	DIVUW	(PC+VAL)	; DD ED FB addr
+
+	DIVUW	(HL)		; DD ED CB
+
+;-----------------------------------------------------------------------
+
+	; DEHL is optional
+
+	DIVW	DEHL,BC		; ED CA
+	DIVW	DEHL,DE		; ED DA
+	DIVW	DEHL,HL		; ED EA
+	DIVW	DEHL,SP		; ED FA
+
+	DIVW	DEHL,IX		; DD ED EA
+	DIVW	DEHL,IY		; FD ED EA
+
+	DIVW	DEHL,VAL	; FD ED FA val
+
+	DIVW	DEHL,(ADDR)	; DD ED DA addr
+
+	DIVW	DEHL,(IX+VAL)	; FD ED CA  val
+	DIVW	DEHL,(IX-VAL)	; FD ED CA -val
+	DIVW	DEHL,(IY+VAL)	; FD ED DA  val
+	DIVW	DEHL,(IY-VAL)	; FD ED DA -val
+
+	DIVW	DEHL,<ADDR>	; DD ED FA disp
+	DIVW	DEHL,(PC+VAL)	; DD ED FA addr
+
+	DIVW	DEHL,(HL)	; DD ED CA
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	DIVW	BC		; ED CA
+	DIVW	DE		; ED DA
+	DIVW	HL		; ED EA
+	DIVW	SP		; ED FA
+
+	DIVW	IX		; DD ED EA
+	DIVW	IY		; FD ED EA
+
+	DIVW	VAL		; FD ED FA val
+
+	DIVW	(ADDR)		; DD ED DA addr
+
+	DIVW	(IX+VAL)	; FD ED CA  val
+	DIVW	(IX-VAL)	; FD ED CA -val
+	DIVW	(IY+VAL)	; FD ED DA  val
+	DIVW	(IY-VAL)	; FD ED DA -val
+
+	DIVW	<ADDR>		; DD ED FA disp
+	DIVW	(PC+VAL)	; DD ED FA addr
+
+	DIVW	(HL)		; DD ED CA
+
+;-----------------------------------------------------------------------
+
+	DJNZ	$+5		; 10 d
+
+;-----------------------------------------------------------------------
+
+	EI			; FB
+	EI	55h		; ED 7F mask
+
+;-----------------------------------------------------------------------
+
+	EX	AF,AF'		; 08
+
+	EX	(SP),HL		; E3
+	EX	(SP),IX		; DD E3
+	EX	(SP),IY		; FD E3
+
+	EX	H,L		; ED EF
+
+	EX	DE,HL		; EB
+	EX	DE,IX		; DD EB
+	EX	DE,IY		; FD EB
+
+	EX	A,A		; ED 3F
+	EX	A,B		; ED 07
+	EX	A,C		; ED 0F
+	EX	A,D		; ED 17
+	EX	A,E		; ED 1F
+	EX	A,H		; ED 27
+	EX	A,L		; ED 2F
+
+	EX	A,IXH		; DD ED 27
+	EX	A,IXL		; DD ED 2F
+	EX	A,IYH		; FD ED 27
+	EX	A,IYL		; FD ED 2F
+
+	EX	A,(HL)		; ED 37
+
+	EX	A,(ADDR)	; DD ED 3F addr
+
+	EX	A,(IX+VAL)	; FD ED 0F  val
+	EX	A,(IX-VAL)	; FD ED 0F -val
+	EX	A,(IY+VAL)	; FD ED 17  val
+	EX	A,(IY-VAL)	; FD ED 17 -val
+	EX	A,(HL+VAL)	; FD ED 1F  val
+	EX	A,(HL-VAL)	; FD ED 1F -val
+
+	EX	A,(IX)		; DD ED 37 00
+	EX	A,(IX+5)	; DD ED 37  d
+	EX	A,(IX-5)	; DD ED 37 -d
+	EX	A,(IY)		; FD ED 37 00
+	EX	A,(IY+5)	; FD ED 37  d
+	EX	A,(IY-5)	; FD ED 37 -d
+
+	EX	A,<ADDR>	; FD ED 07 disp
+	EX	A,(PC+VAL)	; FD ED 07 addr
+
+	EX	A,(SP)		; DD ED 07 0000
+	EX	A,(SP+VAL)	; DD ED 07  val
+	EX	A,(SP-VAL)	; DD ED 07 -val
+
+	EX	A,(HL+IX)	; DD ED 0F
+	EX	A,(IX+HL)	; DD ED 0F
+	EX	A,(HL+IY)	; DD ED 17
+	EX	A,(IY+HL)	; DD ED 17
+	EX	A,(IX+IY)	; DD ED 1F
+	EX	A,(IY+IX)	; DD ED 1F
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	EXTS	A		; ED 64
+
+	EXTS	HL		; ED 6C
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	EXTS			; ED 64
+
+;-----------------------------------------------------------------------
+
+	EXX			; D9
+
+;-----------------------------------------------------------------------
+
+	HALT			; 76
+
+;-----------------------------------------------------------------------
+
+	IM	0		; ED 46
+	IM	1		; ED 56
+	IM	2		; ED 5E
+	IM	3		; ED 4E
+
+;-----------------------------------------------------------------------
+
+	IN	A,(C)		; ED 78
+	IN	B,(C)		; ED 40
+	IN	C,(C)		; ED 48
+	IN	D,(C)		; ED 50
+	IN	E,(C)		; ED 58
+	IN	H,(C)		; ED 60
+	IN	L,(C)		; ED 68
+
+	IN	IXH,(C)		; DD ED 60
+	IN	IXL,(C)		; DD ED 68
+	IN	IYH,(C)		; FD ED 60
+	IN	IYL,(C)		; FD ED 68
+
+	IN	(ADDR),(C)	; DD ED 78 addr
+
+	IN	(IX+VAL),(C)	; FD ED 48  val
+	IN	(IX-VAL),(C)	; FD ED 48 -val
+	IN	(IY+VAL),(C)	; FD ED 50  val
+	IN	(IY-VAL),(C)	; FD ED 50 -val
+	IN	(HL+VAL),(C)	; FD ED 58  val
+	IN	(HL-VAL),(C)	; FD ED 58 -val
+
+	IN	(IX),(C)	; FD ED 48 0000
+	IN	(IY),(C)	; FD ED 50 0000
+	IN	(HL),(C)	; FD ED 58 0000
+
+	IN	<ADDR>,(C)	; FD ED 40 disp
+	IN	(PC+VAL),(C)	; FD ED 40 addr
+
+	IN	(SP),(C)	; DD ED 40 0000
+	IN	(SP+VAL),(C)	; DD ED 40  val
+	IN	(SP-VAL),(C)	; DD ED 40 -val
+
+	IN	(HL+IX),(C)	; DD ED 48
+	IN	(IX+HL),(C)	; DD ED 48
+	IN	(HL+IY),(C)	; DD ED 50
+	IN	(IY+HL),(C)	; DD ED 50
+	IN	(IX+IY),(C)	; DD ED 58
+	IN	(IY+IX),(C)	; DD ED 58
+
+	IN	A,(5)		; DB n
+
+;-----------------------------------------------------------------------
+
+	INC	A		; 3C
+	INC	B		; 04
+	INC	C		; 0C
+	INC	D		; 14
+	INC	E		; 1C
+	INC	H		; 24
+	INC	L		; 2C
+
+	INC	IXH		; DD 24
+	INC	IXL		; DD 2C
+	INC	IYH		; FD 24
+	INC	IYL		; FD 2C
+
+	INC	(HL)		; 34
+
+	INC	(ADDR)		; DD 3C addr
+
+	INC	(IX+VAL)	; FD 0C  val
+	INC	(IX-VAL)	; FD 0C -val
+	INC	(IY+VAL)	; FD 14  val
+	INC	(IY-VAL)	; FD 14 -val
+	INC	(HL+VAL)	; FD 1C  val
+	INC	(HL-VAL)	; FD 1C -val
+
+	INC	(IX)		; DD 34 00
+	INC	(IX+5)		; DD 34  d
+	INC	(IX-5)		; DD 34 -d
+	INC	(IY)		; FD 34 00
+	INC	(IY+5)		; FD 34  d
+	INC	(IY-5)		; FD 34 -d
+
+	INC	<ADDR>		; FD 04 disp
+	INC	(PC+VAL)	; FD 04 addr
+
+	INC	(SP)		; DD 04 0000
+	INC	(SP+VAL)	; DD 04  val
+	INC	(SP-VAL)	; DD 04 -val
+
+	INC	(HL+IX)		; DD 0C
+	INC	(IX+HL)		; DD 0C
+	INC	(HL+IY)		; DD 14
+	INC	(IY+HL)		; DD 14
+	INC	(IX+IY)		; DD 1C
+	INC	(IY+IX)		; DD 1C
+
+;-----------------------------------------------------------------------
+
+	; INC form also allowed for register pairs
+
+	INCW	BC		; 03
+	INCW	DE		; 13
+	INCW	HL		; 23
+	INCW	SP		; 33
+
+	INC	BC		; 03
+	INC	DE		; 13
+	INC	HL		; 23
+	INC	SP		; 33
+
+	INCW	IX		; DD 23
+	INCW	IY		; FD 23
+
+	INC	IX		; DD 23
+	INC	IY		; FD 23
+
+	INCW	(HL)		; DD 03
+
+	INCW	(ADDR)		; DD 13 addr
+
+	INCW	(IX+VAL)	; FD 03  val
+	INCW	(IX-VAL)	; FD 03 -val
+	INCW	(IY+VAL)	; FD 13  val
+	INCW	(IY-VAL)	; FD 13 -val
+
+	INCW	<ADDR>		; DD 33 disp
+	INCW	(PC+VAL)	; DD 33 addr
+
+;-----------------------------------------------------------------------
+
+	IND			; ED AA 
+	INDW			; ED 8A
+
+;-----------------------------------------------------------------------
+
+	INDR			; ED BA
+	INDRW			; ED 9A
+
+;-----------------------------------------------------------------------
+
+	INI			; ED A2
+	INIW			; ED 82
+
+;-----------------------------------------------------------------------
+
+	INIR			; ED B2
+	INIRW			; ED 92
+
+;-----------------------------------------------------------------------
+
+	; IN form also allowed
+
+	INW	HL,(C)		; ED B7
+
+	IN	HL,(C)		; ED B7
+
+;-----------------------------------------------------------------------
+
+	JAF	$+6		; DD 28 d
+
+;-----------------------------------------------------------------------
+
+	JAR	$+6		; DD 20 d
+
+;-----------------------------------------------------------------------
+
+	JP	NZ,(HL)		; DD C2
+	JP	Z,(HL)		; DD CA
+	JP	NC,(HL)		; DD D2
+	JP	C,(HL)		; DD DA
+	JP	PO,(HL)		; DD E2
+	JP	PE,(HL)		; DD EA
+	JP	NV,(HL)		; DD E2
+	JP	V,(HL)		; DD EA
+	JP	P,(HL)		; DD F2
+	JP	M,(HL)		; DD FA
+	JP	NS,(HL)		; DD F2
+	JP	S,(HL)		; DD FA
+
+	JP	(HL)		; E9
+
+	JP	(IX)		; DD E9
+	JP	(IY)		; FD E9
+
+	JP	NZ,ADDR		; C2 addr
+	JP	Z,ADDR		; CA addr
+	JP	NC,ADDR		; D2 addr
+	JP	C,ADDR		; DA addr
+	JP	PO,ADDR		; E2 addr
+	JP	PE,ADDR		; EA addr
+	JP	NV,ADDR		; E2 addr
+	JP	V,ADDR		; EA addr
+	JP	P,ADDR		; F2 addr
+	JP	M,ADDR		; FA addr
+	JP	NS,ADDR		; F2 addr
+	JP	S,ADDR		; FA addr
+
+	JP	ADDR		; C3 addr
+
+	JP	NZ,<ADDR>	; FD C2 disp
+	JP	Z,<ADDR>	; FD CA disp
+	JP	NC,<ADDR>	; FD D2 disp
+	JP	C,<ADDR>	; FD DA disp
+	JP	PO,<ADDR>	; FD E2 disp
+	JP	PE,<ADDR>	; FD EA disp
+	JP	NV,<ADDR>	; FD E2 disp
+	JP	V,<ADDR>	; FD EA disp
+	JP	P,<ADDR>	; FD F2 disp
+	JP	M,<ADDR>	; FD FA disp
+	JP	NS,<ADDR>	; FD F2 disp
+	JP	S,<ADDR>	; FD FA disp
+
+	JP	<ADDR>		; FD C3 disp
+
+	JP	NZ,(PC+VAL)	; FD C2 addr
+	JP	Z,(PC+VAL)	; FD CA addr
+	JP	NC,(PC+VAL)	; FD D2 addr
+	JP	C,(PC+VAL)	; FD DA addr
+	JP	PO,(PC+VAL)	; FD E2 addr
+	JP	PE,(PC+VAL)	; FD EA addr
+	JP	NV,(PC+VAL)	; FD E2 addr
+	JP	V,(PC+VAL)	; FD EA addr
+	JP	P,(PC+VAL)	; FD F2 addr
+	JP	M,(PC+VAL)	; FD FA addr
+	JP	NS,(PC+VAL)	; FD F2 addr
+	JP	S,(PC+VAL)	; FD FA addr
+
+	JP	(PC+VAL)	; FD C3 addr
+
+;-----------------------------------------------------------------------
+
+	JR	NZ,$+5		; 20 d
+	JR	Z,$+5		; 28 d
+	JR	NC,$+5		; 30 d
+	JR	C,$+5		; 38 d
+
+;-----------------------------------------------------------------------
+
+	LD	A,A		; 7F
+	LD	A,B		; 78
+	LD	A,C		; 79
+	LD	A,D		; 7A
+	LD	A,E		; 7B
+	LD	A,H		; 7C
+	LD	A,L		; 7D
+
+	LD	A,IXH		; DD 7C
+	LD	A,IXL		; DD 7D
+	LD	A,IYH		; FD 7C
+	LD	A,IYL		; FD 7D
+
+	LD	A,5		; 3E n
+
+	LD	A,(BC)		; 0A
+	LD	A,(DE)		; 1A
+
+	LD	A,(HL)		; 7E
+
+	LD	A,(ADDR)	; 3A addr
+
+	LD	A,(IX+VAL)	; FD 79  val
+	LD	A,(IX-VAL)	; FD 79 -val
+	LD	A,(IY+VAL)	; FD 7A  val
+	LD	A,(IY-VAL)	; FD 7A -val
+	LD	A,(HL+VAL)	; FD 7B  val
+	LD	A,(HL-VAL)	; FD 7B -val
+
+	LD	A,(IX)		; DD 7E 00
+	LD	A,(IX+5)	; DD 7E  d
+	LD	A,(IX-5)	; DD 7E -d
+	LD	A,(IY)		; FD 7E 00
+	LD	A,(IY+5)	; FD 7E  d
+	LD	A,(IY-5)	; FD 7E -d
+
+	LD	A,<ADDR>	; FD 78 disp
+	LD	A,(PC+VAL)	; FD 78 addr
+
+	LD	A,(SP)		; DD 78 0000
+	LD	A,(SP+VAL)	; DD 78  val
+	LD	A,(SP-VAL)	; DD 78 -val
+
+	LD	A,(HL+IX)	; DD 79
+	LD	A,(IX+HL)	; DD 79
+	LD	A,(HL+IY)	; DD 7A
+	LD	A,(IY+HL)	; DD 7A
+	LD	A,(IX+IY)	; DD 7B
+	LD	A,(IY+IX)	; DD 7B
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	LD	A,A		; 7F
+	LD	B,A		; 47
+	LD	C,A		; 4F
+	LD	D,A		; 57
+	LD	E,A		; 5F
+	LD	H,A		; 67
+	LD	L,A		; 6F
+
+	LD	IXH,A		; DD 67
+	LD	IXL,A		; DD 6F
+	LD	IYH,A		; FD 67
+	LD	IYL,A		; FD 6F
+
+	LD	(BC),A		; 02
+	LD	(DE),A		; 12
+
+	LD	(HL),A		; 77
+
+	LD	(ADDR),A	; 32 addr
+
+	LD	(IX+VAL),A	; ED 2B  val
+	LD	(IX-VAL),A	; ED 2B -val
+	LD	(IY+VAL),A	; ED 33  val
+	LD	(IY-VAL),A	; ED 33 -val
+	LD	(HL+VAL),A	; ED 3B  val
+	LD	(HL-VAL),A	; ED 3B -val
+
+	LD	(IX),A		; DD 77 00
+	LD	(IX+5),A	; DD 77  d
+	LD	(IX-5),A	; DD 77 -d
+	LD	(IY),A		; FD 77 00
+	LD	(IY+5),A	; FD 77  d
+	LD	(IY-5),A	; FD 77 -d
+
+	LD	<ADDR>,A	; ED 23 disp
+	LD	(PC+VAL),A	; ED 23 addr
+
+	LD	(SP),A		; ED 03 0000
+	LD	(SP+VAL),A	; ED 03  val
+	LD	(SP-VAL),A	; ED 03 -val
+
+	LD	(HL+IX),A	; ED 0B
+	LD	(IX+HL),A	; ED 0B
+	LD	(HL+IY),A	; ED 13
+	LD	(IY+HL),A	; ED 13
+	LD	(IX+IY),A	; ED 1B
+	LD	(IY+IX),A	; ED 1B
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	LD	A,I		; ED 57
+	LD	A,R		; ED 5F
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	LD	A,5		; 3E n
+	LD	B,5		; 06 n
+	LD	C,5		; 0E n
+	LD	D,5		; 16 n
+	LD	E,5		; 1E n
+	LD	H,5		; 26 n
+	LD	L,5		; 2E n
+
+	LD	IXH,5		; DD 26 n
+	LD	IXL,5		; DD 2E n
+	LD	IYH,5		; FD 26 n
+	LD	IYL,5		; FD 2E n
+
+	LD	(HL),5		; 36 n
+
+	LD	(ADDR),5	; DD 3E addr n
+
+	LD	(IX+VAL),5	; FD 0E  val n
+	LD	(IX-VAL),5	; FD 0E -val n
+	LD	(IY+VAL),5	; FD 16  val n
+	LD	(IY-VAL),5	; FD 16 -val n
+	LD	(HL+VAL),5	; FD 1E  val n
+	LD	(HL-VAL),5	; FD 1E -val n
+
+	LD	(IX),5		; DD 36 00 n
+	LD	(IX+5),5	; DD 36  d n
+	LD	(IX-5),5	; DD 36 -d n
+	LD	(IY),5		; FD 36 00 n
+	LD	(IY+5),5	; FD 36  d n
+	LD	(IY-5),5	; FD 36 -d n
+
+	LD	<ADDR>,5	; FD 06 disp n
+	LD	(PC+VAL),5	; FD 06 addr n
+
+	LD	(SP),5		; DD 06 0000 n
+	LD	(SP+VAL),5	; DD 06  val n
+	LD	(SP-VAL),5	; DD 06 -val n
+
+	LD	(HL+IX),5	; DD 0E n
+	LD	(IX+HL),5	; DD 0E n
+	LD	(HL+IY),5	; DD 16 n
+	LD	(IY+HL),5	; DD 16 n
+	LD	(IX+IY),5	; DD 1E n
+	LD	(IY+IX),5	; DD 1E n
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	LD	A,A		; 7F
+	LD	A,B		; 78
+	LD	A,C		; 79
+	LD	A,D		; 7A
+	LD	A,E		; 7B
+	LD	A,H		; 7C
+	LD	A,L		; 7D
+
+	LD	B,A		; 47
+	LD	B,B		; 40
+	LD	B,C		; 41
+	LD	B,D		; 42
+	LD	B,E		; 43
+	LD	B,H		; 44
+	LD	B,L		; 45
+
+	LD	C,A		; 4F
+	LD	C,B		; 48
+	LD	C,C		; 49
+	LD	C,D		; 4A
+	LD	C,E		; 4B
+	LD	C,H		; 4C
+	LD	C,L		; 4D
+
+	LD	D,A		; 57
+	LD	D,B		; 50
+	LD	D,C		; 51
+	LD	D,D		; 52
+	LD	D,E		; 53
+	LD	D,H		; 54
+	LD	D,L		; 55
+
+	LD	E,A		; 5F
+	LD	E,B		; 58
+	LD	E,C		; 59
+	LD	E,D		; 5A
+	LD	E,E		; 5B
+	LD	E,H		; 5C
+	LD	E,L		; 5D
+
+	LD	H,A		; 67
+	LD	H,B		; 60
+	LD	H,C		; 61
+	LD	H,D		; 62
+	LD	H,E		; 63
+	LD	H,H		; 64
+	LD	H,L		; 65
+
+	LD	L,A		; 6F
+	LD	L,B		; 68
+	LD	L,C		; 69
+	LD	L,D		; 6A
+	LD	L,E		; 6B
+	LD	L,H		; 6C
+	LD	L,L		; 6D
+
+	LD	A,IXH		; DD 7C
+	LD	A,IXL		; DD 7D
+	LD	A,IYH		; FD 7C
+	LD	A,IYL		; FD 7D
+
+	LD	B,IXH		; DD 44
+	LD	B,IXL		; DD 45
+	LD	B,IYH		; FD 44
+	LD	B,IYL		; FD 45
+
+	LD	C,IXH		; DD 4C
+	LD	C,IXL		; DD 4D
+	LD	C,IYH		; FD 4C
+	LD	C,IYL		; FD 4D
+
+	LD	D,IXH		; DD 54
+	LD	D,IXL		; DD 55
+	LD	D,IYH		; FD 54
+	LD	D,IYL		; FD 55
+
+	LD	E,IXH		; DD 5C
+	LD	E,IXL		; DD 5D
+	LD	E,IYH		; FD 5C
+	LD	E,IYL		; FD 5D
+
+	LD	IXH,A		; DD 67
+	LD	IXL,A		; DD 6F
+	LD	IYH,A		; FD 67
+	LD	IYL,A		; FD 6F
+
+	LD	IXH,B		; DD 60
+	LD	IXL,B		; DD 68
+	LD	IYH,B		; FD 60
+	LD	IYL,B		; FD 68
+
+	LD	IXH,C		; DD 61
+	LD	IXL,C		; DD 69
+	LD	IYH,C		; FD 61
+	LD	IYL,C		; FD 69
+
+	LD	IXH,D		; DD 62
+	LD	IXL,D		; DD 6A
+	LD	IYH,D		; FD 62
+	LD	IYL,D		; FD 6A
+
+	LD	IXH,E		; DD 63
+	LD	IXL,E		; DD 6B
+	LD	IYH,E		; FD 63
+	LD	IYL,E		; FD 6B
+
+	LD	IXH,IXH		; DD 64
+	LD	IXH,IXL		; DD 65
+	LD	IXL,IXH		; DD 6C
+	LD	IXL,IXL		; DD 6D
+
+	LD	IYH,IYH		; FD 64
+	LD	IYH,IYL		; FD 65
+	LD	IYL,IYH		; FD 6C
+	LD	IYL,IYL		; FD 6D
+
+	LD	A,(HL)		; 7E
+	LD	B,(HL)		; 46
+	LD	C,(HL)		; 4E
+	LD	D,(HL)		; 56
+	LD	E,(HL)		; 5E
+	LD	H,(HL)		; 66
+	LD	L,(HL)		; 6E
+
+	LD	(HL),A		; 77
+	LD	(HL),B		; 70
+	LD	(HL),C		; 71
+	LD	(HL),D		; 72
+	LD	(HL),E		; 73
+	LD	(HL),H		; 74
+	LD	(HL),L		; 75
+
+	LD	A,(IX)		; DD 7E 00
+	LD	B,(IX)		; DD 46 00
+	LD	C,(IX)		; DD 4E 00
+	LD	D,(IX)		; DD 56 00
+	LD	E,(IX)		; DD 5E 00
+	LD	H,(IX)		; DD 66 00
+	LD	L,(IX)		; DD 6E 00
+
+	LD	A,(IX+5)	; DD 7E  d
+	LD	B,(IX+5)	; DD 46  d
+	LD	C,(IX+5)	; DD 4E  d
+	LD	D,(IX+5)	; DD 56  d
+	LD	E,(IX+5)	; DD 5E  d
+	LD	H,(IX+5)	; DD 66  d
+	LD	L,(IX+5)	; DD 6E  d
+
+	LD	A,(IX-5)	; DD 7E -d
+	LD	B,(IX-5)	; DD 46 -d
+	LD	C,(IX-5)	; DD 4E -d
+	LD	D,(IX-5)	; DD 56 -d
+	LD	E,(IX-5)	; DD 5E -d
+	LD	H,(IX-5)	; DD 66 -d
+	LD	L,(IX-5)	; DD 6E -d
+
+	LD	A,(IY)		; FD 7E 00
+	LD	B,(IY)		; FD 46 00
+	LD	C,(IY)		; FD 4E 00
+	LD	D,(IY)		; FD 56 00
+	LD	E,(IY)		; FD 5E 00
+	LD	H,(IY)		; FD 66 00
+	LD	L,(IY)		; FD 6E 00
+
+	LD	A,(IY+5)	; FD 7E  d
+	LD	B,(IY+5)	; FD 46  d
+	LD	C,(IY+5)	; FD 4E  d
+	LD	D,(IY+5)	; FD 56  d
+	LD	E,(IY+5)	; FD 5E  d
+	LD	H,(IY+5)	; FD 66  d
+	LD	L,(IY+5)	; FD 6E  d
+
+	LD	A,(IY-5)	; FD 7E -d
+	LD	B,(IY-5)	; FD 46 -d
+	LD	C,(IY-5)	; FD 4E -d
+	LD	D,(IY-5)	; FD 56 -d
+	LD	E,(IY-5)	; FD 5E -d
+	LD	H,(IY-5)	; FD 66 -d
+	LD	L,(IY-5)	; FD 6E -d
+
+	LD	(IX),A		; DD 77 00
+	LD	(IX),B		; DD 70 00
+	LD	(IX),C		; DD 71 00
+	LD	(IX),D		; DD 72 00
+	LD	(IX),E		; DD 73 00
+	LD	(IX),H		; DD 74 00
+	LD	(IX),L		; DD 75 00
+
+	LD	(IX+5),A	; DD 77  d
+	LD	(IX+5),B	; DD 70  d
+	LD	(IX+5),C	; DD 71  d
+	LD	(IX+5),D	; DD 72  d
+	LD	(IX+5),E	; DD 73  d
+	LD	(IX+5),H	; DD 74  d
+	LD	(IX+5),L	; DD 75  d
+
+	LD	(IX-5),A	; DD 77 -d
+	LD	(IX-5),B	; DD 70 -d
+	LD	(IX-5),C	; DD 71 -d
+	LD	(IX-5),D	; DD 72 -d
+	LD	(IX-5),E	; DD 73 -d
+	LD	(IX-5),H	; DD 74 -d
+	LD	(IX-5),L	; DD 75 -d
+
+	LD	(IY),A		; FD 77 00
+	LD	(IY),B		; FD 70 00
+	LD	(IY),C		; FD 71 00
+	LD	(IY),D		; FD 72 00
+	LD	(IY),E		; FD 73 00
+	LD	(IY),H		; FD 74 00
+	LD	(IY),L		; FD 75 00
+
+	LD	(IY+5),A	; FD 77  d
+	LD	(IY+5),B	; FD 70  d
+	LD	(IY+5),C	; FD 71  d
+	LD	(IY+5),D	; FD 72  d
+	LD	(IY+5),E	; FD 73  d
+	LD	(IY+5),H	; FD 74  d
+	LD	(IY+5),L	; FD 75  d
+
+	LD	(IY-5),A	; FD 77 -d
+	LD	(IY-5),B	; FD 70 -d
+	LD	(IY-5),C	; FD 71 -d
+	LD	(IY-5),D	; FD 72 -d
+	LD	(IY-5),E	; FD 73 -d
+	LD	(IY-5),H	; FD 74 -d
+	LD	(IY-5),L	; FD 75 -d
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	LD	I,A		; ED 47
+	LD	R,A		; ED 4F
+
+;-----------------------------------------------------------------------
+
+	LDA	HL,(ADDR)	; 21 addr
+	LDA	IX,(ADDR)	; DD 21 addr
+	LDA	IY,(ADDR)	; FD 21 addr
+
+	LDA	HL,(IX+VAL)	; ED 2A  val
+	LDA	HL,(IX-VAL)	; ED 2A -val
+	LDA	HL,(IY+VAL)	; ED 32  val
+	LDA	HL,(IY-VAL)	; ED 32 -val
+	LDA	HL,(HL+VAL)	; ED 3A  val
+	LDA	HL,(HL-VAL)	; ED 3A -val
+
+	LDA	IX,(IX+VAL)	; DD ED 2A  val
+	LDA	IX,(IX-VAL)	; DD ED 2A -val
+	LDA	IX,(IY+VAL)	; DD ED 32  val
+	LDA	IX,(IY-VAL)	; DD ED 32 -val
+	LDA	IX,(HL+VAL)	; DD ED 3A  val
+	LDA	IX,(HL-VAL)	; DD ED 3A -val
+
+	LDA	IY,(IX+VAL)	; FD ED 2A  val
+	LDA	IY,(IX-VAL)	; FD ED 2A -val
+	LDA	IY,(IY+VAL)	; FD ED 32  val
+	LDA	IY,(IY-VAL)	; FD ED 32 -val
+	LDA	IY,(HL+VAL)	; FD ED 3A  val
+	LDA	IY,(HL-VAL)	; FD ED 3A -val
+
+	LDA	HL,(IX)		; ED 2A 0000
+	LDA	HL,(IY)		; ED 32 0000
+	LDA	HL,(HL)		; ED 3A 0000
+
+	LDA	IX,(IX)		; DD ED 2A 0000
+	LDA	IX,(IY)		; DD ED 32 0000
+	LDA	IX,(HL)		; DD ED 3A 0000
+
+	LDA	IY,(IX)		; FD ED 2A 0000
+	LDA	IY,(IY)		; FD ED 32 0000
+	LDA	IY,(HL)		; FD ED 3A 0000
+
+	LDA	HL,<ADDR>	; ED 22 disp
+	LDA	IX,<ADDR>	; DD ED 22 disp
+	LDA	IY,<ADDR>	; FD ED 22 disp
+
+	LDA	HL,(PC+VAL)	; ED 22 addr
+	LDA	IX,(PC+VAL)	; DD ED 22 addr
+	LDA	IY,(PC+VAL)	; FD ED 22 addr
+
+	LDA	HL,(SP)		; ED 02 0000
+	LDA	HL,(SP+VAL)	; ED 02  val
+	LDA	HL,(SP-VAL)	; ED 02 -val
+	LDA	IX,(SP)		; DD ED 02 0000
+	LDA	IX,(SP+VAL)	; DD ED 02  val
+	LDA	IX,(SP-VAL)	; DD ED 02 -val
+	LDA	IY,(SP)		; FD ED 02 0000
+	LDA	IY,(SP+VAL)	; FD ED 02  val
+	LDA	IY,(SP-VAL)	; FD ED 02 -val
+
+	LDA	HL,(HL+IX)	; ED 0A
+	LDA	HL,(IX+HL)	; ED 0A
+	LDA	HL,(HL+IY)	; ED 12
+	LDA	HL,(IY+HL)	; ED 12
+	LDA	HL,(IX+IY)	; ED 1A
+	LDA	HL,(IY+IX)	; ED 1A
+
+	LDA	IX,(HL+IX)	; DD ED 0A
+	LDA	IX,(IX+HL)	; DD ED 0A
+	LDA	IX,(HL+IY)	; DD ED 12
+	LDA	IX,(IY+HL)	; DD ED 12
+	LDA	IX,(IX+IY)	; DD ED 1A
+	LDA	IX,(IY+IX)	; DD ED 1A
+
+	LDA	IY,(HL+IX)	; FD ED 0A
+	LDA	IY,(IX+HL)	; FD ED 0A
+	LDA	IY,(HL+IY)	; FD ED 12
+	LDA	IY,(IY+HL)	; FD ED 12
+	LDA	IY,(IX+IY)	; FD ED 1A
+	LDA	IY,(IY+IX)	; FD ED 1A
+
+;-----------------------------------------------------------------------
+
+	LDCTL	(C),HL		; ED 6E
+	LDCTL	(C),IX		; DD ED 6E
+	LDCTL	(C),IY		; FD ED 6E
+
+	LDCTL	USP,HL		; ED 8F
+	LDCTL	USP,IX		; DD ED 8F
+	LDCTL	USP,IY		; FD ED 8F
+
+	LDCTL	HL,(C)		; ED 66
+	LDCTL	IX,(C)		; DD ED 66
+	LDCTL	IY,(C)		; FD ED 66
+
+	LDCTL	HL,USP		; ED 87
+	LDCTL	IX,USP		; DD ED 87
+	LDCTL	IY,USP		; FD ED 87
+
+;-----------------------------------------------------------------------
+
+	LDD			; ED A8
+	LDDR			; ED B8
+
+	LDI			; ED A0
+	LDIR			; ED B0
+
+;-----------------------------------------------------------------------
+
+	LDUD	A,(HL)		; ED 86
+
+	LDUD	A,(IX)		; DD ED 86 00
+	LDUD	A,(IX+5)	; DD ED 86  d
+	LDUD	A,(IX-5)	; DD ED 86 -d
+
+	LDUD	A,(IY)		; FD ED 86 00
+	LDUD	A,(IY+5)	; FD ED 86  d
+	LDUD	A,(IY-5)	; FD ED 86 -d
+
+	LDUD	(HL),A		; ED 8E
+
+	LDUD	(IX),A		; DD ED 8E 00
+	LDUD	(IX+5),A	; DD ED 8E  d
+	LDUD	(IX-5),A	; DD ED 8E -d
+
+	LDUD	(IY),A		; FD ED 8E 00
+	LDUD	(IY+5),A	; FD ED 8E  d
+	LDUD	(IY-5),A	; FD ED 8E -d
+
+;-----------------------------------------------------------------------
+
+	LDUP	A,(HL)		; ED 96
+
+	LDUP	A,(IX)		; DD ED 96 00
+	LDUP	A,(IX+5)	; DD ED 96  d
+	LDUP	A,(IX-5)	; DD ED 96 -d
+
+	LDUP	A,(IY)		; FD ED 96 00
+	LDUP	A,(IY+5)	; FD ED 96  d
+	LDUP	A,(IY-5)	; FD ED 96 -d
+
+	LDUP	(HL),A		; ED 9E
+
+	LDUP	(IX),A		; DD ED 9E 00
+	LDUP	(IX+5),A	; DD ED 9E  d
+	LDUP	(IX-5),A	; DD ED 9E -d
+
+	LDUP	(IY),A		; FD ED 9E 00
+	LDUP	(IY+5),A	; FD ED 9E  d
+	LDUP	(IY-5),A	; FD ED 9E -d
+
+;-----------------------------------------------------------------------
+
+	; LD form also allowed
+
+	LDW	BC,VAL		; 01 val
+	LDW	DE,VAL		; 11 val
+	LDW	HL,VAL		; 21 val
+	LDW	SP,VAL		; 31 val
+
+	LDW	IX,VAL		; DD 21 val
+	LDW	IY,VAL		; FD 21 val
+
+	LDW	BC,(HL)		; ED 06
+	LDW	DE,(HL)		; ED 16
+	LDW	HL,(HL)		; ED 26
+	LDW	SP,(HL)		; ED 36
+
+	LDW	BC,(IX)		; DD ED 06 00
+	LDW	BC,(IX+5)	; DD ED 06  val
+	LDW	BC,(IX-5)	; DD ED 06 -val
+	LDW	BC,(IY)		; FD ED 06 00
+	LDW	BC,(IY+5)	; FD ED 06  val
+	LDW	BC,(IY-5)	; FD ED 06 -val
+
+	LDW	DE,(IX)		; DD ED 16 00
+	LDW	DE,(IX+5)	; DD ED 16  val
+	LDW	DE,(IX-5)	; DD ED 16 -val
+	LDW	DE,(IY)		; FD ED 16 00
+	LDW	DE,(IY+5)	; FD ED 16  val
+	LDW	DE,(IY-5)	; FD ED 16 -val
+
+	LDW	HL,(IX)		; DD ED 26 00
+	LDW	HL,(IX+5)	; DD ED 26  val
+	LDW	HL,(IX-5)	; DD ED 26 -val
+	LDW	HL,(IY)		; FD ED 26 00
+	LDW	HL,(IY+5)	; FD ED 26  val
+	LDW	HL,(IY-5)	; FD ED 26 -val
+
+	LDW	IX,(IX)		; DD ED 2C 0000
+	LDW	IX,(IX+5)	; DD ED 2C  val
+	LDW	IX,(IX-5)	; DD ED 2C -val
+	LDW	IX,(IY)		; DD ED 34 0000
+	LDW	IX,(IY+5)	; DD ED 34  val
+	LDW	IX,(IY-5)	; DD ED 34 -val
+
+	LDW	IY,(IX)		; FD ED 2C 0000
+	LDW	IY,(IX+5)	; FD ED 2C  val
+	LDW	IY,(IX-5)	; FD ED 2C -val
+	LDW	IY,(IY)		; FD ED 34 0000
+	LDW	IY,(IY+5)	; FD ED 34  val
+	LDW	IY,(IY-5)	; FD ED 34 -val
+
+	LDW	SP,(IX)		; DD ED 36 00
+	LDW	SP,(IX+5)	; DD ED 36  val
+	LDW	SP,(IX-5)	; DD ED 36 -val
+	LDW	SP,(IY)		; FD ED 36 00
+	LDW	SP,(IY+5)	; FD ED 36  val
+	LDW	SP,(IY-5)	; FD ED 36 -val
+
+	LDW	BC,(ADDR)	; ED 4B addr
+	LDW	DE,(ADDR)	; ED 5B addr
+	LDW	HL,(ADDR)	; 2A addr
+	LDW	SP,(ADDR)	; ED 7B addr
+
+	LDW	IX,(ADDR)	; DD 2A addr
+	LDW	IY,(ADDR)	; FD 2A addr
+
+	LDW	(HL),BC		; ED 0E
+	LDW	(HL),DE		; ED 1E
+	LDW	(HL),HL		; ED 2E
+	LDW	(HL),SP		; ED 3E
+
+	LDW	(IX),BC		; DD ED 0E 00
+	LDW	(IX+5),BC	; DD ED 0E  val
+	LDW	(IX-5),BC	; DD ED 0E -val
+	LDW	(IY),BC		; FD ED 0E 00
+	LDW	(IY+5),BC	; FD ED 0E  val
+	LDW	(IY-5),BC	; FD ED 0E -val
+
+	LDW	(IX),DE		; DD ED 1E 00
+	LDW	(IX+5),DE	; DD ED 1E  val
+	LDW	(IX-5),DE	; DD ED 1E -val
+	LDW	(IY),DE		; FD ED 1E 00
+	LDW	(IY+5),DE	; FD ED 1E  val
+	LDW	(IY-5),DE	; FD ED 1E -val
+
+	LDW	(IX),HL		; DD ED 2E 00
+	LDW	(IX+5),HL	; DD ED 2E  val
+	LDW	(IX-5),HL	; DD ED 2E -val
+	LDW	(IY),HL		; FD ED 2E 00
+	LDW	(IY+5),HL	; FD ED 2E  val
+	LDW	(IY-5),HL	; FD ED 2E -val
+
+	LDW	(IX),IX		; DD ED 2D 0000
+	LDW	(IX+5),IX	; DD ED 2D  val
+	LDW	(IX-5),IX	; DD ED 2D -val
+	LDW	(IY),IX		; DD ED 35 0000
+	LDW	(IY+5),IX	; DD ED 35  val
+	LDW	(IY-5),IX	; DD ED 35 -val
+
+	LDW	(IX),IY		; FD ED 2D 0000
+	LDW	(IX+5),IY	; FD ED 2D  val
+	LDW	(IX-5),IY	; FD ED 2D -val
+	LDW	(IY),IY		; FD ED 35 0000
+	LDW	(IY+5),IY	; FD ED 35  val
+	LDW	(IY-5),IY	; FD ED 35 -val
+
+	LDW	(IX),SP		; DD ED 3E 00
+	LDW	(IX+5),SP	; DD ED 3E  val
+	LDW	(IX-5),SP	; DD ED 3E -val
+	LDW	(IY),SP		; FD ED 3E 00
+	LDW	(IY+5),SP	; FD ED 3E  val
+	LDW	(IY-5),SP	; FD ED 3E -val
+
+	LDW	(ADDR),BC	; ED 43 addr
+	LDW	(ADDR),DE	; ED 53 addr
+	LDW	(ADDR),HL	; 22 addr
+	LDW	(ADDR),SP	; ED 73 addr
+
+	LDW	(ADDR),IX	; DD 22 addr
+	LDW	(ADDR),IY	; FD 22 addr
+
+	LDW	SP,HL		; F9
+	LDW	SP,IX		; DD F9
+	LDW	SP,IY		; FD F9
+
+	LDW	HL,(IX+VAL)	; ED 2C  val
+	LDW	HL,(IX-VAL)	; ED 2C -val
+	LDW	HL,(IY+VAL)	; ED 34  val
+	LDW	HL,(IY-VAL)	; ED 34 -val
+	LDW	HL,(HL+VAL)	; ED 3C  val
+	LDW	HL,(HL-VAL)	; ED 3C -val
+
+	LDW	IX,(IX+VAL)	; DD ED 2C  val
+	LDW	IX,(IX-VAL)	; DD ED 2C -val
+	LDW	IX,(IY+VAL)	; DD ED 34  val
+	LDW	IX,(IY-VAL)	; DD ED 34 -val
+	LDW	IX,(HL+VAL)	; DD ED 3C  val
+	LDW	IX,(HL-VAL)	; DD ED 3C -val
+
+	LDW	IY,(IX+VAL)	; FD ED 2C  val
+	LDW	IY,(IX-VAL)	; FD ED 2C -val
+	LDW	IY,(IY+VAL)	; FD ED 34  val
+	LDW	IY,(IY-VAL)	; FD ED 34 -val
+	LDW	IY,(HL+VAL)	; FD ED 3C  val
+	LDW	IY,(HL-VAL)	; FD ED 3C -val
+
+	LDW	HL,(SP)		; ED 04 0000
+	LDW	HL,(SP+VAL)	; ED 04  val
+	LDW	HL,(SP-VAL)	; ED 04 -val
+
+	LDW	IX,(SP)		; DD ED 04 0000
+	LDW	IX,(SP+VAL)	; DD ED 04  val
+	LDW	IX,(SP-VAL)	; DD ED 04 -val
+
+	LDW	IY,(SP)		; FD ED 04 0000
+	LDW	IY,(SP+VAL)	; FD ED 04  val
+	LDW	IY,(SP-VAL)	; FD ED 04 -val
+
+	LDW	(IX+VAL),HL	; ED 2D  val
+	LDW	(IX-VAL),HL	; ED 2D -val
+	LDW	(IY+VAL),HL	; ED 35  val
+	LDW	(IY-VAL),HL	; ED 35 -val
+	LDW	(HL+VAL),HL	; ED 3D  val
+	LDW	(HL-VAL),HL	; ED 3D -val
+
+	LDW	(IX+VAL),IX	; DD ED 2D  val
+	LDW	(IX-VAL),IX	; DD ED 2D -val
+	LDW	(IY+VAL),IX	; DD ED 35  val
+	LDW	(IY-VAL),IX	; DD ED 35 -val
+	LDW	(HL+VAL),IX	; DD ED 3D  val
+	LDW	(HL-VAL),IX	; DD ED 3D -val
+
+	LDW	(IX+VAL),IY	; FD ED 2D  val
+	LDW	(IX-VAL),IY	; FD ED 2D -val
+	LDW	(IY+VAL),IY	; FD ED 35  val
+	LDW	(IY-VAL),IY	; FD ED 35 -val
+	LDW	(HL+VAL),IY	; FD ED 3D  val
+	LDW	(HL-VAL),IY	; FD ED 3D -val
+
+	LDW	(SP),HL		; ED 05 0000
+	LDW	(SP+VAL),HL	; ED 05  val
+	LDW	(SP-VAL),HL	; ED 05 -val
+
+	LDW	(SP),IX		; DD ED 05 0000
+	LDW	(SP+VAL),IX	; DD ED 05  val
+	LDW	(SP-VAL),IX	; DD ED 05 -val
+
+	LDW	(SP),IY		; FD ED 05 0000
+	LDW	(SP+VAL),IY	; FD ED 05  val
+	LDW	(SP-VAL),IY	; FD ED 05 -val
+
+	LDW	HL,(HL+IX)	; ED 0C
+	LDW	HL,(IX+HL)	; ED 0C
+	LDW	HL,(HL+IY)	; ED 14
+	LDW	HL,(IY+HL)	; ED 14
+	LDW	HL,(IX+IY)	; ED 1C
+	LDW	HL,(IY+IX)	; ED 1C
+
+	LDW	IX,(HL+IX)	; DD ED 0C
+	LDW	IX,(IX+HL)	; DD ED 0C
+	LDW	IX,(HL+IY)	; DD ED 14
+	LDW	IX,(IY+HL)	; DD ED 14
+	LDW	IX,(IX+IY)	; DD ED 1C
+	LDW	IX,(IY+IX)	; DD ED 1C
+
+	LDW	IY,(HL+IX)	; FD ED 0C
+	LDW	IY,(IX+HL)	; FD ED 0C
+	LDW	IY,(HL+IY)	; FD ED 14
+	LDW	IY,(IY+HL)	; FD ED 14
+	LDW	IY,(IX+IY)	; FD ED 1C
+	LDW	IY,(IY+IX)	; FD ED 1C
+
+	LDW	(HL+IX),HL	; ED 0D
+	LDW	(IX+HL),HL	; ED 0D
+	LDW	(HL+IY),HL	; ED 15
+	LDW	(IY+HL),HL	; ED 15
+	LDW	(IX+IY),HL	; ED 1D
+	LDW	(IY+IX),HL	; ED 1D
+
+	LDW	(HL+IX),IX	; DD ED 0D
+	LDW	(IX+HL),IX	; DD ED 0D
+	LDW	(HL+IY),IX	; DD ED 15
+	LDW	(IY+HL),IX	; DD ED 15
+	LDW	(IX+IY),IX	; DD ED 1D
+	LDW	(IY+IX),IX	; DD ED 1D
+
+	LDW	(HL+IX),IY	; FD ED 0D
+	LDW	(IX+HL),IY	; FD ED 0D
+	LDW	(HL+IY),IY	; FD ED 15
+	LDW	(IY+HL),IY	; FD ED 15
+	LDW	(IX+IY),IY	; FD ED 1D
+	LDW	(IY+IX),IY	; FD ED 1D
+
+	LDW	HL,<ADDR>	; ED 24 disp
+	LDW	HL,(PC+VAL)	; ED 24 addr
+
+	LDW	IX,<ADDR>	; DD ED 24 disp
+	LDW	IY,<ADDR>	; FD ED 24 disp
+	LDW	IX,(PC+VAL)	; DD ED 24 addr
+	LDW	IY,(PC+VAL)	; FD ED 24 addr
+
+	LDW	<ADDR>,HL	; ED 25 disp
+	LDW	(PC+VAL),HL	; ED 25 addr
+
+	LDW	<ADDR>,IX	; DD ED 25 disp
+	LDW	<ADDR>,IY	; FD ED 25 disp
+	LDW	(PC+VAL),IX	; DD ED 25 addr
+	LDW	(PC+VAL),IY	; FD ED 25 addr
+
+	LDW	(HL),VAL	; DD 01 val
+
+	LDW	(ADDR),VAL	; DD 11 addr val
+
+	LDW	<ADDR>,VAL	; DD 31 disp val
+	LDW	(PC+VAL),VAL	; DD 31 addr val
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	LD	BC,VAL		; 01 val
+	LD	DE,VAL		; 11 val
+	LD	HL,VAL		; 21 val
+	LD	SP,VAL		; 31 val
+
+	LD	IX,VAL		; DD 21 val
+	LD	IY,VAL		; FD 21 val
+
+	LD	BC,(HL)		; ED 06
+	LD	DE,(HL)		; ED 16
+	LD	HL,(HL)		; ED 26
+	LD	SP,(HL)		; ED 36
+
+	LD	BC,(IX)		; DD ED 06 00
+	LD	BC,(IX+5)	; DD ED 06  val
+	LD	BC,(IX-5)	; DD ED 06 -val
+	LD	BC,(IY)		; FD ED 06 00
+	LD	BC,(IY+5)	; FD ED 06  val
+	LD	BC,(IY-5)	; FD ED 06 -val
+
+	LD	DE,(IX)		; DD ED 16 00
+	LD	DE,(IX+5)	; DD ED 16  val
+	LD	DE,(IX-5)	; DD ED 16 -val
+	LD	DE,(IY)		; FD ED 16 00
+	LD	DE,(IY+5)	; FD ED 16  val
+	LD	DE,(IY-5)	; FD ED 16 -val
+
+	LD	HL,(IX)		; DD ED 26 00
+	LD	HL,(IX+5)	; DD ED 26  val
+	LD	HL,(IX-5)	; DD ED 26 -val
+	LD	HL,(IY)		; FD ED 26 00
+	LD	HL,(IY+5)	; FD ED 26  val
+	LD	HL,(IY-5)	; FD ED 26 -val
+
+	LD	IX,(IX)		; DD ED 2C 0000
+	LD	IX,(IX+5)	; DD ED 2C  val
+	LD	IX,(IX-5)	; DD ED 2C -val
+	LD	IX,(IY)		; DD ED 34 0000
+	LD	IX,(IY+5)	; DD ED 34  val
+	LD	IX,(IY-5)	; DD ED 34 -val
+
+	LD	IY,(IX)		; FD ED 2C 0000
+	LD	IY,(IX+5)	; FD ED 2C  val
+	LD	IY,(IX-5)	; FD ED 2C -val
+	LD	IY,(IY)		; FD ED 34 0000
+	LD	IY,(IY+5)	; FD ED 34  val
+	LD	IY,(IY-5)	; FD ED 34 -val
+
+	LD	SP,(IX)		; DD ED 36 00
+	LD	SP,(IX+5)	; DD ED 36  val
+	LD	SP,(IX-5)	; DD ED 36 -val
+	LD	SP,(IY)		; FD ED 36 00
+	LD	SP,(IY+5)	; FD ED 36  val
+	LD	SP,(IY-5)	; FD ED 36 -val
+
+	LD	BC,(ADDR)	; ED 4B addr
+	LD	DE,(ADDR)	; ED 5B addr
+	LD	HL,(ADDR)	; 2A addr
+	LD	SP,(ADDR)	; ED 7B addr
+
+	LD	IX,(ADDR)	; DD 2A addr
+	LD	IY,(ADDR)	; FD 2A addr
+
+	LD	(HL),BC		; ED 0E
+	LD	(HL),DE		; ED 1E
+	LD	(HL),HL		; ED 2E
+	LD	(HL),SP		; ED 3E
+
+	LD	(IX),BC		; DD ED 0E 00
+	LD	(IX+5),BC	; DD ED 0E  val
+	LD	(IX-5),BC	; DD ED 0E -val
+	LD	(IY),BC		; FD ED 0E 00
+	LD	(IY+5),BC	; FD ED 0E  val
+	LD	(IY-5),BC	; FD ED 0E -val
+
+	LD	(IX),DE		; DD ED 1E 00
+	LD	(IX+5),DE	; DD ED 1E  val
+	LD	(IX-5),DE	; DD ED 1E -val
+	LD	(IY),DE		; FD ED 1E 00
+	LD	(IY+5),DE	; FD ED 1E  val
+	LD	(IY-5),DE	; FD ED 1E -val
+
+	LD	(IX),HL		; DD ED 2E 00
+	LD	(IX+5),HL	; DD ED 2E  val
+	LD	(IX-5),HL	; DD ED 2E -val
+	LD	(IY),HL		; FD ED 2E 00
+	LD	(IY+5),HL	; FD ED 2E  val
+	LD	(IY-5),HL	; FD ED 2E -val
+
+	LD	(IX),IX		; DD ED 2D 0000
+	LD	(IX+5),IX	; DD ED 2D  val
+	LD	(IX-5),IX	; DD ED 2D -val
+	LD	(IY),IX		; DD ED 35 0000
+	LD	(IY+5),IX	; DD ED 35  val
+	LD	(IY-5),IX	; DD ED 35 -val
+
+	LD	(IX),IY		; FD ED 2D 0000
+	LD	(IX+5),IY	; FD ED 2D  val
+	LD	(IX-5),IY	; FD ED 2D -val
+	LD	(IY),IY		; FD ED 35 0000
+	LD	(IY+5),IY	; FD ED 35  val
+	LD	(IY-5),IY	; FD ED 35 -val
+
+	LD	(IX),SP		; DD ED 3E 00
+	LD	(IX+5),SP	; DD ED 3E  val
+	LD	(IX-5),SP	; DD ED 3E -val
+	LD	(IY),SP		; FD ED 3E 00
+	LD	(IY+5),SP	; FD ED 3E  val
+	LD	(IY-5),SP	; FD ED 3E -val
+
+	LD	(ADDR),BC	; ED 43 addr
+	LD	(ADDR),DE	; ED 53 addr
+	LD	(ADDR),HL	; 22 addr
+	LD	(ADDR),SP	; ED 73 addr
+
+	LD	(ADDR),IX	; DD 22 addr
+	LD	(ADDR),IY	; FD 22 addr
+
+	LD	SP,HL		; F9
+	LD	SP,IX		; DD F9
+	LD	SP,IY		; FD F9
+
+	LD	HL,(IX+VAL)	; ED 2C  val
+	LD	HL,(IX-VAL)	; ED 2C -val
+	LD	HL,(IY+VAL)	; ED 34  val
+	LD	HL,(IY-VAL)	; ED 34 -val
+	LD	HL,(HL+VAL)	; ED 3C  val
+	LD	HL,(HL-VAL)	; ED 3C -val
+
+	LD	IX,(IX+VAL)	; DD ED 2C  val
+	LD	IX,(IX-VAL)	; DD ED 2C -val
+	LD	IX,(IY+VAL)	; DD ED 34  val
+	LD	IX,(IY-VAL)	; DD ED 34 -val
+	LD	IX,(HL+VAL)	; DD ED 3C  val
+	LD	IX,(HL-VAL)	; DD ED 3C -val
+
+	LD	IY,(IX+VAL)	; FD ED 2C  val
+	LD	IY,(IX-VAL)	; FD ED 2C -val
+	LD	IY,(IY+VAL)	; FD ED 34  val
+	LD	IY,(IY-VAL)	; FD ED 34 -val
+	LD	IY,(HL+VAL)	; FD ED 3C  val
+	LD	IY,(HL-VAL)	; FD ED 3C -val
+
+	LD	HL,(SP)		; ED 04 0000
+	LD	HL,(SP+VAL)	; ED 04  val
+	LD	HL,(SP-VAL)	; ED 04 -val
+
+	LD	IX,(SP)		; DD ED 04 0000
+	LD	IX,(SP+VAL)	; DD ED 04  val
+	LD	IX,(SP-VAL)	; DD ED 04 -val
+
+	LD	IY,(SP)		; FD ED 04 0000
+	LD	IY,(SP+VAL)	; FD ED 04  val
+	LD	IY,(SP-VAL)	; FD ED 04 -val
+
+	LD	(IX+VAL),HL	; ED 2D  val
+	LD	(IX-VAL),HL	; ED 2D -val
+	LD	(IY+VAL),HL	; ED 35  val
+	LD	(IY-VAL),HL	; ED 35 -val
+	LD	(HL+VAL),HL	; ED 3D  val
+	LD	(HL-VAL),HL	; ED 3D -val
+
+	LD	(IX+VAL),IX	; DD ED 2D  val
+	LD	(IX-VAL),IX	; DD ED 2D -val
+	LD	(IY+VAL),IX	; DD ED 35  val
+	LD	(IY-VAL),IX	; DD ED 35 -val
+	LD	(HL+VAL),IX	; DD ED 3D  val
+	LD	(HL-VAL),IX	; DD ED 3D -val
+
+	LD	(IX+VAL),IY	; FD ED 2D  val
+	LD	(IX-VAL),IY	; FD ED 2D -val
+	LD	(IY+VAL),IY	; FD ED 35  val
+	LD	(IY-VAL),IY	; FD ED 35 -val
+	LD	(HL+VAL),IY	; FD ED 3D  val
+	LD	(HL-VAL),IY	; FD ED 3D -val
+
+	LD	(SP),HL		; ED 05 0000
+	LD	(SP+VAL),HL	; ED 05  val
+	LD	(SP-VAL),HL	; ED 05 -val
+
+	LD	(SP),IX		; DD ED 05 0000
+	LD	(SP+VAL),IX	; DD ED 05  val
+	LD	(SP-VAL),IX	; DD ED 05 -val
+
+	LD	(SP),IY		; FD ED 05 0000
+	LD	(SP+VAL),IY	; FD ED 05  val
+	LD	(SP-VAL),IY	; FD ED 05 -val
+
+	LD	HL,(HL+IX)	; ED 0C
+	LD	HL,(IX+HL)	; ED 0C
+	LD	HL,(HL+IY)	; ED 14
+	LD	HL,(IY+HL)	; ED 14
+	LD	HL,(IX+IY)	; ED 1C
+	LD	HL,(IY+IX)	; ED 1C
+
+	LD	IX,(HL+IX)	; DD ED 0C
+	LD	IX,(IX+HL)	; DD ED 0C
+	LD	IX,(HL+IY)	; DD ED 14
+	LD	IX,(IY+HL)	; DD ED 14
+	LD	IX,(IX+IY)	; DD ED 1C
+	LD	IX,(IY+IX)	; DD ED 1C
+
+	LD	IY,(HL+IX)	; FD ED 0C
+	LD	IY,(IX+HL)	; FD ED 0C
+	LD	IY,(HL+IY)	; FD ED 14
+	LD	IY,(IY+HL)	; FD ED 14
+	LD	IY,(IX+IY)	; FD ED 1C
+	LD	IY,(IY+IX)	; FD ED 1C
+
+	LD	(HL+IX),HL	; ED 0D
+	LD	(IX+HL),HL	; ED 0D
+	LD	(HL+IY),HL	; ED 15
+	LD	(IY+HL),HL	; ED 15
+	LD	(IX+IY),HL	; ED 1D
+	LD	(IY+IX),HL	; ED 1D
+
+	LD	(HL+IX),IX	; DD ED 0D
+	LD	(IX+HL),IX	; DD ED 0D
+	LD	(HL+IY),IX	; DD ED 15
+	LD	(IY+HL),IX	; DD ED 15
+	LD	(IX+IY),IX	; DD ED 1D
+	LD	(IY+IX),IX	; DD ED 1D
+
+	LD	(HL+IX),IY	; FD ED 0D
+	LD	(IX+HL),IY	; FD ED 0D
+	LD	(HL+IY),IY	; FD ED 15
+	LD	(IY+HL),IY	; FD ED 15
+	LD	(IX+IY),IY	; FD ED 1D
+	LD	(IY+IX),IY	; FD ED 1D
+
+	LD	HL,<ADDR>	; ED 24 disp
+	LD	HL,(PC+VAL)	; ED 24 addr
+
+	LD	IX,<ADDR>	; DD ED 24 disp
+	LD	IY,<ADDR>	; FD ED 24 disp
+	LD	IX,(PC+VAL)	; DD ED 24 addr
+	LD	IY,(PC+VAL)	; FD ED 24 addr
+
+	LD	<ADDR>,HL	; ED 25 disp
+	LD	(PC+VAL),HL	; ED 25 addr
+
+	LD	<ADDR>,IX	; DD ED 25 disp
+	LD	<ADDR>,IY	; FD ED 25 disp
+	LD	(PC+VAL),IX	; DD ED 25 addr
+	LD	(PC+VAL),IY	; FD ED 25 addr
+
+	LD	(HL),VAL	; DD 01 val
+
+	LD	(ADDR),VAL	; DD 11 addr val
+
+	LD	<ADDR>,VAL	; DD 31 disp val
+	LD	(PC+VAL),VAL	; DD 31 addr val
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	; Long/short test
+
+	LD	(HL),5		; short	36 05
+	LD	(HL),-5		; short 36 FB
+	LD	(HL),1234h	; long  DD 01 1234
+
+	LDW	(HL),5		; long  DD 01 0005
+	LDW	(HL),-5		; long	DD 01 FFFB
+	LDW	(HL),1234h	; long	DD 01 1234
+
+	LD	(ADDR),5	; short	DD 3E addr 05
+	LD	(ADDR),-5	; short DD 3E addr FB
+	LD	(ADDR),1234h	; long  DD 11 addr 1234
+
+	LDW	(ADDR),5	; long  DD 11 addr 0005
+	LDW	(ADDR),-5	; long	DD 11 addr FFFB
+	LDW	(ADDR),1234h	; long	DD 11 addr 1234
+
+	LD	<ADDR>,5	; short	FD 06 disp 05
+	LD	<ADDR>,-5	; short FD 06 disp FB
+	LD	<ADDR>,1234h	; long  DD 31 disp 1234
+
+	LDW	<ADDR>,5	; long  DD 31 disp 0005
+	LDW	<ADDR>,-5	; long	DD 31 disp FFFB
+	LDW	<ADDR>,1234h	; long	DD 31 disp 1234
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	MULT	A,A		; ED F8
+	MULT	A,B		; ED C0
+	MULT	A,C		; ED C8
+	MULT	A,D		; ED D0
+	MULT	A,E		; ED D8
+	MULT	A,H		; ED E0
+	MULT	A,L		; ED E8
+
+	MULT	A,IXH		; DD ED E0
+	MULT	A,IXL		; DD ED E8
+	MULT	A,IYH		; FD ED E0
+	MULT	A,IYL		; FD ED E8
+
+	MULT	A,5		; FD ED F8 n
+
+	MULT	A,(HL)		; ED F0
+
+	MULT	A,(ADDR)	; DD ED F8 addr
+
+	MULT	A,(IX+VAL)	; FD ED C8  val
+	MULT	A,(IX-VAL)	; FD ED C8 -val
+	MULT	A,(IY+VAL)	; FD ED D0  val
+	MULT	A,(IY-VAL)	; FD ED D0 -val
+	MULT	A,(HL+VAL)	; FD ED D8  val
+	MULT	A,(HL-VAL)	; FD ED D8 -val
+
+	MULT	A,(IX)		; DD ED F0 00
+	MULT	A,(IX+5)	; DD ED F0  d
+	MULT	A,(IX-5)	; DD ED F0 -d
+	MULT	A,(IY)		; FD ED F0 00
+	MULT	A,(IY+5)	; FD ED F0  d
+	MULT	A,(IY-5)	; FD ED F0 -d
+
+	MULT	A,<ADDR>	; FD ED C0 disp
+	MULT	A,(PC+VAL)	; FD ED C0 addr
+
+	MULT	A,(SP)		; DD ED C0 0000
+	MULT	A,(SP+VAL)	; DD ED C0  val
+	MULT	A,(SP-VAL)	; DD ED C0 -val
+
+	MULT	A,(HL+IX)	; DD ED C8
+	MULT	A,(IX+HL)	; DD ED C8
+	MULT	A,(HL+IY)	; DD ED D0
+	MULT	A,(IY+HL)	; DD ED D0
+	MULT	A,(IX+IY)	; DD ED D8
+	MULT	A,(IY+IX)	; DD ED D8
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	MULT	A		; ED F8
+	MULT	B		; ED C0
+	MULT	C		; ED C8
+	MULT	D		; ED D0
+	MULT	E		; ED D8
+	MULT	H		; ED E0
+	MULT	L		; ED E8
+
+	MULT	IXH		; DD ED E0
+	MULT	IXL		; DD ED E8
+	MULT	IYH		; FD ED E0
+	MULT	IYL		; FD ED E8
+
+	MULT	5		; FD ED F8 n
+
+	MULT	(HL)		; ED F0
+
+	MULT	(ADDR)		; DD ED F8 addr
+
+	MULT	(IX+VAL)	; FD ED C8  val
+	MULT	(IX-VAL)	; FD ED C8 -val
+	MULT	(IY+VAL)	; FD ED D0  val
+	MULT	(IY-VAL)	; FD ED D0 -val
+	MULT	(HL+VAL)	; FD ED D8  val
+	MULT	(HL-VAL)	; FD ED D8 -val
+
+	MULT	(IX)		; DD ED F0 00
+	MULT	(IX+5)		; DD ED F0  d
+	MULT	(IX-5)		; DD ED F0 -d
+	MULT	(IY)		; FD ED F0 00
+	MULT	(IY+5)		; FD ED F0  d
+	MULT	(IY-5)		; FD ED F0 -d
+
+	MULT	<ADDR>		; FD ED C0 disp
+	MULT	(PC+VAL)	; FD ED C0 addr
+
+	MULT	(SP)		; DD ED C0 0000
+	MULT	(SP+VAL)	; DD ED C0  val
+	MULT	(SP-VAL)	; DD ED C0 -val
+
+	MULT	(HL+IX)		; DD ED C8
+	MULT	(IX+HL)		; DD ED C8
+	MULT	(HL+IY)		; DD ED D0
+	MULT	(IY+HL)		; DD ED D0
+	MULT	(IX+IY)		; DD ED D8
+	MULT	(IY+IX)		; DD ED D8
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	MULTU	A,A		; ED F9
+	MULTU	A,B		; ED C1
+	MULTU	A,C		; ED C9
+	MULTU	A,D		; ED D1
+	MULTU	A,E		; ED D9
+	MULTU	A,H		; ED E1
+	MULTU	A,L		; ED E9
+
+	MULTU	A,IXH		; DD ED E1
+	MULTU	A,IXL		; DD ED E9
+	MULTU	A,IYH		; FD ED E1
+	MULTU	A,IYL		; FD ED E9
+
+	MULTU	A,5		; FD ED F9 n
+
+	MULTU	A,(HL)		; ED F1
+
+	MULTU	A,(ADDR)	; DD ED F9 addr
+
+	MULTU	A,(IX+VAL)	; FD ED C9  val
+	MULTU	A,(IX-VAL)	; FD ED C9 -val
+	MULTU	A,(IY+VAL)	; FD ED D1  val
+	MULTU	A,(IY-VAL)	; FD ED D1 -val
+	MULTU	A,(HL+VAL)	; FD ED D9  val
+	MULTU	A,(HL-VAL)	; FD ED D9 -val
+
+	MULTU	A,(IX)		; DD ED F1 00
+	MULTU	A,(IX+5)	; DD ED F1  d
+	MULTU	A,(IX-5)	; DD ED F1 -d
+	MULTU	A,(IY)		; FD ED F1 00
+	MULTU	A,(IY+5)	; FD ED F1  d
+	MULTU	A,(IY-5)	; FD ED F1 -d
+
+	MULTU	A,<ADDR>	; FD ED C1 disp
+	MULTU	A,(PC+VAL)	; FD ED C1 addr
+
+	MULTU	A,(SP)		; DD ED C1 0000
+	MULTU	A,(SP+VAL)	; DD ED C1  val
+	MULTU	A,(SP-VAL)	; DD ED C1 -val
+
+	MULTU	A,(HL+IX)	; DD ED C9
+	MULTU	A,(IX+HL)	; DD ED C9
+	MULTU	A,(HL+IY)	; DD ED D1
+	MULTU	A,(IY+HL)	; DD ED D1
+	MULTU	A,(IX+IY)	; DD ED D9
+	MULTU	A,(IY+IX)	; DD ED D9
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	MULTU	A		; ED F9
+	MULTU	B		; ED C1
+	MULTU	C		; ED C9
+	MULTU	D		; ED D1
+	MULTU	E		; ED D9
+	MULTU	H		; ED E1
+	MULTU	L		; ED E9
+
+	MULTU	IXH		; DD ED E1
+	MULTU	IXL		; DD ED E9
+	MULTU	IYH		; FD ED E1
+	MULTU	IYL		; FD ED E9
+
+	MULTU	5		; FD ED F9 n
+
+	MULTU	(HL)		; ED F1
+
+	MULTU	(ADDR)		; DD ED F9 addr
+
+	MULTU	(IX+VAL)	; FD ED C9  val
+	MULTU	(IX-VAL)	; FD ED C9 -val
+	MULTU	(IY+VAL)	; FD ED D1  val
+	MULTU	(IY-VAL)	; FD ED D1 -val
+	MULTU	(HL+VAL)	; FD ED D9  val
+	MULTU	(HL-VAL)	; FD ED D9 -val
+
+	MULTU	(IX)		; DD ED F1 00
+	MULTU	(IX+5)		; DD ED F1  d
+	MULTU	(IX-5)		; DD ED F1 -d
+	MULTU	(IY)		; FD ED F1 00
+	MULTU	(IY+5)		; FD ED F1  d
+	MULTU	(IY-5)		; FD ED F1 -d
+
+	MULTU	<ADDR>		; FD ED C1 disp
+	MULTU	(PC+VAL)	; FD ED C1 addr
+
+	MULTU	(SP)		; DD ED C1 0000
+	MULTU	(SP+VAL)	; DD ED C1  val
+	MULTU	(SP-VAL)	; DD ED C1 -val
+
+	MULTU	(HL+IX)		; DD ED C9
+	MULTU	(IX+HL)		; DD ED C9
+	MULTU	(HL+IY)		; DD ED D1
+	MULTU	(IY+HL)		; DD ED D1
+	MULTU	(IX+IY)		; DD ED D9
+	MULTU	(IY+IX)		; DD ED D9
+
+;-----------------------------------------------------------------------
+
+	; HL is optional
+
+	MULTUW	HL,BC		; ED C3
+	MULTUW	HL,DE		; ED D3
+	MULTUW	HL,HL		; ED E3
+	MULTUW	HL,SP		; ED F3
+
+	MULTUW	HL,IX		; DD ED E3
+	MULTUW	HL,IY		; FD ED E3
+
+	MULTUW	HL,VAL		; FD ED F3 val
+
+	MULTUW	HL,(ADDR)	; DD ED D3 addr
+
+	MULTUW	HL,(IX+VAL)	; FD ED C3  val
+	MULTUW	HL,(IX-VAL)	; FD ED C3 -val
+	MULTUW	HL,(IY+VAL)	; FD ED D3  val
+	MULTUW	HL,(IY-VAL)	; FD ED D3 -val
+
+	MULTUW	HL,(IX)		; FD ED C3 0000
+	MULTUW	HL,(IX+5)	; FD ED C3  val
+	MULTUW	HL,(IX-5)	; FD ED C3 -val
+	MULTUW	HL,(IY)		; FD ED D3 0000
+	MULTUW	HL,(IY+5)	; FD ED D3  val
+	MULTUW	HL,(IY-5)	; FD ED D3 -val
+
+	MULTUW	HL,<ADDR>	; DD ED F3 disp
+	MULTUW	HL,(PC+VAL)	; DD ED F3 addr
+
+	MULTUW	HL,(HL)		; DD ED C3
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	MULTUW	BC		; ED C3
+	MULTUW	DE		; ED D3
+	MULTUW	HL		; ED E3
+	MULTUW	SP		; ED F3
+
+	MULTUW	IX		; DD ED E3
+	MULTUW	IY		; FD ED E3
+
+	MULTUW	VAL		; FD ED F3 val
+
+	MULTUW	(ADDR)		; DD ED D3 addr
+
+	MULTUW	(IX+VAL)	; FD ED C3  val
+	MULTUW	(IX-VAL)	; FD ED C3 -val
+	MULTUW	(IY+VAL)	; FD ED D3  val
+	MULTUW	(IY-VAL)	; FD ED D3 -val
+
+	MULTUW	(IX)		; FD ED C3 0000
+	MULTUW	(IX+5)		; FD ED C3  val
+	MULTUW	(IX-5)		; FD ED C3 -val
+	MULTUW	(IY)		; FD ED D3 0000
+	MULTUW	(IY+5)		; FD ED D3  val
+	MULTUW	(IY-5)		; FD ED D3 -val
+
+	MULTUW	<ADDR>		; DD ED F3 disp
+	MULTUW	(PC+VAL)	; DD ED F3 addr
+
+	MULTUW	(HL)		; DD ED C3
+
+;-----------------------------------------------------------------------
+
+	; HL is optional
+
+	MULTW	HL,BC		; ED C2
+	MULTW	HL,DE		; ED D2
+	MULTW	HL,HL		; ED E2
+	MULTW	HL,SP		; ED F2
+
+	MULTW	HL,IX		; DD ED E2
+	MULTW	HL,IY		; FD ED E2
+
+	MULTW	HL,VAL		; FD ED F2 val
+
+	MULTW	HL,(ADDR)	; DD ED D2 addr
+
+	MULTW	HL,(IX+VAL)	; FD ED C2  val
+	MULTW	HL,(IX-VAL)	; FD ED C2 -val
+	MULTW	HL,(IY+VAL)	; FD ED D2  val
+	MULTW	HL,(IY-VAL)	; FD ED D2 -val
+
+	MULTW	HL,(IX)		; FD ED C2 0000
+	MULTW	HL,(IX+5)	; FD ED C2  val
+	MULTW	HL,(IX-5)	; FD ED C2 -val
+	MULTW	HL,(IY)		; FD ED D2 0000
+	MULTW	HL,(IY+5)	; FD ED D2  val
+	MULTW	HL,(IY-5)	; FD ED D2 -val
+
+	MULTW	HL,<ADDR>	; DD ED F2 disp
+	MULTW	HL,(PC+VAL)	; DD ED F2 addr
+
+	MULTW	HL,(HL)		; DD ED C2
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	MULTW	BC		; ED C2
+	MULTW	DE		; ED D2
+	MULTW	HL		; ED E2
+	MULTW	SP		; ED F2
+
+	MULTW	IX		; DD ED E2
+	MULTW	IY		; FD ED E2
+
+	MULTW	VAL		; FD ED F2 val
+
+	MULTW	(ADDR)		; DD ED D2 addr
+
+	MULTW	(IX+VAL)	; FD ED C2  val
+	MULTW	(IX-VAL)	; FD ED C2 -val
+	MULTW	(IY+VAL)	; FD ED D2  val
+	MULTW	(IY-VAL)	; FD ED D2 -val
+
+	MULTW	(IX)		; FD ED C2 0000
+	MULTW	(IX+5)		; FD ED C2  val
+	MULTW	(IX-5)		; FD ED C2 -val
+	MULTW	(IY)		; FD ED D2 0000
+	MULTW	(IY+5)		; FD ED D2  val
+	MULTW	(IY-5)		; FD ED D2 -val
+
+	MULTW	<ADDR>		; DD ED F2 disp
+	MULTW	(PC+VAL)	; DD ED F2 addr
+
+	MULTW	(HL)		; DD ED C2
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	NEG	A		; ED 44
+
+	NEG	HL		; ED 4C
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	NEG			; ED 44
+
+;-----------------------------------------------------------------------
+
+	NOP			; 00
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	OR	A,A		; B7
+	OR	A,B		; B0
+	OR	A,C		; B1
+	OR	A,D		; B2
+	OR	A,E		; B3
+	OR	A,H		; B4
+	OR	A,L		; B5
+
+	OR	A,IXH		; DD B4
+	OR	A,IXL		; DD B5
+	OR	A,IYH		; FD B4
+	OR	A,IYL		; FD B5
+
+	OR	A,5		; F6 n
+
+	OR	A,(HL)		; B6
+
+	OR	A,(ADDR)	; DD B7 addr
+
+	OR	A,(IX+VAL)	; FD B1  val
+	OR	A,(IX-VAL)	; FD B1 -val
+	OR	A,(IY+VAL)	; FD B2  val
+	OR	A,(IY-VAL)	; FD B2 -val
+	OR	A,(HL+VAL)	; FD B3  val
+	OR	A,(HL-VAL)	; FD B3 -val
+
+	OR	A,(IX)		; DD B6 00
+	OR	A,(IX+5)	; DD B6  d
+	OR	A,(IX-5)	; DD B6 -d
+	OR	A,(IY)		; FD B6 00
+	OR	A,(IY+5)	; FD B6  d
+	OR	A,(IY-5)	; FD B6 -d
+
+	OR	A,<ADDR>	; FD B0 disp
+	OR	A,(PC+VAL)	; FD B0 addr
+
+	OR	A,(SP)		; DD B0 0000
+	OR	A,(SP+VAL)	; DD B0  val
+	OR	A,(SP-VAL)	; DD B0 -val
+
+	OR	A,(HL+IX)	; DD B1
+	OR	A,(IX+HL)	; DD B1
+	OR	A,(HL+IY)	; DD B2
+	OR	A,(IY+HL)	; DD B2
+	OR	A,(IX+IY)	; DD B3
+	OR	A,(IY+IX)	; DD B3
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	OR	A		; B7
+	OR	B		; B0
+	OR	C		; B1
+	OR	D		; B2
+	OR	E		; B3
+	OR	H		; B4
+	OR	L		; B5
+
+	OR	IXH		; DD B4
+	OR	IXL		; DD B5
+	OR	IYH		; FD B4
+	OR	IYL		; FD B5
+
+	OR	5		; F6 n
+
+	OR	(HL)		; B6
+
+	OR	(ADDR)		; DD B7 addr
+
+	OR	(IX+VAL)	; FD B1  val
+	OR	(IX-VAL)	; FD B1 -val
+	OR	(IY+VAL)	; FD B2  val
+	OR	(IY-VAL)	; FD B2 -val
+	OR	(HL+VAL)	; FD B3  val
+	OR	(HL-VAL)	; FD B3 -val
+
+	OR	(IX)		; DD B6 00
+	OR	(IX+5)		; DD B6  d
+	OR	(IX-5)		; DD B6 -d
+	OR	(IY)		; FD B6 00
+	OR	(IY+5)		; FD B6  d
+	OR	(IY-5)		; FD B6 -d
+
+	OR	<ADDR>		; FD B0 disp
+	OR	(PC+VAL)	; FD B0 addr
+
+	OR	(SP)		; DD B0 0000
+	OR	(SP+VAL)	; DD B0  val
+	OR	(SP-VAL)	; DD B0 -val
+
+	OR	(HL+IX)		; DD B1
+	OR	(IX+HL)		; DD B1
+	OR	(HL+IY)		; DD B2
+	OR	(IY+HL)		; DD B2
+	OR	(IX+IY)		; DD B3
+	OR	(IY+IX)		; DD B3
+
+;-----------------------------------------------------------------------
+
+	OTDR			; ED BB
+	OTDRW			; ED 9B
+
+;-----------------------------------------------------------------------
+
+	OTIR			; ED B3
+	OTIRW			; ED 93
+
+;-----------------------------------------------------------------------
+
+	OUT	(C),A		; ED 79
+	OUT	(C),B		; ED 41
+	OUT	(C),C		; ED 49
+	OUT	(C),D		; ED 51
+	OUT	(C),E		; ED 59
+	OUT	(C),H		; ED 61
+	OUT	(C),L		; ED 69
+
+	OUT	(C),IXH		; DD ED 61
+	OUT	(C),IXL		; DD ED 69
+	OUT	(C),IYH		; FD ED 61
+	OUT	(C),IYL		; FD ED 69
+
+	OUT	(C),(ADDR)	; DD ED 79 addr
+
+	OUT	(C),(IX+VAL)	; FD ED 49  val
+	OUT	(C),(IX-VAL)	; FD ED 49 -val
+	OUT	(C),(IY+VAL)	; FD ED 51  val
+	OUT	(C),(IY-VAL)	; FD ED 51 -val
+	OUT	(C),(HL+VAL)	; FD ED 59  val
+	OUT	(C),(HL-VAL)	; FD ED 59 -val
+
+	OUT	(C),(IX)	; FD ED 49 0000
+	OUT	(C),(IY)	; FD ED 51 0000
+	OUT	(C),(HL)	; FD ED 59 0000
+
+	OUT	(C),<ADDR>	; FD ED 41 disp
+	OUT	(C),(PC+VAL)	; FD ED 41 addr
+
+	OUT	(C),(SP)	; DD ED 41 0000
+	OUT	(C),(SP+VAL)	; DD ED 41  val
+	OUT	(C),(SP-VAL)	; DD ED 41 -val
+
+	OUT	(C),(HL+IX)	; DD ED 49
+	OUT	(C),(IX+HL)	; DD ED 49
+	OUT	(C),(HL+IY)	; DD ED 51
+	OUT	(C),(IY+HL)	; DD ED 51
+	OUT	(C),(IX+IY)	; DD ED 59
+	OUT	(C),(IY+IX)	; DD ED 59
+
+	OUT	(5),A		; D3 n
+
+;-----------------------------------------------------------------------
+
+	OUTD			; ED AB
+	OUTDW			; ED 8B
+
+;-----------------------------------------------------------------------
+
+	OUTI			; ED A3
+	OUTIW			; ED 83
+
+;-----------------------------------------------------------------------
+
+	; OUT form is also allowed
+
+	OUTW	(C),HL		; ED BF
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	OUT	(C),HL		; ED BF
+
+;-----------------------------------------------------------------------
+
+	PCACHE			; ED 65
+
+;-----------------------------------------------------------------------
+
+	POP	AF		; F1
+	POP	BC		; C1
+	POP	DE		; D1
+	POP	HL		; E1
+
+	POP	IX		; DD E1
+	POP	IY		; FD E1
+
+	POP	(HL)		; DD C1
+
+	POP	(ADDR)		; DD D1 addr
+
+	POP	<ADDR>		; DD F1 disp
+	POP	(PC+VAL)	; DD F1 addr
+
+;-----------------------------------------------------------------------
+
+	PUSH	AF		; F5
+	PUSH	BC		; C5
+	PUSH	DE		; D5
+	PUSH	HL		; E5
+
+	PUSH	IX		; DD E5
+	PUSH	IY		; FD E5
+
+	PUSH	VAL		; FD F5 val
+
+	PUSH	(HL)		; DD C5
+
+	PUSH	(ADDR)		; DD D5 addr
+
+	PUSH	<ADDR>		; DD F5 disp
+	PUSH	(PC+VAL)	; DD F5 addr
+
+;-----------------------------------------------------------------------
+
+	RES	0,A		; CB 87
+	RES	0,B		; CB 80
+	RES	0,C		; CB 81
+	RES	0,D		; CB 82
+	RES	0,E		; CB 83
+	RES	0,H		; CB 84
+	RES	0,L		; CB 85
+	RES	0,(HL)		; CB 86
+
+	RES	1,A		; CB 8F
+	RES	1,B		; CB 88
+	RES	1,C		; CB 89
+	RES	1,D		; CB 8A
+	RES	1,E		; CB 8B
+	RES	1,H		; CB 8C
+	RES	1,L		; CB 8D
+	RES	1,(HL)		; CB 8E
+
+	RES	2,A		; CB 97
+	RES	2,B		; CB 90
+	RES	2,C		; CB 91
+	RES	2,D		; CB 92
+	RES	2,E		; CB 93
+	RES	2,H		; CB 94
+	RES	2,L		; CB 95
+	RES	2,(HL)		; CB 96
+
+	RES	3,A		; CB 9F
+	RES	3,B		; CB 98
+	RES	3,C		; CB 99
+	RES	3,D		; CB 9A
+	RES	3,E		; CB 9B
+	RES	3,H		; CB 9C
+	RES	3,L		; CB 9D
+	RES	3,(HL)		; CB 9E
+
+	RES	4,A		; CB A7
+	RES	4,B		; CB A0
+	RES	4,C		; CB A1
+	RES	4,D		; CB A2
+	RES	4,E		; CB A3
+	RES	4,H		; CB A4
+	RES	4,L		; CB A5
+	RES	4,(HL)		; CB A6
+
+	RES	5,A		; CB AF
+	RES	5,B		; CB A8
+	RES	5,C		; CB A9
+	RES	5,D		; CB AA
+	RES	5,E		; CB AB
+	RES	5,H		; CB AC
+	RES	5,L		; CB AD
+	RES	5,(HL)		; CB AE
+
+	RES	6,A		; CB B7
+	RES	6,B		; CB B0
+	RES	6,C		; CB B1
+	RES	6,D		; CB B2
+	RES	6,E		; CB B3
+	RES	6,H		; CB B4
+	RES	6,L		; CB B5
+	RES	6,(HL)		; CB B6
+
+	RES	7,A		; CB BF
+	RES	7,B		; CB B8
+	RES	7,C		; CB B9
+	RES	7,D		; CB BA
+	RES	7,E		; CB BB
+	RES	7,H		; CB BC
+	RES	7,L		; CB BD
+	RES	7,(HL)		; CB BE
+
+	RES	0,(IX)		; DD CB 00 86
+	RES	0,(IX+5)	; DD CB  d 86
+	RES	0,(IX-5)	; DD CB -d 86
+	RES	0,(IY)		; FD CB 00 86
+	RES	0,(IY+5)	; FD CB  d 86
+	RES	0,(IY-5)	; FD CB -d 86
+
+	RES	1,(IX)		; DD CB 00 8E
+	RES	1,(IX+5)	; DD CB  d 8E
+	RES	1,(IX-5)	; DD CB -d 8E
+	RES	1,(IY)		; FD CB 00 8E
+	RES	1,(IY+5)	; FD CB  d 8E
+	RES	1,(IY-5)	; FD CB -d 8E
+
+	RES	2,(IX)		; DD CB 00 96
+	RES	2,(IX+5)	; DD CB  d 96
+	RES	2,(IX-5)	; DD CB -d 96
+	RES	2,(IY)		; FD CB 00 96
+	RES	2,(IY+5)	; FD CB  d 96
+	RES	2,(IY-5)	; FD CB -d 96
+
+	RES	3,(IX)		; DD CB 00 9E
+	RES	3,(IX+5)	; DD CB  d 9E
+	RES	3,(IX-5)	; DD CB -d 9E
+	RES	3,(IY)		; FD CB 00 9E
+	RES	3,(IY+5)	; FD CB  d 9E
+	RES	3,(IY-5)	; FD CB -d 9E
+
+	RES	4,(IX)		; DD CB 00 A6
+	RES	4,(IX+5)	; DD CB  d A6
+	RES	4,(IX-5)	; DD CB -d A6
+	RES	4,(IY)		; FD CB 00 A6
+	RES	4,(IY+5)	; FD CB  d A6
+	RES	4,(IY-5)	; FD CB -d A6
+
+	RES	5,(IX)		; DD CB 00 AE
+	RES	5,(IX+5)	; DD CB  d AE
+	RES	5,(IX-5)	; DD CB -d AE
+	RES	5,(IY)		; FD CB 00 AE
+	RES	5,(IY+5)	; FD CB  d AE
+	RES	5,(IY-5)	; FD CB -d AE
+
+	RES	6,(IX)		; DD CB 00 B6
+	RES	6,(IX+5)	; DD CB  d B6
+	RES	6,(IX-5)	; DD CB -d B6
+	RES	6,(IY)		; FD CB 00 B6
+	RES	6,(IY+5)	; FD CB  d B6
+	RES	6,(IY-5)	; FD CB -d B6
+
+	RES	7,(IX)		; DD CB 00 BE
+	RES	7,(IX+5)	; DD CB  d BE
+	RES	7,(IX-5)	; DD CB -d BE
+	RES	7,(IY)		; FD CB 00 BE
+	RES	7,(IY+5)	; FD CB  d BE
+	RES	7,(IY-5)	; FD CB -d BE
+
+;-----------------------------------------------------------------------
+
+	RET	NZ		; C0
+	RET	Z		; C8
+	RET	NC		; D0
+	RET	C		; D8
+	RET	PO		; E0
+	RET	PE		; E8
+	RET	NV		; E0
+	RET	V		; E8
+	RET	P		; F0
+	RET	M		; F8
+	RET	NS		; F0
+	RET	S		; F8
+
+	RET			; C9
+
+;-----------------------------------------------------------------------
+
+	RETI			; ED 4D
+
+;-----------------------------------------------------------------------
+
+	RETIL			; ED 55
+
+;-----------------------------------------------------------------------
+
+	RETN			; ED 45
+
+;-----------------------------------------------------------------------
+
+	RL	A		; CB 17
+	RL	B		; CB 10
+	RL	C		; CB 11
+	RL	D		; CB 12
+	RL	E		; CB 13
+	RL	H		; CB 14
+	RL	L		; CB 15
+
+	RL	(HL)		; CB 16
+
+	RL	(IX)		; DD CB 00 16
+	RL	(IX+5)		; DD CB  d 16
+	RL	(IX-5)		; DD CB -d 16
+	RL	(IY)		; FD CB 00 16
+	RL	(IY+5)		; FD CB  d 16
+	RL	(IY-5)		; FD CB -d 16
+
+;-----------------------------------------------------------------------
+
+	RLA			; 17
+
+;-----------------------------------------------------------------------
+
+	RLC	A		; CB 07
+	RLC	B		; CB 00
+	RLC	C		; CB 01
+	RLC	D		; CB 02
+	RLC	E		; CB 03
+	RLC	H		; CB 04
+	RLC	L		; CB 05
+
+	RLC	(HL)		; CB 06
+
+	RLC	(IX)		; DD CB 00 06
+	RLC	(IX+5)		; DD CB  d 06
+	RLC	(IX-5)		; DD CB -d 06
+	RLC	(IY)		; FD CB 00 06
+	RLC	(IY+5)		; FD CB  d 06
+	RLC	(IY-5)		; FD CB -d 06
+
+;-----------------------------------------------------------------------
+
+	RLCA			; 07
+
+;-----------------------------------------------------------------------
+
+	RLD			; ED 6F
+
+;-----------------------------------------------------------------------
+
+	RR	A		; CB 1F
+	RR	B		; CB 18
+	RR	C		; CB 19
+	RR	D		; CB 1A
+	RR	E		; CB 1B
+	RR	H		; CB 1C
+	RR	L		; CB 1D
+
+	RR	(HL)		; CB 1E
+
+	RR	(IX)		; DD CB 00 1E
+	RR	(IX+5)		; DD CB  d 1E
+	RR	(IX-5)		; DD CB -d 1E
+	RR	(IY)		; FD CB 00 1E
+	RR	(IY+5)		; FD CB  d 1E
+	RR	(IY-5)		; FD CB -d 1E
+
+;-----------------------------------------------------------------------
+
+	RRA			; 1F
+
+;-----------------------------------------------------------------------
+
+	RRC	A		; CB 0F
+	RRC	B		; CB 08
+	RRC	C		; CB 09
+	RRC	D		; CB 0A
+	RRC	E		; CB 0B
+	RRC	H		; CB 0C
+	RRC	L		; CB 0D
+
+	RRC	(HL)		; CB 0E
+
+	RRC	(IX)		; DD CB 00 0E
+	RRC	(IX+5)		; DD CB  d 0E
+	RRC	(IX-5)		; DD CB -d 0E
+	RRC	(IY)		; FD CB 00 0E
+	RRC	(IY+5)		; FD CB  d 0E
+	RRC	(IY-5)		; FD CB -d 0E
+
+;-----------------------------------------------------------------------
+
+	RRCA			; 0F
+
+;-----------------------------------------------------------------------
+
+	RRD			; ED 67
+
+;-----------------------------------------------------------------------
+
+	RST	00h		; C7
+	RST	08h		; CF
+	RST	10h		; D7
+	RST	18h		; DF
+	RST	20h		; E7
+	RST	28h		; EF
+	RST	30h		; F7
+	RST	38h		; FF
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	SBC	A,A		; 9F
+	SBC	A,B		; 98
+	SBC	A,C		; 99
+	SBC	A,D		; 9A
+	SBC	A,E		; 9B
+	SBC	A,H		; 9C
+	SBC	A,L		; 9D
+
+	SBC	A,IXH		; DD 9C
+	SBC	A,IXL		; DD 9D
+	SBC	A,IYH		; FD 9C
+	SBC	A,IYL		; FD 9D
+
+	SBC	A,5		; DE n
+
+	SBC	A,(HL)		; 9E
+
+	SBC	A,(ADDR)	; DD 9F addr
+
+	SBC	A,(IX+VAL)	; FD 99  val
+	SBC	A,(IX-VAL)	; FD 99 -val
+	SBC	A,(IY+VAL)	; FD 9A  val
+	SBC	A,(IY-VAL)	; FD 9A -val
+	SBC	A,(HL+VAL)	; FD 9B  val
+	SBC	A,(HL-VAL)	; FD 9B -val
+
+	SBC	A,(IX)		; DD 9E 00
+	SBC	A,(IX+5)	; DD 9E  d
+	SBC	A,(IX-5)	; DD 9E -d
+	SBC	A,(IY)		; FD 9E 00
+	SBC	A,(IY+5)	; FD 9E  d
+	SBC	A,(IY-5)	; FD 9E -d
+
+	SBC	A,<ADDR>	; FD 98 disp
+	SBC	A,(PC+VAL)	; FD 98 addr
+
+	SBC	A,(SP)		; DD 98 0000
+	SBC	A,(SP+VAL)	; DD 98  val
+	SBC	A,(SP-VAL)	; DD 98 -val
+
+	SBC	A,(HL+IX)	; DD 99
+	SBC	A,(IX+HL)	; DD 99
+	SBC	A,(HL+IY)	; DD 9A
+	SBC	A,(IY+HL)	; DD 9A
+	SBC	A,(IX+IY)	; DD 9B
+	SBC	A,(IY+IX)	; DD 9B
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	SBC	A		; 9F
+	SBC	B		; 98
+	SBC	C		; 99
+	SBC	D		; 9A
+	SBC	E		; 9B
+	SBC	H		; 9C
+	SBC	L		; 9D
+
+	SBC	IXH		; DD 9C
+	SBC	IXL		; DD 9D
+	SBC	IYH		; FD 9C
+	SBC	IYL		; FD 9D
+
+	SBC	5		; DE n
+
+	SBC	(HL)		; 9E
+
+	SBC	(ADDR)		; DD 9F addr
+
+	SBC	(IX+VAL)	; FD 99  val
+	SBC	(IX-VAL)	; FD 99 -val
+	SBC	(IY+VAL)	; FD 9A  val
+	SBC	(IY-VAL)	; FD 9A -val
+	SBC	(HL+VAL)	; FD 9B  val
+	SBC	(HL-VAL)	; FD 9B -val
+
+	SBC	(IX)		; DD 9E 00
+	SBC	(IX+5)		; DD 9E  d
+	SBC	(IX-5)		; DD 9E -d
+	SBC	(IY)		; FD 9E 00
+	SBC	(IY+5)		; FD 9E  d
+	SBC	(IY-5)		; FD 9E -d
+
+	SBC	<ADDR>		; FD 98 disp
+	SBC	(PC+VAL)	; FD 98 addr
+
+	SBC	(SP)		; DD 98 0000
+	SBC	(SP+VAL)	; DD 98  val
+	SBC	(SP-VAL)	; DD 98 -val
+
+	SBC	(HL+IX)		; DD 99
+	SBC	(IX+HL)		; DD 99
+	SBC	(HL+IY)		; DD 9A
+	SBC	(IY+HL)		; DD 9A
+	SBC	(IX+IY)		; DD 9B
+	SBC	(IY+IX)		; DD 9B
+
+;-----------------------------------------------------------------------
+
+	SBC	HL,BC		; ED 42
+	SBC	HL,DE		; ED 52
+	SBC	HL,HL		; ED 62
+	SBC	HL,SP		; ED 72
+
+	SBC	IX,BC		; DD ED 42
+	SBC	IX,DE		; DD ED 52
+	SBC	IX,IX		; DD ED 62
+	SBC	IX,SP		; DD ED 72
+
+	SBC	IY,BC		; FD ED 42
+	SBC	IY,DE		; FD ED 52
+	SBC	IY,IY		; FD ED 62
+	SBC	IY,SP		; FD ED 72
+
+;-----------------------------------------------------------------------
+
+	SC	VAL		; ED 71 val
+
+;-----------------------------------------------------------------------
+
+	SCF			; 37
+
+;-----------------------------------------------------------------------
+
+	SET	0,A		; CB C7
+	SET	0,B		; CB C0
+	SET	0,C		; CB C1
+	SET	0,D		; CB C2
+	SET	0,E		; CB C3
+	SET	0,H		; CB C4
+	SET	0,L		; CB C5
+	SET	0,(HL)		; CB C6
+
+	SET	1,A		; CB CF
+	SET	1,B		; CB C8
+	SET	1,C		; CB C9
+	SET	1,D		; CB CA
+	SET	1,E		; CB CB
+	SET	1,H		; CB CC
+	SET	1,L		; CB CD
+	SET	1,(HL)		; CB CE
+
+	SET	2,A		; CB D7
+	SET	2,B		; CB D0
+	SET	2,C		; CB D1
+	SET	2,D		; CB D2
+	SET	2,E		; CB D3
+	SET	2,H		; CB D4
+	SET	2,L		; CB D5
+	SET	2,(HL)		; CB D6
+
+	SET	3,A		; CB DF
+	SET	3,B		; CB D8
+	SET	3,C		; CB D9
+	SET	3,D		; CB DA
+	SET	3,E		; CB DB
+	SET	3,H		; CB DC
+	SET	3,L		; CB DD
+	SET	3,(HL)		; CB DE
+
+	SET	4,A		; CB E7
+	SET	4,B		; CB E0
+	SET	4,C		; CB E1
+	SET	4,D		; CB E2
+	SET	4,E		; CB E3
+	SET	4,H		; CB E4
+	SET	4,L		; CB E5
+	SET	4,(HL)		; CB E6
+
+	SET	5,A		; CB EF
+	SET	5,B		; CB E8
+	SET	5,C		; CB E9
+	SET	5,D		; CB EA
+	SET	5,E		; CB EB
+	SET	5,H		; CB EC
+	SET	5,L		; CB ED
+	SET	5,(HL)		; CB EE
+
+	SET	6,A		; CB F7
+	SET	6,B		; CB F0
+	SET	6,C		; CB F1
+	SET	6,D		; CB F2
+	SET	6,E		; CB F3
+	SET	6,H		; CB F4
+	SET	6,L		; CB F5
+	SET	6,(HL)		; CB F6
+
+	SET	7,A		; CB FF
+	SET	7,B		; CB F8
+	SET	7,C		; CB F9
+	SET	7,D		; CB FA
+	SET	7,E		; CB FB
+	SET	7,H		; CB FC
+	SET	7,L		; CB FD
+	SET	7,(HL)		; CB FE
+
+	SET	0,(IX)		; DD CB 00 C6
+	SET	0,(IX+5)	; DD CB  d C6
+	SET	0,(IX-5)	; DD CB -d C6
+	SET	0,(IY)		; FD CB 00 C6
+	SET	0,(IY+5)	; FD CB  d C6
+	SET	0,(IY-5)	; FD CB -d C6
+
+	SET	1,(IX)		; DD CB 00 CE
+	SET	1,(IX+5)	; DD CB  d CE
+	SET	1,(IX-5)	; DD CB -d CE
+	SET	1,(IY)		; FD CB 00 CE
+	SET	1,(IY+5)	; FD CB  d CE
+	SET	1,(IY-5)	; FD CB -d CE
+
+	SET	2,(IX)		; DD CB 00 D6
+	SET	2,(IX+5)	; DD CB  d D6
+	SET	2,(IX-5)	; DD CB -d D6
+	SET	2,(IY)		; FD CB 00 D6
+	SET	2,(IY+5)	; FD CB  d D6
+	SET	2,(IY-5)	; FD CB -d D6
+
+	SET	3,(IX)		; DD CB 00 DE
+	SET	3,(IX+5)	; DD CB  d DE
+	SET	3,(IX-5)	; DD CB -d DE
+	SET	3,(IY)		; FD CB 00 DE
+	SET	3,(IY+5)	; FD CB  d DE
+	SET	3,(IY-5)	; FD CB -d DE
+
+	SET	4,(IX)		; DD CB 00 E6
+	SET	4,(IX+5)	; DD CB  d E6
+	SET	4,(IX-5)	; DD CB -d E6
+	SET	4,(IY)		; FD CB 00 E6
+	SET	4,(IY+5)	; FD CB  d E6
+	SET	4,(IY-5)	; FD CB -d E6
+
+	SET	5,(IX)		; DD CB 00 EE
+	SET	5,(IX+5)	; DD CB  d EE
+	SET	5,(IX-5)	; DD CB -d EE
+	SET	5,(IY)		; FD CB 00 EE
+	SET	5,(IY+5)	; FD CB  d EE
+	SET	5,(IY-5)	; FD CB -d EE
+
+	SET	6,(IX)		; DD CB 00 F6
+	SET	6,(IX+5)	; DD CB  d F6
+	SET	6,(IX-5)	; DD CB -d F6
+	SET	6,(IY)		; FD CB 00 F6
+	SET	6,(IY+5)	; FD CB  d F6
+	SET	6,(IY-5)	; FD CB -d F6
+
+	SET	7,(IX)		; DD CB 00 FE
+	SET	7,(IX+5)	; DD CB  d FE
+	SET	7,(IX-5)	; DD CB -d FE
+	SET	7,(IY)		; FD CB 00 FE
+	SET	7,(IY+5)	; FD CB  d FE
+	SET	7,(IY-5)	; FD CB -d FE
+
+;-----------------------------------------------------------------------
+
+	SLA	A		; CB 27
+	SLA	B		; CB 20
+	SLA	C		; CB 21
+	SLA	D		; CB 22
+	SLA	E		; CB 23
+	SLA	H		; CB 24
+	SLA	L		; CB 25
+
+	SLA	(HL)		; CB 26
+
+	SLA	(IX)		; DD CB 00 26
+	SLA	(IX+5)		; DD CB  d 26
+	SLA	(IX-5)		; DD CB -d 26
+	SLA	(IY)		; FD CB 00 26
+	SLA	(IY+5)		; FD CB  d 26
+	SLA	(IY-5)		; FD CB -d 26
+
+;-----------------------------------------------------------------------
+
+	SRA	A		; CB 2F
+	SRA	B		; CB 28
+	SRA	C		; CB 29
+	SRA	D		; CB 2A
+	SRA	E		; CB 2B
+	SRA	H		; CB 2C
+	SRA	L		; CB 2D
+
+	SRA	(HL)		; CB 2E
+
+	SRA	(IX)		; DD CB 00 2E
+	SRA	(IX+5)		; DD CB  d 2E
+	SRA	(IX-5)		; DD CB -d 2E
+	SRA	(IY)		; FD CB 00 2E
+	SRA	(IY+5)		; FD CB  d 2E
+	SRA	(IY-5)		; FD CB -d 2E
+
+;-----------------------------------------------------------------------
+
+	SRL	A		; CB 3F
+	SRL	B		; CB 38
+	SRL	C		; CB 39
+	SRL	D		; CB 3A
+	SRL	E		; CB 3B
+	SRL	H		; CB 3C
+	SRL	L		; CB 3D
+
+	SRL	(HL)		; CB 3E
+
+	SRL	(IX)		; DD CB 00 3E
+	SRL	(IX+5)		; DD CB  d 3E
+	SRL	(IX-5)		; DD CB -d 3E
+	SRL	(IY)		; FD CB 00 3E
+	SRL	(IY+5)		; FD CB  d 3E
+	SRL	(IY-5)		; FD CB -d 3E
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	SUB	A,A		; 97
+	SUB	A,B		; 90
+	SUB	A,C		; 91
+	SUB	A,D		; 92
+	SUB	A,E		; 93
+	SUB	A,H		; 94
+	SUB	A,L		; 95
+
+	SUB	A,IXH		; DD 94
+	SUB	A,IXL		; DD 95
+	SUB	A,IYH		; FD 94
+	SUB	A,IYL		; FD 95
+
+	SUB	A,5		; D6 n
+
+	SUB	A,(HL)		; 96
+
+	SUB	A,(ADDR)	; DD 97 addr
+
+	SUB	A,(IX+VAL)	; FD 91  val
+	SUB	A,(IX-VAL)	; FD 91 -val
+	SUB	A,(IY+VAL)	; FD 92  val
+	SUB	A,(IY-VAL)	; FD 92 -val
+	SUB	A,(HL+VAL)	; FD 93  val
+	SUB	A,(HL-VAL)	; FD 93 -val
+
+	SUB	A,(IX)		; DD 96 00
+	SUB	A,(IX+5)	; DD 96  d
+	SUB	A,(IX-5)	; DD 96 -d
+	SUB	A,(IY)		; FD 96 00
+	SUB	A,(IY+5)	; FD 96  d
+	SUB	A,(IY-5)	; FD 96 -d
+
+	SUB	A,<ADDR>	; FD 90 disp
+	SUB	A,(PC+VAL)	; FD 90 addr
+
+	SUB	A,(SP)		; DD 90 0000
+	SUB	A,(SP+VAL)	; DD 90  val
+	SUB	A,(SP-VAL)	; DD 90 -val
+
+	SUB	A,(HL+IX)	; DD 91
+	SUB	A,(IX+HL)	; DD 91
+	SUB	A,(HL+IY)	; DD 92
+	SUB	A,(IY+HL)	; DD 92
+	SUB	A,(IX+IY)	; DD 93
+	SUB	A,(IY+IX)	; DD 93
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	SUB	A		; 97
+	SUB	B		; 90
+	SUB	C		; 91
+	SUB	D		; 92
+	SUB	E		; 93
+	SUB	H		; 94
+	SUB	L		; 95
+
+	SUB	IXH		; DD 94
+	SUB	IXL		; DD 95
+	SUB	IYH		; FD 94
+	SUB	IYL		; FD 95
+
+	SUB	5		; D6 n
+
+	SUB	(HL)		; 96
+
+	SUB	(ADDR)		; DD 97 addr
+
+	SUB	(IX+VAL)	; FD 91  val
+	SUB	(IX-VAL)	; FD 91 -val
+	SUB	(IY+VAL)	; FD 92  val
+	SUB	(IY-VAL)	; FD 92 -val
+	SUB	(HL+VAL)	; FD 93  val
+	SUB	(HL-VAL)	; FD 93 -val
+
+	SUB	(IX)		; DD 96 00
+	SUB	(IX+5)		; DD 96  d
+	SUB	(IX-5)		; DD 96 -d
+	SUB	(IY)		; FD 96 00
+	SUB	(IY+5)		; FD 96  d
+	SUB	(IY-5)		; FD 96 -d
+
+	SUB	<ADDR>		; FD 90 disp
+	SUB	(PC+VAL)	; FD 90 addr
+
+	SUB	(SP)		; DD 90 0000
+	SUB	(SP+VAL)	; DD 90  val
+	SUB	(SP-VAL)	; DD 90 -val
+
+	SUB	(HL+IX)		; DD 91
+	SUB	(IX+HL)		; DD 91
+	SUB	(HL+IY)		; DD 92
+	SUB	(IY+HL)		; DD 92
+	SUB	(IX+IY)		; DD 93
+	SUB	(IY+IX)		; DD 93
+
+;-----------------------------------------------------------------------
+
+	; HL is optional
+
+	SUBW	HL,BC		; ED CE
+	SUBW	HL,DE		; ED DE
+	SUBW	HL,HL		; ED EE
+	SUBW	HL,SP		; ED FE
+
+	SUBW	HL,IX		; DD ED EE
+	SUBW	HL,IY		; FD ED EE
+
+	SUBW	HL,VAL		; FD ED FE val
+
+	SUBW	HL,(ADDR)	; DD ED DE addr
+
+	SUBW	HL,(IX+VAL)	; FD ED CE  val
+	SUBW	HL,(IX-VAL)	; FD ED CE -val
+	SUBW	HL,(IY+VAL)	; FD ED DE  val
+	SUBW	HL,(IY-VAL)	; FD ED DE -val
+
+	SUBW	HL,<ADDR>	; DD ED FE disp
+	SUBW	HL,(PC+VAL)	; DD ED FE addr
+
+	SUBW	HL,(HL)		; DD ED CE
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	SUBW	BC		; ED CE
+	SUBW	DE		; ED DE
+	SUBW	HL		; ED EE
+	SUBW	SP		; ED FE
+
+	SUBW	IX		; DD ED EE
+	SUBW	IY		; FD ED EE
+
+	SUBW	VAL		; FD ED FE val
+
+	SUBW	(ADDR)		; DD ED DE addr
+
+	SUBW	(IX+VAL)	; FD ED CE  val
+	SUBW	(IX-VAL)	; FD ED CE -val
+	SUBW	(IY+VAL)	; FD ED DE  val
+	SUBW	(IY-VAL)	; FD ED DE -val
+
+	SUBW	<ADDR>		; DD ED FE disp
+	SUBW	(PC+VAL)	; DD ED FE addr
+
+	SUBW	(HL)		; DD ED CE
+
+;-----------------------------------------------------------------------
+
+	TSET	A		; CB 37
+	TSET	B		; CB 30
+	TSET	C		; CB 31
+	TSET	D		; CB 32
+	TSET	E		; CB 33
+	TSET	H		; CB 34
+	TSET	L		; CB 35
+
+	TSET	(HL)		; CB 36
+
+	TSET	(IX)		; DD CB 00 36
+	TSET	(IX+5)		; DD CB  d 36
+	TSET	(IX-5)		; DD CB -d 36
+	TSET	(IY)		; FD CB 00 36
+	TSET	(IY+5)		; FD CB  d 36
+	TSET	(IY-5)		; FD CB -d 36
+
+;-----------------------------------------------------------------------
+
+	TSTI	(C)		; ED 70
+
+;-----------------------------------------------------------------------
+
+	; A is optional
+
+	XOR	A,A		; AF
+	XOR	A,B		; A8
+	XOR	A,C		; A9
+	XOR	A,D		; AA
+	XOR	A,E		; AB
+	XOR	A,H		; AC
+	XOR	A,L		; AD
+
+	XOR	A,IXH		; DD AC
+	XOR	A,IXL		; DD AD
+	XOR	A,IYH		; FD AC
+	XOR	A,IYL		; FD AD
+
+	XOR	A,5		; EE n
+
+	XOR	A,(HL)		; AE
+
+	XOR	A,(ADDR)	; DD AF addr
+
+	XOR	A,(IX+VAL)	; FD A9  val
+	XOR	A,(IX-VAL)	; FD A9 -val
+	XOR	A,(IY+VAL)	; FD AA  val
+	XOR	A,(IY-VAL)	; FD AA -val
+	XOR	A,(HL+VAL)	; FD AB  val
+	XOR	A,(HL-VAL)	; FD AB -val
+
+	XOR	A,(IX)		; DD AE 00
+	XOR	A,(IX+5)	; DD AE  d
+	XOR	A,(IX-5)	; DD AE -d
+	XOR	A,(IY)		; FD AE 00
+	XOR	A,(IY+5)	; FD AE  d
+	XOR	A,(IY-5)	; FD AE -d
+
+	XOR	A,<ADDR>	; FD A8 disp
+	XOR	A,(PC+VAL)	; FD A8 addr
+
+	XOR	A,(SP)		; DD A8 0000
+	XOR	A,(SP+VAL)	; DD A8  val
+	XOR	A,(SP-VAL)	; DD A8 -val
+
+	XOR	A,(HL+IX)	; DD A9
+	XOR	A,(IX+HL)	; DD A9
+	XOR	A,(HL+IY)	; DD AA
+	XOR	A,(IY+HL)	; DD AA
+	XOR	A,(IX+IY)	; DD AB
+	XOR	A,(IY+IX)	; DD AB
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	XOR	A		; AF
+	XOR	B		; A8
+	XOR	C		; A9
+	XOR	D		; AA
+	XOR	E		; AB
+	XOR	H		; AC
+	XOR	L		; AD
+
+	XOR	IXH		; DD AC
+	XOR	IXL		; DD AD
+	XOR	IYH		; FD AC
+	XOR	IYL		; FD AD
+
+	XOR	5		; EE n
+
+	XOR	(HL)		; AE
+
+	XOR	(ADDR)		; DD AF addr
+
+	XOR	(IX+VAL)	; FD A9  val
+	XOR	(IX-VAL)	; FD A9 -val
+	XOR	(IY+VAL)	; FD AA  val
+	XOR	(IY-VAL)	; FD AA -val
+	XOR	(HL+VAL)	; FD AB  val
+	XOR	(HL-VAL)	; FD AB -val
+
+	XOR	(IX)		; DD AE 00
+	XOR	(IX+5)		; DD AE  d
+	XOR	(IX-5)		; DD AE -d
+	XOR	(IY)		; FD AE 00
+	XOR	(IY+5)		; FD AE  d
+	XOR	(IY-5)		; FD AE -d
+
+	XOR	<ADDR>		; FD A8 disp
+	XOR	(PC+VAL)	; FD A8 addr
+
+	XOR	(SP)		; DD A8 0000
+	XOR	(SP+VAL)	; DD A8  val
+	XOR	(SP-VAL)	; DD A8 -val
+
+	XOR	(HL+IX)		; DD A9
+	XOR	(IX+HL)		; DD A9
+	XOR	(HL+IY)		; DD AA
+	XOR	(IY+HL)		; DD AA
+	XOR	(IX+IY)		; DD AB
+	XOR	(IY+IX)		; DD AB
+
+;-----------------------------------------------------------------------
+
+	; Extended instructions
+
+	EPUF			; ED 97
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	EPUI			; ED 9F
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	EPUM	(HL)		; ED A6
+
+	EPUM	(HL+IX)		; ED 8C
+	EPUM	(IX+HL)		; ED 8C
+	EPUM	(HL+IY)		; ED 94
+	EPUM	(IY+HL)		; ED 94
+	EPUM	(IX+IY)		; ED 9C
+	EPUM	(IY+IX)		; ED 9C
+
+	EPUM	(IX+VAL)	; ED AC  val
+	EPUM	(IX-VAL)	; ED AC -val
+	EPUM	(IY+VAL)	; ED B4  val
+	EPUM	(IY-VAL)	; ED B4 -val
+	EPUM	(HL+VAL)	; ED BC  val
+	EPUM	(HL-VAL)	; ED BC -val
+
+	EPUM	(IX)		; ED AC 0000
+	EPUM	(IY)		; ED B4 0000
+
+	EPUM	(SP)		; ED 84 0000
+	EPUM	(SP+VAL)	; ED 84  val
+	EPUM	(SP-VAL)	; ED 84 -val
+
+	EPUM	(ADDR)		; ED A7 addr
+
+	EPUM	<ADDR>		; ED A4 disp
+	EPUM	(PC+VAL)	; ED A4 addr
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	MEPU	(HL)		; ED AE
+
+	MEPU	(HL+IX)		; ED 8D
+	MEPU	(IX+HL)		; ED 8D
+	MEPU	(HL+IY)		; ED 95
+	MEPU	(IY+HL)		; ED 95
+	MEPU	(IX+IY)		; ED 9D
+	MEPU	(IY+IX)		; ED 9D
+
+	MEPU	(IX+VAL)	; ED AD  val
+	MEPU	(IX-VAL)	; ED AD -val
+	MEPU	(IY+VAL)	; ED B5  val
+	MEPU	(IY-VAL)	; ED B5 -val
+	MEPU	(HL+VAL)	; ED BD  val
+	MEPU	(HL-VAL)	; ED BD -val
+
+	MEPU	(IX)		; ED AD 0000
+	MEPU	(IY)		; ED B5 0000
+
+	MEPU	(SP)		; ED 85 0000
+	MEPU	(SP+VAL)	; ED 85  val
+	MEPU	(SP-VAL)	; ED 85 -val
+
+	MEPU	(ADDR)		; ED AF addr
+
+	MEPU	<ADDR>		; ED A5 disp
+	MEPU	(PC+VAL)	; ED A5 addr
+
+;-----------------------------------------------------------------------
+
+ADDR	equ	$
+
+	END
+

@@ -1,0 +1,25 @@
+; Nested MACRO definitions
+
+	cseg
+test1	macro
+	db	1,2,3
+test2	macro
+	db	4,5,6
+	endm
+	db	7,8,9
+	endm
+
+	test2
+	test1
+	test2
+	test1
+
+test3	macro
+	rept	4
+	db	0
+	endm
+	endm
+
+	test3
+
+	end

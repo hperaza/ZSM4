@@ -1,0 +1,13 @@
+	cseg
+test	macro	abc
+abc&de:	db	'&abcde'
+de&abc:	db	'abc&de'
+abc#de:
+de#abc:
+	db	'&abc'
+	db	'&abc de'
+	db	'&abc#de'
+	db	'&abc!de'
+	endm
+	test	xz
+	end

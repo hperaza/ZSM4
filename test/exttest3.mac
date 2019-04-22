@@ -1,0 +1,10 @@
+	.z80
+	extrn	x
+	cseg
+	org	20h
+	ld	hl,x
+	dseg
+	org	40h
+	dw	x
+	end
+

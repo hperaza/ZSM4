@@ -1,0 +1,32 @@
+cputest	macro
+	ifz80
+	if2
+	.printx	'CPU is Z80'
+	endif
+	db	0
+	endif
+	ifz180
+	if2
+	.printx	'CPU is Z180'
+	endif
+	db	1
+	endif
+	ifz280
+	if2
+	.printx	'CPU is Z280'
+	endif
+	db	2
+	endif
+	endm
+
+	cputest		; default is Z80
+	.z80
+	cputest
+	.z180
+	cputest
+	.z280
+	cputest
+	.z80
+	cputest
+
+	end

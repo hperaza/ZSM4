@@ -1,0 +1,8 @@
+	db	and 1
+	db	1 and
+	db	and not 1
+	db	1 and not
+	if	and not 1
+	db	1
+	endif
+	end

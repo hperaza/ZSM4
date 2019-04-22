@@ -1,0 +1,15 @@
+	.lall
+
+	irpc	c,abc
+m&c	macro
+	local	d		;; allowed
+d	aset	d+1
+	db	'&c'
+	endm
+	endm
+
+	ma
+	mb
+	mc
+
+	end

@@ -1,0 +1,23 @@
+	cseg
+
+a1	equ	1234h			; 1234
+
+b1	equ	low a1			; 0034
+b2	equ	high a1			; 0012
+
+c1	equ	low(a1)			; 0034
+c2	equ	low(a1)+1000h		; 1034
+c3	equ	low(a1+1000h)		; 0034
+
+a2	equ	low a1 + 1000h		; 1034
+a3	equ	high a1 + 1000h		; 1012
+a4	equ	1000h + low a1		; 1034
+a5	equ	1000h + high a1		; 1012
+
+a8	equ	not a1			; EDCB
+
+a10	equ	low a1 or high a1 shl 8	; 1234
+
+a11	equ	1 shl 1 + 1		; 0003
+
+	end

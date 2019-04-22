@@ -1,0 +1,902 @@
+Changelog
+---------
+
+10/09/17
+
+- Working on a Z80/Z180/Z280 assembler, taking ZSM 2.8 from CP/M UG UK
+  as starting point. The idea is to convert it to a macro-assembler that
+  outputs REL files instead of HEX, and to support all Z180 and Z280 opcodes
+  as per Zilog docs.
+
+
+11/09/17
+
+- Switched away from 8080-only instructions in favor of more efficient Z80
+  instructions.
+
+- Source split into several modules for easier (later) port to RSX180 and
+  UZI180.
+
+- Code reformatted.
+
+- Symbol table now starts at the beginning of the available memory and is
+  separated from opcode+regs+conds list.
+
+
+12/09/17
+
+- Code cleanup.
+
+- Version number is now 3.0
+
+- Removed tab compression for listing output, as the original source line
+  now starts at a tab boundary.
+
+- Removed TABS and NOTABS LIST options.
+
+
+13/09/17
+
+- Double-quotes can now be used where single quotes are allowed.
+
+- Preliminary set of routines to output REL code.
+
+- Some jp->jr optimizations.
+
+- Listing output is now more M80-like, with error code on first column and
+  space for segment type identification chars.
+
+
+15/09/17
+
+- Switching to REL output, HEX support removed.
+
+- DS output on listing now shows number of bytes reserved.
+
+- DSEG and CSEG segment types are now supported.
+
+- ID routine now does a better checking of legal identifier chars, and
+  prevents buffer overrun. Very long names are simply truncated.
+
+- The input line is now terminated with a null and no longer with a CR/LF;
+  this simplifies checks through the code.
+
+- GNC no longer advances PTR1 past end of input record. This fixes the
+  erratic behavior and/or crashes that happened when procesing certain
+  statements.
+
+- The old monolithic code is now split into a convenient set of routines.
+  This eliminates a lot of jump instructions, replacing them with a shorter
+  return. Also makes adding new feature easier.
+
+- More strict syntax checking.
+
+- Non-closed quoted strings now produce an error.
+
+- Syntax check: after a label only TAB or a colon ':' is now allowed.
+  Before, any separator char was allowed (skipped), which caused certain
+  syntax errors to go unnoticed.
+
+
+16/09/17
+
+- Symbol entries are now written to REL file (right now all of them).
+
+- Syntax check: jp (?l/?x/?y) did not generate errors: first character of
+  register pair was simply ignored!
+
+- Syntax check: closing bracket now required for most of the relevant
+  instructions and no longer ignored/skipped.
+
+- More code optimizations.
+
+
+17/09/17
+
+- Optimized the EVALREG and EVALCND routines. Register and condition tables
+  were split to avoid prevent name collisions.
+
+- $ is now allowed at the start of a label.
+
+- 'Extended' operators (AND, OR, MOD, etc.) no longer require delimiter
+  dots. This is done for compatibility with M80, and in order to allow dots
+  in label names.
+
+- SYMENT and SIMLUK routines optimized; symbol table searches are now much
+  faster.
+
+- Added support for absolute segments (ASEG).
+
+- Added .Z80/.Z180/.Z280 pseudo-ops.
+
+- Optimized INT, the numeric conversion routine.
+
+- The input REC buffer is no longer filled with spaces prior to loading the
+  line; this further improves performance.
+
+- Similarly, IDBUF is no longer filled with spaces before collecting an
+  identifier.
+
+- Added support for PUBLIC and EXTRN pseudo-ops; now only public symbols are
+  output to the REL file.
+
+- Public labels can now be defined by terminating them with a double-colon.
+
+- Added support for all the extra Z180 instructions.
+
+- Added support for a few of the simplest Z280 instructions.
+
+
+19/09/17
+
+- Better syntax checking for A,I A,R I,A, R,A SP,HL SP,IX SP,IY, etc.
+
+- Spaces are now allowed before and after commas, names, etc. The original
+  code was particularly weak here in that the *wrong* object code was
+  generated without warning!
+
+- Preliminary EMITB and EMITW routines.
+
+- Code generation routines now use EMITB and EMITW.
+
+
+21/09/17
+
+- Symbol flags field now contains a value in the range 0..15, and is no
+  longer a bit field. That way it can carry more information.
+
+- DB and DW now use EMITB and EMITW.
+
+- More syntax check fixes: ADD A,xx and ADD xx; JP $; LD HL,$+xx; etc.
+
+- Empty expressions now produce a syntax error.
+
+
+23/09/17
+
+- PUSH/POP: ensure operand is a register pair.
+
+- Preliminary support for undocumented Z80 (and documented Z280) instructions
+  that use half index registers IXH/IXL/IYH/IYL.
+
+- More Z280 instructions supported:
+    ADD/ADC/AND/SUB/SBC/OR/XOR A,(addr)
+    ADD/ADC/AND/SUB/SBC/OR/XOR A,(IX/IY/HL+d16)
+    ADD/ADC/AND/SUB/SBC/OR/XOR A,<offs>
+    ADD/ADC/AND/SUB/SBC/OR/XOR A,(SP+d16)
+    ADD/ADC/AND/OR/XOR A,(HL+IX/HL+IY/IX+IY)
+
+- < and > no longer allowed in expressions, since they conflict with Z280
+  syntax (use LT, LE, GT, GE and NE operators instead).
+
+- Added NV and V as synonyms for PO and PE condition codes respectively.
+
+- Added NS and S as synonyms for P and M condition codes respectively (for
+  compatibility with the Z280 docs).
+
+
+24/09/17
+
+- More Z280 instructions supported:
+    ADC IX/IY,rp
+    ADD HL/IX/IY,A
+    ADDW/SUBW/CPW HL,...
+    JP/CALL [cond,](HL)
+    JP/CALL [cond,]<addr>
+    INC/DEC ...
+    EPUF/EPUI
+
+- Optional argument:
+    CPL [A]
+
+
+24/09/17
+
+- More Z280 instructions supported:
+    INCW, DECW
+
+
+25/09/17
+
+- More Z280 instructions supported:
+    DIV, DIVU
+    DIVW, DIVUW
+    EX additional modes
+    IN additional modes
+
+
+28/09/17
+
+- Expression mode check (right now limited only to segment types).
+
+- Output of code/data-relative words to REL file.
+
+- The listing output no longer truncates or limits the number of object
+  code bytes displayed. Continuation lines are now used when large amount
+  of object code is generated.
+
+- Output to listing of segment-relative words is now done as 16-bit values
+  with segment type identifier.
+
+
+29/09/17
+
+- More Z280 instructions supported:
+    LDCTL
+    LDA
+    LDUD, LDUP
+    PUSH and POP additional modes
+    MULTW, MULTUW
+    MULT, MULTU
+
+- EVAL* functions now return with A=(EVFLGS) and HL=(VAL); that saves a lot
+  of bytes and makes life easier for the calling routine.
+
+- More code optimizations.
+
+- END without argument now defaults to 0 and not to (PC).
+
+
+30/09/17
+
+- More Z280 instructions supported:
+    OUT additional modes
+
+- New routine EVBRKT to evaluate ()-operands.
+
+
+01/10/17
+
+- The remaining Z280 instructions are now supported:
+    NEG and CPL additional modes
+    EXTS
+    INW, OUTW
+    DI, EI additional modes
+    all pending LD/LDW modes
+    SC
+    EPUM, MEPU
+
+- Extended EVBRKT routine to evaluate Z280 <>-operands as well.
+
+- <>-relative addresses now correct.
+
+- Compared output of the assembler against a disassembler, fixed obvious
+  errors.
+
+
+02/10/17
+
+- Better label value checking in order to detect multiple-defined and phase
+  error conditions.
+
+
+03/10/17
+
+- 'External' bit is now checked during expression evaluation; result set
+  according to rules.
+
+- Fixed a couple of bugs in EXTRN and PUBLIC keyword implementations.
+
+- Addresses on continuation lines are now correct.
+
+- Writing of External chains to REL file (still to do: Ext+offset).
+
+- Generated REL file is basically correct at this point: the program can
+  compile itself and the executable binary matches the one generated with
+  M80.
+
+
+04/10/17
+
+- Fixed ASEG bug: reloc counter was not being updated in REL file.
+
+- Fixed "db '''abc'" case: the quote preceding abc is now correctly
+  generated.
+
+- Added "dc" pseudo-op.
+
+
+05/10/17
+
+- External symbols can now be declared as 'label##' just like in M80.
+
+- Added .EVEN pseudo-op. Requires linker support.
+
+- Preliminary work on MACRO support.
+
+- External references of type ext+offs now work.
+
+- Segment type char for EQU and END is now shown on listing.
+
+
+07/10/17
+
+- Expression evaluation routine is now a stack machine that honors operand
+  precedence, brackets also allowed.
+
+
+08/10/17
+
+- On close, write EOF chars up to the end of the current 128-byte record
+  (originally was up to the next 256-byte boundary, often wasting an extra
+  record.)
+
+- Files that end on a record boundary (no explicit EOF character) are now
+  read correctly.
+
+- Implemented INCLUDE pseudo-op; nested files are possible, max 5 levels
+  (chosen rather arbitrarily; in principle all available memory could be
+  used, but is better to set a limit in order to detect early any cases
+  of infinite recursion).
+
+- Fixed a bug in Z280 instructions: in (HL+disp) an explicit disp is
+  always 16 bits.
+
+- Fixed a bug that caused the page header to be output to the console
+  when the error (or summary) line coincided with the top of the page.
+
+
+09/10/17
+
+- Do not allow IXH,IXL,IYH,IYL in Z180 mode (not supported by the CPU).
+
+- Do not allow mixing of HL/IX/IY in the same LD r,r instruction.
+
+- Do not allow IXH,IXL,IYH,IYL in (HL) or (IX/IY) instructions.
+
+
+09/10/17
+
+- Defined the MACRO table format, further work on MACRO support routines.
+
+
+18/10/17
+
+- INCLUDE files now use the same buffer as the input file, thus reducing
+  dynamic storage requirements. The data pushed on the stack (FCB, recno,
+  char index) does not contain pointers, so it can be easily relocated
+  during garbage collection.
+
+
+19/10/17
+
+- REPT now works, and can be nested.
+
+- Parameterless macros now work, but things can still get broken if garbage
+  collection happens while the macro is executing (i.e. by exiting an inner
+  macro.)
+
+- Fixed a bug in MFREE routine.
+
+
+20/10/17
+
+- MACROs with parameters now work, although there are several quirks and
+  strings/<> are not yet supported.
+
+
+21/10/17
+
+- Fixed remaining (hopefully!) bugs in character constant handling:
+    ld hl,'''a' and ld hl,'a''' - now produce correct code
+    ld a,''aa'                  - now gives an error
+    db 'a'+1                    - now produces correct code
+    etc.
+
+- Added listing of MACROs, they are output before symbol table.
+
+- Default input file extension is now MAC.
+
+- Reloc values (cseg, dseg, extrn, etc.) are now forced to 16-bit quantities.
+
+- More strict size/mode checking of 8-bit operands.
+
+- Inter-segment and/or external addresses not allowed as relative jump
+  destinations.
+
+
+22/10/17
+
+- Implemented the (PC+nnnn) operand form for the relevant Z280 instructions.
+
+- Fixed a bug that affected Z280 instructions when the optional HL first
+  operand was missing.
+
+- Added .PRINTX, SUBTTL and IFT/IFF/IF1/IF2 pseudo-operators.
+
+- Implemented EXITM.
+
+- ZSM equates are now placed in a separate ZSM.INC file.
+
+- Argument to DEFS cannot be reloc.
+
+- Fixed a small bug that caused the assembler to crash when the disk was full.
+
+- Save/restore ix when calling BDOS.
+
+- Init r0,r1,r2 of CPMFCB on startup, as CCP does not init these fields?
+
+
+23/10/17
+
+- Added .RADIX pseudo-op. The integer conversion routine now uses the
+  current base if no explicit value type is specified.
+
+- Default include file extension is now LIB.
+
+
+24/10/17
+
+- Implemented .PHASE and .DEPHASE pseudo-ops.
+
+- Implemented IFDEF and IFNDEF pseud-ops (note: unlike M80, register names
+  are not 'defined').
+
+- Added DEFM as synonym of DEFB.
+
+- Fixed a bug in MACRO dummy argument processing: blanks after a comma were
+  not skipped.
+
+- Better handling of macro parameters (Z180.INC from e.g. P112 ROM BIOS now
+  works), but not perfect yet.
+
+- Fixed a bug in Z280 instructions with <addr> operand form: relative address
+  was offset by 2 (and by 5 in ADDW, CPW, etc. instructions)
+
+
+25/10/17
+
+- Fixed reloc mode of END operand (entry point).
+
+- Memory allocation routines now in a separate module.
+
+- Implemented IRPC macro.
+
+
+26/10/17
+
+- Opcode search now does a binary search. Did not improve speed of Z80
+  assembly since in the old table the entries were already sorted by usage
+  frequency, but Z280 assembly is now approx. 15% faster.
+
+
+28/10/17
+
+- Free-format allowed (hopefully correct now): labels no longer have to start
+  at column 1, and instructions do not need to be preceded by a blank.
+
+- Fixed a bug in LIST pseudo-op, option bits were not correctly set.
+
+- Fixed a bug in EQU pseudo-op that caused a 'P' or 'M' error to be output
+  for a label that was previously declared as PUBLIC.
+
+- End of MACRO body is now marked with an EOF, and not with a null char in
+  order to allow for empty lines in MACROs.
+
+- Working on COMMON segment support.
+
+
+29/10/17
+
+- MACRO processing: null arguments are now processed correctly.
+
+- Implemented IRP.
+
+- TITLE and SUBTTL argument may be optionally enclosed in quotes. In certain
+  cases this is even necessary, otherwise a statement like "SUBTTL Macro
+  Definitions" could be interpreted as the definition of a MACRO named
+  SUBTTL.
+
+
+30/10/17
+
+- Fixed a bug in PUBLIC pseudo-op: if it appeared after a label was defined,
+  the label was not set to PUBLIC.
+
+- COMMON block segment size is now output to REL file.
+
+- COMMON block selection is now output to REL file when a new block is defined.
+
+
+01/11/17
+
+- 'LIST 5' and/or 'LIST SORT+SYMBOLS' forms no longer allowed. Use 'LIST
+  SORT,SYMBOLS' instead.
+
+- Changed symbol table format to accommodate COMMON segment info.
+
+- HIGH, LOW, NOT - operand cannot be reloc.
+
+- Select the right COMMON when emitting a COMMON address ref to the REL file.
+
+- COMMON support more or less complete now (only certain cases of expression
+  evaluation involving COMMON segments might fail).
+
+- Implemented LOCAL variables.
+
+
+02/11/17
+
+- Fixed nested MACROs.
+
+- '%' now works in MACRO and IRP arguments as it does in RMAC and M80.
+
+- Processing of '&' special char and quoted strings in MACRO text hopefully
+  now correct.
+
+- Comments starting with two semicolons are not stored in the MACRO.
+
+- Added ENTRY as synonym of PUBLIC.
+
+- Added DEFZ pseudo-op.
+
+
+03/11/17
+
+- Added ASET (synonym of DEFL) and DEFC (synonym of DC) pseudo-ops.
+
+
+04/11/17
+
+- Ensure enough available memory during MACRO build.
+
+- Redefining a MACRO now deletes the old one, space is recovered via garbage
+  collection when no macro is executing.
+
+- Check for REC buffer overflow during MACRO expansion.
+
+- GLOBL pseudo-op renamed to GLOBAL.
+
+
+05/11/17
+
+- Fixed a bug in the processing of unary operators HIGH, LOW and NOT.
+
+- Implemented IFB, IFNB, IFIDN, IFDIF.
+
+- Implemented .REQUEST/RQST, NAME and IDENT.
+
+- Strip parity bit when reading the source file.
+
+- Main routine is now in a system-dependent file, which in turn calls the
+  Z80ASM main assembler routine.
+
+
+07/11/17
+
+- Added .ODD (complement to .EVEN) and .COMMENT pseudo-ops.
+
+- RSX180 version already works, but there is no support for TI: read/write
+  yet.
+
+
+11/11/17
+
+- Added EXT as a synonym of EXTRN for compatibility with RMAC and M80.
+
+- NAME, IDENT and .PRINTX now allow the ('string') form.
+
+- MACLIB now ignored on pass 2.
+
+- RSX180 version: try extending task limits when running out of memory.
+
+- RSX180 version: command line parsing is now correct.
+
+
+13/11/17
+
+- Optimized the bubble sort routine: as the sort advances only a shorter
+  sub-list needs to be re-scanned, not the complete list!
+
+
+14/11/17
+
+- Symbol sort routine now checks available memory when building pointer
+  list, and extends task limits if necessary.
+
+
+27/11/17
+
+- Fixed a bug in the expression evaluation routine: in an expression
+  involving at least two variables, when the first variable was External
+  the chain address was set instead to the second variable (or to the last
+  one found), and thus making it also External with the result that the
+  External chain ended up incorrect (discovered when trying to compile TKB).
+
+- Ignore errors in false conditional sections.
+
+- Fixed a small bug in MALLOC: INCMEM was being called with wrong value
+  in DE.
+
+- Fixed a regression bug in INC/DEC routines involving index registers:
+  the displacement was wrong!
+
+
+28/11/17
+
+- Fixed a bug in MALLOC/INCMEM routines that caused symbol table corruption.
+
+
+04/12/17
+
+- Fixed a bug in 'LD IXH,IXH', etc. instructions: the prefix was generated
+  twice.
+
+- Fixed 'MEPU (HL)' instruction.
+
+
+10/12/17
+
+- Suppress all code output for false conditionals (EQU was still getting into
+  listing).
+
+- Colons are now required after labels that are not followed by an opcode
+  (i.e. when the label is the only thing on a line). This was done in order
+  to detect errors such as the following:
+	ld	a,5
+	stc		; before, 'stc' was interpreted as a label
+	ret		;  and not flagged as an error
+
+- Added .LIST and .XLIST pseudo-ops for compatibility with M80.
+
+
+11/12/17
+
+- Listing routines are now in a separate file.
+
+
+17/12/17
+
+- Apply subtraction reloc rules to <addr> operands.
+
+
+25/02/18
+
+- Added signed LESS relational operator from ZSM 2.9.
+
+- Display date and time on listing (done for both RSX180 and CP/M 3).
+
+
+20/03/18
+
+- Added MACROS, NOMACROS and XMACROS option to the LIST command, and the
+  M80-compatible shortcuts .LALL, .SALL and .XALL.
+
+
+12/05/18
+
+- Increased input buffer size to 160.
+
+
+21/05/18
+
+- Allow nested < > in MACRO arguments.
+
+
+23/05/18
+
+- PAGE statement now accepts an expression argument to set the page length.
+
+
+24/05/18
+
+- DEFL/EQU are now processed correctly; error cases now work as in M80.
+
+- MACLIB is now also processed during pass 2, until we figure out a way to
+  display missing file error from pass 1 on pass 2.
+
+
+29/05/18
+
+- The CP/M version now has a command line syntax and an interactive mode
+  similar to the RSX180 version (but no option switches implemented yet).
+
+
+30/05/18
+
+- Added /Sn option to set max length of symbols in REL file (n=5..8).
+
+- Added /Dsym=value to define a symbol via the command line.
+
+- Added /L option to force generation of listing file.
+
+- The INT routine now properly decodes values with forced decimal base
+  (D suffix). [why wasn't that there???]
+
+- Reset LIST options before 2nd pass.
+
+- Reset MACRO def level before 2nd pass if an unterminated MACRO is detected.
+
+- Display a 'T' error also for unterminated conditionals.
+
+
+31/05/18
+
+- Bug fix: don't send errors to PRN file if listing is suppressed.
+
+
+02/06/18
+
+- Experimental /U option to treat all Undefined symbols as Externals.
+
+- Bug fix: if the label preceding ENDM ended with a colon, ENDM was not
+  processed.
+
+- Default extension for include files is now .MAC.
+
+- Bug fix: overflow to next line of listing was not correct for DEFW.
+
+- Bug fix: EVBRKT routine now takes EVMODE into consideration when deciding
+  the operand width of Z280 (HL+d8/d16) operands. This fixes a phase error
+  when compiling kernel.280 of the CPU280 CP/M 3 distribution (command was
+  'ldw hl,(hl+dTbl)': during first pass dTbl was undefined with a value of
+  zero, which caused 'ldw hl,(hl)' to be generated instead).
+
+
+05/06/18
+
+- Fixed a bug in /U option: an M error was being generated for implicit
+  external labels that were also referenced as explicit external## later
+  in the code.
+
+- Added /M switch to initialize DEFS block to zeros.
+
+
+06/06/18
+
+- Some opcodes without and argument did not produce an error (e.g. ADD, SUB,
+  AND, INC).
+
+- Same for IF without argument (a bit trickier, since the error was being
+  generated, but suppressed as false conditional side-effect.)
+
+- Same for EQU, DEFL and MACRO without a preceding label (this bug could even
+  crash the assembler!)
+
+
+10/06/18
+
+- Listing output to printer is now correct (device code was wrong).
+
+- Nested <>s now allowed in IRPC.
+
+- Added /Zn switch to set the initial CPU type.
+
+
+11/06/18
+
+- Do not expand macros if conditional state is False (else recursive macros
+  will loop forever).
+
+- Fixed IFIDN/IFDIF string comparison.
+
+
+21/06/18
+
+- Fixed 'ldw ix,(ix+d8)' and 'ldw (ix+d8),ix' type of instructions: the 8-bit
+  displacement is promoted to 16 bits instead of producing an error.
+
+- Fixed addw, cpw, etc. instructions with optional hl argument: if no second
+  argument is specified, then hl is the argument (an error was generated due
+  to an early end-of-line test, bug introduced 06/06/18).
+
+- Added .SFCOND (same as LIST NOCOND) and .LFCOND (same as LIST COND).
+
+
+24/06/18
+
+- Optimized LIST processing routine.
+
+
+26/06/18
+
+- Fixed a minor bug in LIST processing (introduced 24/06/18).
+
+- % in MACRO arguments can be followed by an expression, not just a variable
+  name.
+
+- Force True state of IF statement if ERRFLG is set.
+
+- EXITM now restores conditional stack level.
+
+- Implemented NUL operator.
+
+
+28/06/18
+
+- Fixed a bug in IRPC: if the argument was not enclosed in <>, the first char
+  of the sequence was forced to uppercase.
+
+- Do not process LOCAL if in a nested macro; store it in macro def struct
+  instead.
+
+- MSTORE: treat symbols containing '&' as labels (i.e. do not test them for
+  opcodes).
+
+
+29/06/18
+
+- Force output of label value to listing (current PC address) if the label
+  is the only thing on the line. The line also appears in .xall mode.
+
+
+06/07/18
+
+- Fixed a bug in .PHASE: DEFS statements were setting the location counter
+  with Absolute address mode instead of the current segment mode.
+
+
+08/07/18
+
+- Fixed another bug in .PHASE: REL chain pointer of External references
+  statements were setting the location counter address mode to Absolute
+  instead of to the current segment mode.
+
+- Fixed a bug in GNR: if the last line of an include file contained chars
+  but not a newline, the end-of-line marker was being written to the wrong
+  place since HL was not saved/restored before/after calling CLSLIB.
+
+- RSX180 kernel compiled with ZSM4 now produces the same system image as
+  with M80 except for one byte, the offending line being in p112.mac:
+
+   dw ((44237 / TCKSEC) * 50 + (44237 MOD TCKSEC) * 50 / TCKSEC) AND 7FFFh
+
+  M80 gives 5667h as result (seems to be rounding up the second division),
+  while ZSM4 gives the same result as when hand-computed.
+
+
+19/08/18
+
+- Syntax of RSX180 option switches now matches the CP/M version (removed ':'
+  separator for /D /Z and /S arguments.)
+
+
+11/09/18
+
+- Bug fix: a line containing a label inside a false conditional was wrongly
+  output to listing when LIST XMACROS was enabled.
+
+
+02/10/18
+
+- Bug fix: the RSX180 version did not restore file mode and LUN properly
+  after an include file open error.
+
+
+07/10/18
+
+- Bug fix: 'U' error code was not being output to listing for IF statements
+  with undefined arguments.
+
+- SUBTTL no longer forces a page break.
+
+
+14/11/18
+
+- Increased max identifier length to 15 chars.
+
+
+17/11/18
+
+- Added IFZ80, IFZ180 and IFZ280 conditional operators.
+
+
+09/12/18
+
+- A second occurrence of an ELSE inside the same IF now produces an error.
+
+
+17/12/18
+
+- Fixed a bug in COMMON selection: a 'select COMMON' item was output for a
+  null (unset) COMMON block during DS statement processing.
+
+
+12/04/19
+
+- Reset RADIX to 10 before processing the command line options.
+
+- The CP/M version now displays an error and aborts the command line if
+  an invalid option switch or option argument is specified, just like the
+  RSX180 version does.
+

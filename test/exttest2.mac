@@ -1,0 +1,8 @@
+	.z80
+	extrn	x
+	cseg
+	ld	hl,x
+	dseg
+	dw	x
+	end
+

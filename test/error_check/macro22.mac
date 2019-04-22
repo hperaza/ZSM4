@@ -1,0 +1,29 @@
+	list	macros
+
+; Testing nested < > in macro arguments
+
+m1	MACRO	arg
+	dw	arg
+	ENDM
+
+m2	MACRO	arg
+	m1	arg
+	ENDM
+
+	m1	100		; OK
+
+	m2	100		; OK
+
+	m2	<100>		; OK
+
+	m1	100h OR 20h	; error
+
+	m1	<100h OR 20h>	; OK
+
+	m2	100h OR 20h	; error
+
+	m2	<100h OR 20h>	; error
+
+	m2	<<100h OR 20h>>	; OK
+
+	end

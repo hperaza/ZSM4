@@ -1,0 +1,9 @@
+test1	macro	a,b,c
+	db	a,b,c
+	endm
+test2	macro
+	test1	1,2,3
+	endm
+	test1	1,2,3
+	test2
+	end

@@ -1,0 +1,7 @@
+big	macro	a
+	db	a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a
+	endm
+
+	big	'Testing input buffer overflow during macro expansion'
+
+	end

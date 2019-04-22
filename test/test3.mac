@@ -1,0 +1,39 @@
+	equ	0
+
+	ld
+	add
+	add	a,
+	sub
+	or
+	and
+	xor
+
+	if
+	endif
+
+	macro
+	endm
+
+	equ	10h
+
+aa	defl	5
+	equ	6
+
+	defl
+	equ
+
+dd	defl
+ee	equ
+
+mm:	macro
+	db	1
+	endm
+
+bb:
+:
+
+	mm
+
+	mm:
+
+	end

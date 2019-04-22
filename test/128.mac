@@ -1,0 +1,16 @@
+	.z80
+	ld	hl,1
+	ld	de,2
+	ld	bc,3
+	ldir
+
+	ld	hl,1
+	ld	de,2
+	ld	bc,3
+	ldir
+
+	ld	hl,1
+	ld	de,2
+	ld	bc,3
+	ldir
+	end

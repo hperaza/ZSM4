@@ -1,0 +1,6685 @@
+;**********************************************************************;
+;                                                                      ;
+;   This file is part of ZSM4, a Z80/Z180/Z280 relocatable macro-      ;
+;   assembler in Z80 assembly. Copyright (C) 2017-2019, Hector Peraza. ;
+;                                                                      ;
+;   This work is derived from Z80ASM, originally written by Michael    ;
+;   G. Lehman (1977) and with modifications by Ray Halls (1992) and    ;
+;   Neil Harrison (1983). See history of changes below.                ;
+;                                                                      ;
+;   This program is free software; you can redistribute it and/or      ;
+;   modify it under the terms of the GNU General Public License as     ;
+;   published by the Free Software Foundation; either version 2 of     ;
+;   the License, or (at your option) any later version.                ;
+;                                                                      ;
+;   This program is distributed in the hope that it will be useful,    ;
+;   but WITHOUT ANY WARRANTY; without even the implied warranty of     ;
+;   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      ;
+;   GNU General Public License for more details.                       ;
+;                                                                      ;
+;   You should have received a copy of the GNU General Public License  ;
+;   along with this program; if not, write to the Free Software        ;
+;   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.          ;
+;                                                                      ;
+;**********************************************************************;
+
+	TITLE	Z80/Z180/Z280 Macro-Assembler
+
+;-----------------------------------------------------------------------
+;
+;	Z80ASM - Z80 RESIDENT ASSEMBLER
+;
+;	Originally written in 8080 assembly language for assembly
+;	by the CP/M assembler. Now in Zilog mnemonics so that it can
+;	assemble itself!
+;
+;-----------------------------------------------------------------------
+;
+;	Original - Michael G. Lehman, LEHMAN CONSULTING SERVICES
+;	(C) COPYRIGHT 1977
+;
+;	US User Group, Vol 16
+;
+;-----------------------------------------------------------------------
+;
+;	Modified by Ray Halls
+;	August 1982
+;	for CP/M Users Group (UK)
+;
+;	   i) Correction to OP-CODE handling
+;	  ii) Addition of Console Output and Print File for Listing pass
+;	 iii) Additional error reporting
+;	  iv) Expansion of DEFB facilities
+;	   v) More comprehensive Relative displacement computation
+;	  vi) Accurate assembly of Labels
+;	 vii) Unsigned 16-bit by 8-bit divide added to expression handling
+;
+;	October 1982
+;
+;	Bugs in NEG and I/O Opcode Routines fixed.
+;
+;-----------------------------------------------------------------------
+;
+;	Modified even more by Neil Harrison
+;	January 1983
+;
+;	   i) added DB,DW,DS as equivalent to DEFB,DEFW,DEFS
+;	  ii) permitted full CP/M 2.x drive specification A: to P:,
+;	      except for list option A: to O:, P being used to direct
+;	      listing to printer
+;	 iii) forced errors & error count to always display on console
+;	  iv) Made divide into true 16 bit by 16 bit operation
+;	   v) Added "modulo" function using '%'
+;	  vi) Added IF, ELSE, ENDIF conditional pseudo ops
+;	 vii) Increased HEX file record size to 24 bytes to reduce
+;	      disk usage.
+;	viii) Added option to convert spaces to tabs in PRN and printer
+;	      output. This greatly reduces PRN file size.
+;	  ix) Added symbol table overflow check
+;	   x) Added conditional assembly option for Z80 processor.
+;	      Principally used in place of MOVE subroutine. Where
+;	      convenient MOVE replaced by LDIR, an 8080 subroutine
+;	      which has the same register usage as the Z80 instruction.
+;	  xi) Added sorted symbol table
+;	 xii) Added LIST pseudo-op
+;	xiii) Added TITLE pseudo-op
+;	 xiv) Moved all one time initialisation code into the input
+;	      buffer to save space.
+;	  xv) Expanded expression evaluation to include: .NOT.,.MOD.,
+;	      .SHR.,.SHL.,.EQ.,.NE.,.GT.,.GE.,.LT.,.LE.,.LOW.,.HIGH.
+;	      "." is no longer valid in labels! Use "_" instead, e.g. LAB_01
+;	 xvi) Limited symbol table searches to avoid confusion with opcodes.
+;	xvii) Fixed a bug in the end of file code.
+;
+;-----------------------------------------------------------------------
+;
+;	Modified even even more by Hector Peraza
+;	September 2017 (on ZSM's 40th anniversary!)
+;
+;	   i) Fixed many bugs that used to crash the assembler when
+;	      it encountered invalid syntax.
+;	  ii) More strict syntax checking, but not perfect yet.
+;	 iii) Optimized code, removed redundancies. Faster symbol
+;	      table searches. The main assembly routine is no longer
+;	      a monolithic piece of code with thousands of jumps around,
+;	      but was restructured into a set of routines that are
+;	      called from, and return to, the main thread. This not
+;	      only saves a lot of bytes, but makes adding further
+;	      features and enhancements much easier.
+;	  iv) Source was split into different modules for easier port
+;	      to other Z80 OSes.
+;	   v) Abandoned 8080 executable compatibility in favor of the more
+;	      efficient Z80 instructions.
+;	  vi) Fixed processing of character expressions (e.g. statements
+;	      like DW '''a' now work correctly).
+;	 vii) Where single-quotes were allowed, double-quotes are now
+;	      also allowed, e.g. DEFB "string".
+;	viii) Labels are allowed to start with '$'.
+;	  ix) '?' and '@' also allowed in labels.
+;	   x) The assembler now produces Microsoft REL object files
+;             instead of Intel HEX files.
+;         xi) 'Expanded' operators are no longer delimited by '.', but
+;	      by a space or TAB instead. This was done in order to allow
+;	      dots in label names and pseudo-operators, and for compatibility
+;	      with M80. Interestingly, this resulted in more compact code.
+;	 xii) The expression evaluation routine is now smarter: symbol
+;	      names, register names, opcodes and conditional codes no
+;	      longer conflict with each other.
+;	xiii) Added REL-related pseudo-operators: ASEG, CSEG, DSEG, PUBLIC,
+;             GLOBAL, ENTRY, EXT and EXTRN (note that COMMON segments are
+;	      not yet supported).
+;	 xiv) Added support for the extra Z180 instructions. New .Z80 and
+;	      .Z180 pseudo-operators allow selecting target processor type.
+;	  xv) Replaced the simple but *very*slow* add-in-a-loop multiply
+;	      routine by a faster one. Same for the division routine.
+;	 xvi) Spaces and/or TABs are now allowed before/after commas,
+;	      brackets, etc. Originally, the assembler would happily
+;	      generate wrong object code in cases such as 'ld a,( hl )'
+;	      without complain!!!
+;	xvii) Listing output format is now more M80-like, with error
+;	      code on first column. Since the source line section now
+;	      starts at a tab boundary, TAB expansion and compression is
+;	      no longer needed. The TABS and NOTABS LIST options were
+;	      therefore removed.
+;      xviii) Long error messages are now a compile-time option.
+;
+;-----------------------------------------------------------------------
+;
+;	More (rather heavy) modifications by Hector Peraza
+;	October 2017 - November 2018
+;
+;	   i) Added .Z280 pseudo-operator, and support for the complete
+;	      set of Z280 instructions. Z80 'undocumented' instructions
+;	      that use half-index registers are now supported in .Z80
+;	      mode.
+;	  ii) Added support for COMMON segments.
+;	 iii) Added a new pseudo-operator '.EVEN' to align code and/or
+;	      data to word boundary (may become useful when writing
+;	      programs for the Z280 CPU).
+;	  iv) All generated code bytes are now shown on the assembly
+;	      listing, instead of just the first 4 bytes.
+;	   v) Added DC pseudo-operator that sets the hi-bit of the last
+;	      character of a string.
+;	  vi) Public labels can now be defined using double-colons '::',
+;	      and external references with '##', again for compatibility
+;	      with M80.
+;	 vii) Expression evaluation now honors operator precedence and
+;	      relocation rules. In addition, brackets are now allowed,
+;	      e.g. 'LD A,(IX+2*(k+8))', etc.
+;	viii) Added support for INCLUDE files. Can be nested.
+;	  ix) Opcode table restructured: entries are now grouped by
+;	      number of characters and sorted alphabetically in order
+;	      to allow for binary searches.
+;	   x) Free-format is now allowed (i.e. labels do not have to
+;	      start at column 1, and instructions do not have to be
+;	      preceded by a blank).
+;	  xi) Added support for MACROs, including REPT, IRP and IRPC.
+;	 xii) Default source file extension is now MAC.
+;	xiii) Added more flavors of IF conditionals: IFT, IFF, IF1,
+;	      IF2, IFDEF, IFNDEF, IFB, IFNB, IFIDN, IFDIF, IFZ80, IFZ180,
+;	      IFZ280.
+;	 xiv) Added new LIST options: MACROS (list all lines of MACRO
+;	      expansions), XMACROS (list only the lines that generate
+;	      object code), NOMACROS (don't list MACRO expansions).
+;	      The default is LIST XMACROS.
+;	  xv) Added more pseudo-operators: ASET, DEFL (same as ASET),
+;	      DEFM (same as DEFB), DEFC (same as DC), DEFZ, .PHASE,
+;	      .DEPHASE, .RADIX, .PRINTX, .COMMENT, .REQUEST, .ODD,
+;	      RQST, SUBTTL, NAME, IDENT, .LIST (for compatibility with
+;	      M80, same as LIST ON), .XLIST (same as LIST OFF), .LALL
+;	      (same as LIST MACROS), .SALL (same as LIST NOMACROS), .XALL
+;	      (same as LIST XMACROS), .SFCOND (same as LIST NOCOND) and
+;	      .LFCOND (same as LIST COND).
+;	 xvi) Added LESS relational operator from ZSM 2.9.
+;	xvii) Added NUL operator.
+;      xviii) Date and time of assembly is now output to the listing,
+;	      if the functionality is supported by the OS.
+;	 xix) The PAGE pseudo-operator can be optionally followed by
+;	      an expression that sets the page size.
+;         xx) Changed the command line syntax. When called without a  
+;             command, the assembler enters an interactive command mode 
+;             where several files can be assembled without having to 
+;             exit to CP/M.
+;
+;-----------------------------------------------------------------------
+
+	.Z80
+
+	include	ZSM.INC
+
+	.SFCOND
+
+	IF1
+	.PRINTX	'Pass 1'
+	ELSE
+	.PRINTX	'Pass 2'
+	ENDIF
+
+	public	Z80ASM,HOFNAM,LFLAG,OFLAG,QFLAG,DBWFLG,VAL
+	public	IDBUF,ERRFLG,BACKUP,EVFLGS,GNC,CPU,ADDEXT
+	public	PC,PCFLAG,PTR1,UFLAG,SYMTBL,CURSEG,CONDSP
+	public	REC,LEN,IDLEN,OERROR,SYMADR,EVMODE,EXTCHN
+	public	MAXMEM,SYMPTR,SYMMOD,IDADR,NEWSYM,GETPPC
+	public	RADIX,ERRQ,VALERR,REQCHR,CHK8U,GNR,CURCMN
+	public	CMNPTR,DSPTR,OPCODES,OPLEN,MACFLG,CURLNE
+	public	DBWFLG,DSFLAG,EQUFLG,ERRCNT,HDRBUF,HOFEND
+	public	HOFMSG,HOFPG,IFLIST,NOLIST,LSTOPT,LENDS
+	public	HOFDAT,HOFTIM,TITLEB,SBTTLB,NAMLEN,RESETP
+	public	LBLFLG,CNDSTK,CLEVEL,UMODE,ZERODS,DEFCPU
+
+	extrn	UCASE,GNB,CMPHD,ID,OPNLIB,CLINE,WLINE
+	extrn	REWIND,CLSINP,CLOSE1,EVAL,EVALNEW,EVALREG
+	extrn	EVALCND,EVBRKT,WOBJ,WOBJ16,WMNAME,WRQST
+	extrn	WIDENT,WCSIZE,WDSIZE,WENTRY,WDFENT,WLOC
+	extrn	EVALSRG,CLSOBJ,SYMPT,WDFEXT,WEOFFS,CCONST
+	extrn	WCMSIZ,WSELCM,RELERR,REGVAL,CLSLIB,INCLVL
+	extrn	INIOBJ,MCHECK,ADDSYM,SYMLUK,WERROR,FNDOPC
+
+	extrn	LSTINI,LSTOUT,PLINE,SYMBOL,MACROS,LSTB,LSTW
+	extrn	MAXLNE
+
+	extrn	DEFMAC,DFREPT,DFIRP,DFIRPC,ENDMAC,FNDMAC
+	extrn	MDFLVL,MACLVL,FNDREC,FNDNXT,MSTORE,GNRMAC
+	extrn	EXPMAC,CVTNUM,LCLNUM,GETSTR,MACPTR,MACCHK
+
+	CSEG
+;
+;	Init fields
+;
+Z80ASM:	ld	hl,(MAXMEM)
+	ld	(hl),0		; init dynamic storage
+	ld	(DSPTR),hl
+	ld	hl,(SYMTBL)
+	ld	(SYMPT),hl
+	call	RESETP		; reset variables
+	ld	a,DEFLNP
+	ld	(MAXLNE),a	; set default lines per page
+	ld	(CURLNE),a	; set up for head of form on first print
+	xor	a
+	ld	(PASSNO),a	; indicate pass 1
+	ld	(MDFLVL),a	; reset MACRO definition
+	ld	(MACLVL),a	;  and expansion levels
+	ld	(MODNAM),a
+	ld	(MODIDN),a
+	ld	hl,0
+	ld	(CSSIZE),hl	; clear segment sizes
+	ld	(DSSIZE),hl
+	call	INIOBJ
+	ld	hl,HOFPG
+	ld	(hl),' '
+	ld	e,l
+	ld	d,h
+	inc	de
+	ld	bc,3
+	ldir			; clear page number
+	;continue below
+
+	SUBTTL	Main Assembler module
+;-----------------------------------------------------------------------
+;
+;	MAIN ASSEMBLER MODULE
+;
+;-----------------------------------------------------------------------
+;
+;	Main Loop - Read a source record
+;		    Process label and opcode
+;		    Print line (unless option=N)
+;		    Output object code (if necessary)
+;		    Back to main loop for next record
+;
+NEXT:	xor	a
+	ld	(UFLAG),a	; undefined flag
+	ld	(LEN),a		; instruction length
+	ld	(EFLG),a
+	ld	(EQUFLG),a
+	ld	(LBLFLG),a
+	ld	(DSFLAG),a
+	ld	(DBWFLG),a
+	ld	(IFLIST),a
+	ld	(NOLIST),a
+	ld	h,a
+	ld	l,a
+	ld	(LENDS),hl	; init length & flags
+	ld	(ENDADR),hl
+	ld	(ENDMOD),a
+	ld	a,' '
+	ld	(ERRFLG),a	; for this record
+	ld	a,(PASSNO)
+	or	a
+	call	nz,LSTINI	; init listing
+;
+;	Process statememt
+;
+	call	ASSEMB		; read and process record
+;
+;	End of statement processing
+;
+	ld	hl,(CONDSP)	; point to conditional stack
+	ld	a,(hl)		; get current state
+	rra			;  into carry
+	jr	nc,S401A	; don't check terminator if false
+	call	GNC		; check valid terminators
+	or	a
+	jr	z,S401
+
+	ld	a,(ERRFLG)
+	cp	' '
+	jr	nz,S401		; error already, leave it
+	ld	a,'O'
+	ld	(ERRFLG),a
+	jr	S401
+
+S401A:	ld	hl,ERRFLG
+	ld	a,(hl)
+	rla			; forced error?
+	jr	c,S401		; don't change it
+	ld	(hl),' '	; else clear it
+
+S401:	ld	a,(PASSNO)
+	or	a
+	call	nz,LSTOUT	; output listing on pass 2
+
+	ld	hl,(PC)
+	ld	a,(LEN)
+	ld	c,a
+	ld	b,0
+	add	hl,bc
+	ld	de,(LENDS)
+	add	hl,de
+	ld	(PC),hl
+	ld	a,(PASSNO)
+	ld	e,a
+	ld	a,(DSFLAG)	; DEFS,DS and pass 2?
+	and	e
+	jr	z,S402		; branch if not
+	ld	a,(ZERODS)	; initialize DS to zeros?
+	or	a
+	jr	nz,S403		; branch if yes
+	push	hl
+	ld	hl,(CURCMN)
+	call	SELCMN
+	pop	hl
+	ld	a,(PHFLAG)
+	or	a
+	jr	nz,S403A
+	ld	a,(CURSEG)
+S403A:	and	0C0h
+	ld	e,a
+	call	WLOC		; else update current loc
+	jr	S402
+S403:	xor	a
+	call	WOBJ		; write zero bytes to initialize block
+	dec	hl
+	ld	a,h
+	or	l
+	jr	nz,S403
+S402:	ld	a,(EFLG)
+	or	a
+	jp	z,NEXT		; go process next record
+;
+;	Pass 2
+;
+	ld	a,(PASSNO)
+	cpl
+	ld	(PASSNO),a
+	or	a
+	jp	z,ENDIT		; exit if finished
+	call	REWIND		; rewind input file
+	xor	a
+	ld	(TITLEB),a	; clean out title
+	ld	(SBTTLB),a	;  and subtitle buffers
+	ld	a,DEFLNP
+	ld	(MAXLNE),a	; force header at beginning of listing
+	ld	(CURLNE),a
+	call	UPDSIZ		; update current segment size
+	ld	hl,MODNAM
+	ld	a,(hl)
+	or	a
+	jr	nz,S404
+	ld	de,HOFNAM
+	call	S552		; use default name
+	ld	a,c
+S404:	ld	e,a
+	inc	hl
+	call	WMNAME		; output module name
+
+	ld	hl,MODIDN
+	ld	a,(hl)
+	inc	hl
+	ld	e,a
+	or	a
+	call	nz,WIDENT	; output module version identification
+
+	ld	de,(SYMTBL)
+S418:	ld	a,(de)		; get length
+	or	a		; end of table?
+	jr	z,S419		; exit loop if yes
+	ld	b,a		; save identity char in reg B
+	and	0Fh
+	ld	c,a		; save name length in reg C
+	ld	l,a
+	ld	h,0
+	add	hl,de
+	inc	hl
+	inc	hl
+	inc	hl		; HL = address mode field
+	ld	a,b		; get identity char
+	and	0F0h		; leave type bits
+	cp	COMNAME		; COMMON name?
+	jr	nz,S418A	; branch if not
+	push	hl
+	push	de
+	dec	hl
+	ld	d,(hl)		; else get COMMON size into DE
+	dec	hl
+	ld	e,(hl)
+	pop	hl
+	inc	hl		; HL = name
+	ld	b,c		; B = name length
+	ld	c,CMNSYM
+	call	WCMSIZ		; output COMMON size
+	pop	hl
+	jr	S418B
+S418A:	ld	a,(UMODE)
+	or	a		; treat undefined symbols as External?
+	ld	a,(hl)
+	ld	b,a
+	jr	z,S418C		; branch if not
+	and	UNDEF		; undefined symbol?
+	jr	z,S418C		; branch if not
+	ld	a,b
+	and	NOT UNDEF
+	or	EXTSYM		; else convert symbol to External
+	ld	(hl),a
+	jr	S418B
+S418C:	ld	a,b
+	and	GBLSYM
+	jr	z,S418B		; skip if not global
+	push	hl
+	ex	de,hl		; HL = name
+	ld	e,c		; E = name length
+	inc	hl
+	call	WENTRY		; output entry
+	pop	hl
+S418B:	inc	hl
+	inc	hl
+	inc	hl
+	ex	de,hl
+	jr	S418
+
+S419:	ld	hl,(CSSIZE)
+	call	WCSIZE		; set size of code segment
+	ld	hl,(DSSIZE)
+	call	WDSIZE		; set size of data segment
+	call	RESETP		; reset variables
+	ld	e,40h		; CSEG
+	call	WLOC		; set initial loc
+	jp	NEXT		; process all records again
+;
+;	End of assembly
+;
+ENDIT:	ld	de,(SYMTBL)
+S420:	ld	a,(de)		; get length
+	or	a		; end of table?
+	jr	z,S421		; exit loop if yes
+	and	0Fh
+	ld	b,a		; entry length in B
+	ld	l,a
+	ld	h,0
+	add	hl,de
+	inc	hl
+	inc	hl
+	inc	hl		; HL = addres mode field
+	ld	a,(hl)
+	ld	c,a		; save segment type in reg C
+	and	GBLSYM OR EXTSYM
+	jr	z,S420B		; skip if neither Global nor External
+	push	hl
+	ld	a,c		; seg type and linkage mode bits back in A
+	push	af
+	and	0C0h		; mask segment type bits
+	ld	c,a		; segment type in C
+	ld	l,b		; total entry length in L
+	ld	h,0		; HL = entry length
+	inc	de		; DE = addr of name field
+	push	de
+	add	hl,de		; point to value field
+	ld	e,(hl)		; DE = address
+	inc	hl
+	ld	d,(hl)
+	pop	hl		; HL = name, length still in B
+	pop	af
+	call	S420C		; output entry
+	pop	hl
+S420B:	inc	hl
+	inc	hl
+	inc	hl
+	ex	de,hl
+	jr	S420
+
+S420C:	and	EXTSYM		; External?
+	jp	nz,WDFEXT	;  output 'Define External' record if yes
+	jp	WDFENT		;  else output 'Define Entry' record
+
+S421:	ld	hl,(ENDADR)	; get entry point address
+	ld	a,(ENDMOD)	;  and mode
+	and	0C0h
+	ld	c,a
+	call	CLSOBJ		; output entry point record and close obj file
+
+	ld	hl,ERMSG 	; ptr to message
+	ld	de,HDRBUF
+	ld	bc,ERMSGL	; message length
+	ldir			; copy message
+	ld	hl,10
+	ld	(RADIX),hl	; reset base to 10
+	ld	hl,(ERRCNT)
+	push	hl
+	call	CVTNUM
+	pop	hl
+	xor	a
+	ld	(de),a
+	ld	a,h
+	or	l
+	jr	nz,S422
+	ld	a,(QFLAG)
+	or	a
+	jr	nz,S423
+S422:	ld	a,1		; set errors flag to force printing
+	ld	(ERRFLG),a
+S423:	call	PLINE		; print errors
+	ld	a,' '		; clear error flag
+	ld	(ERRFLG),a
+
+	ld	a,(LFLAG)	; do we need to print any symbols?
+	cp	'Z'
+	jp	z,ENDIT4	; don't print if user asked us not to
+
+	ld	a,(LSTOPT)
+	bit	SYMBLS,a	; are symbols to be generated?
+	jp	z,ENDIT4	; skip if not
+
+	xor	a
+	ld	(TITLEB),a	; clean out title
+	ld	(SBTTLB),a	;  and subtitle buffers
+	ld	a,(MAXLNE)
+	inc	a		; force new page
+	ld	(CURLNE),a
+
+	ld	c,STMDEF
+	call	FNDREC		; were any macros in the program?
+	call	nc,MACROS	; do it if so
+
+	ld	hl,(SYMTBL)
+	ld	de,(SYMPTR)
+	call	CMPHD		; were any symbols in the program?
+	call	nz,SYMBOL	; do it if so
+
+ENDIT4:	ld	a,(LFLAG)
+	cp	'O'		; file asked for?
+	call	c,CLOSE1	; yes, close it
+	call	CLSINP		; close input file
+	ret			; exit
+
+ERMSG:	db	CR,LF,'Errors: '
+ERMSGL	equ	$-ERMSG
+;
+;	RESETP - Reset variables in preparation for next pass
+;
+RESETP:	xor	a
+	ld	(PHFLAG),a	; reset .PHASE flag
+	ld	(COMNTC),a
+	ld	(CLEVEL),a	; reset conditionals stack
+	ld	hl,CNDSTK
+	ld	(CONDSP),hl
+	dec	a
+	ld	(hl),a		; we always start true
+	ld	(LSTOPT),a	; set all list option bits
+	ld	hl,10
+	ld	(RADIX),hl	; reset radix
+	ld	hl,0
+	ld	(PC),hl		; reset PC
+	ld	(ASEGPC),hl	;  for all segments
+	ld	(CSEGPC),hl
+	ld	(DSEGPC),hl
+	ld	(CURCMN),hl	; reset current
+	ld	(LASTCM),hl	;  and selected COMMON blocks
+	ld	(ERRCNT),hl
+	ld	(LCLNUM),hl
+	ld	a,(DEFCPU)
+	ld	(CPU),a		; reset CPU type
+	ld	a,40h		; CSEG
+	ld	(CURSEG),a	; reset current segment
+	ret
+;
+;	GNR - Get next record - Fill REC until LF or EOF is found
+;	Truncate source line if longer than RECMAX-1 characters
+;
+GNR:	ld	hl,REC
+	ld	(PTR1),hl	; reset pointer
+
+	ld	a,'+'
+	ld	(MACFLG),a
+
+	ld	a,(MACLVL)
+	or	a		; reading from macro?
+	jp	nz,GNRMAC	; switch to GNRMAC if yes
+
+	ld	a,' '
+	ld	(MACFLG),a
+
+	ld	c,RECMAX-2	; load buffer count
+GNR1:	call	GNB
+	cp	EOF
+	jr	z,GNR3		; return if EOF marker is found
+	cp	CR
+	jr	z,GNR1		; skip CR
+	cp	LF
+	jr	z,GNR2		; LF terminates line
+	inc	c
+	dec	c
+	jr	z,GNR1		; if buffer full, truncate line
+	ld	(hl),a
+	inc	hl
+	dec	c		; decr buffer count
+	jr	GNR1
+GNR3:	push	hl
+	push	bc
+	call	CLSLIB
+	pop	bc
+	pop	hl
+	ld	a,EOF
+	jr	z,GNR2		; if at root level, return EOF
+	ld	a,c
+	cp	RECMAX-2
+	jr	z,GNR
+GNR2:	ld	(hl),0		; terminate buffer
+	ret
+;
+;	GNC - Get next non-blank character
+;	Use PTR1 to index into REC, skip blanks
+;
+GNC:	push	hl
+	ld	hl,(PTR1)
+GNC1:	ld	a,(hl)		; get character
+	or	a
+	jr	z,GNC2		; return if end of line
+	cp	';'
+	jr	z,GNC3
+	inc	hl
+	cp	' '
+	jr	z,GNC1		; skip blanks
+	cp	TAB
+	jr	z,GNC1
+	call	UCASE		; convert L/C to U/C
+GNC2:	ld	(PTR1),hl
+	pop	hl
+	ret
+GNC3:	xor	a
+	jr	GNC2		; treat begin of comment as end of line
+;
+;	BACKUP - Backup PTR1
+;
+BACKUP:	push	hl
+	ld	hl,(PTR1)
+	dec	hl
+	ld	(PTR1),hl
+	pop	hl
+	ret
+;
+;	Read next record and process it
+;
+ASSEMB:	call	GNR		; get next record
+	cp	EOF
+	jp	z,S321		; branch if EOF
+
+	ld	a,(COMNTC)
+	or	a		; in .COMMENT block?
+	jp	nz,S662
+
+	ld	a,(MDFLVL)
+	or	a		; defining a MACRO?
+	jp	nz,MSTORE
+
+	call	GNC		; skip blanks, get first char
+	or	a
+	ret	z		; ignore null line
+	ld	hl,0
+	ld	(IDADR),hl
+	call	BACKUP
+	call	ID		; get identifier
+	cp	':'
+	jr	z,S7		; branch if label
+
+	; an identifier found that is not followed by a colon:
+	; may be label, macro or opcode - can get a bit tricky
+
+	cp	' '		; test op-code separator
+	jr	z,S6
+	cp	TAB
+	jr	z,S6
+	or	a
+	jp	nz,NERROR
+S6:	ld	a,(IDLEN)
+	or	a
+	jp	z,NERROR	; error exit
+	call	ID		; get next identifier, if any
+	call	FNDOPC		; is it an opcode?
+	push	af
+	push	hl
+	ld	a,' '
+	ld	(ERRFLG),a	; clear possible 'L' error
+	ld	a,(IDLEN)
+	ld	c,a		; remember if 2nd identifier present
+	ld	hl,REC
+	ld	(PTR1),hl	; reset text pointer to start of record
+	call	ID		; and rescan first identifier
+	pop	hl
+	pop	af
+	jr	c,S6A		; branch if no 2nd ident or not an opcode
+	ld	e,(hl)		; get opcode value
+	inc	hl
+	ld	d,(hl)
+	inc	hl
+	ld	a,(hl)
+	cp	27		; pseudo-op?
+	jr	nz,S6A		; branch if not
+	ld	a,e
+	cp	1		; EQU/DEFL?
+	jr	z,S6B		; branch if yes
+	cp	24		; MACRO/REPT/IRP/IRPC?
+	jr	nz,S6A		; branch if not
+	ld	a,d
+	or	a		; MACRO?
+	jr	z,S7A		; branch if yes - MACRO defs have priority
+S6A:	push	bc
+	call	FNDMAC		; lookup macro name
+	pop	bc
+	jr	c,S6C		; branch if not found
+	ld	bc,(CONDSP)	; point to conditional stack
+	ld	a,(bc)		; get current state
+	rra			;  into carry
+	jp	c,EXPMAC	; if true, expand macro (switch context)
+	ret			; else just return
+
+S6C:	push	bc
+	call	FNDOPC		; lookup opcode
+	pop	bc
+	jp	nc,S16		; branch if found
+	ld	a,c
+	or	a
+	jp	z,OERROR
+	jr	S7B		; else process as label ONLY IF 2nd ID present
+
+S6B:	ld	(EQUFLG),a
+	jr	S7A
+;
+;	Process label
+;
+S7:	call	GNC		; skip over label delimiter
+S7B:	ld	a,1
+	ld	(LBLFLG),a	; set Label flag for listing
+S7A:	xor	a
+	ld	(SYMMOD),a	; clear mode bits
+	ld	hl,(PTR1)
+	ld	a,(hl)
+	cp	':'		; double-colon means public label
+	jr	nz,S8
+	call	GNC		; skip over separator
+	ld	a,GBLSYM
+	ld	(SYMMOD),a	; set mode to PUBLIC
+S8:	ld	hl,(CONDSP)	; get conditional state
+	ld	a,(hl)		; get state
+	rra
+	jp	nc,S12		; don't enter symbol if false
+	ld	a,(ERRFLG)	; any error
+	cp	' '
+	ret	nz		; exit
+	call	GETPPC		; get effective PC value
+	ld	(VAL),hl
+	ld	hl,(CURCMN)
+	ld	(CMNPTR),hl
+	ld	hl,SYMMOD
+	ld	a,(CURSEG)
+	or	UNDEF		; set Undefined bit
+	or	(hl)		; add current segment type to mode bits
+	ld	(hl),a
+	call	ADDSYM		; enter symbol
+	ret	c		; on error return
+	jp	nz,S11		; jump if new symbol
+
+	ld	a,(EVFLGS)	; symbol exists, fetch identity char
+	ld	c,a
+	ld	a,(EQUFLG)	; EQU or DEFL statement?
+	or	a
+	jp	nz,S12		; skip checks if yes (done in EQU code)
+
+	ld	a,(PASSNO)
+	or	a
+	jr	z,S9		; branch if pass 1
+
+	ld	a,c		; pass 2, check type
+	cp	MULTDEF		; multiple defined?
+	jr	z,S10		; multi defined error if yes
+
+	ld	a,(SYMMOD)
+	ld	(EVMODE),a
+	call	GETPPC		; get effective PC value
+	ld	(VAL),hl
+	call	CMPSYM		; same?
+	call	c,PERROR	; phase error if not
+	jr	S12
+
+S9:	inc	hl		; pass 1, check mode bits
+	inc	hl
+	ld	a,(hl)
+	and	UNDEF		; undefined?
+	dec	hl
+	dec	hl
+	jr	nz,S9A		; branch if yes to set value
+
+	ld	a,(SYMMOD)
+	ld	(EVMODE),a
+	call	GETPPC		; get effective PC value
+	ld	(VAL),hl
+	call	CMPSYM		; same?
+	call	c,SETMDF	; set multi defined flag if not
+	jr	S12
+
+S9A:	ex	de,hl
+	call	GETPPC
+	ex	de,hl
+	ld	(hl),e		; set value
+	inc	hl
+	ld	(hl),d
+	inc	hl
+	ld	a,(CURSEG)
+	ld	c,a
+	ld	a,(hl)
+	and	20h		; keep old GLOBAL bit
+	or	c
+	ld	c,a
+	ld	a,(SYMMOD)
+	and	20h		; merge with new GLOBAL bit, if set
+	or	c
+	ld	(hl),a		; set new address mode
+	inc	hl
+	ld	de,(CURCMN)
+	ld	(hl),e		; set pointer to current COMMON block
+	inc	hl
+	ld	(hl),d
+	jr	S11
+
+S10:	call	MERROR		; else multi defined error
+	jr	S12
+;
+SETMDF:	push	hl
+	ld	hl,(IDADR)
+	ld	a,(hl)
+	and	0Fh
+	or	MULTDEF		; tag symbol as multiple-defined
+	ld	(hl),a
+	pop	hl
+MERROR:	ld	a,'M'
+	ld	(ERRFLG),a
+	scf
+	ret
+;
+PERROR:	ld	a,'P'		; phase error
+	ld	(ERRFLG),a
+	scf
+	ret
+;
+;	New symbol
+;
+S11:	ld	hl,(SYMADR)
+	inc	hl
+	inc	hl
+	ld	a,(hl)
+	and	NOT UNDEF	; clear UNDEF bit
+	ld	(hl),a		; define label
+;
+;	Now process opcode
+;
+S12:	call	GNC		; fetch char after tab or space
+	or	a
+	ret	z		; ignore blank line
+	call	BACKUP		; restore ptrs
+	call	ID
+	cp	' '		; test op-code separator
+	jr	z,S12C
+	cp	TAB
+	jr	z,S12C
+	or	a
+	jr	z,S12C
+	jr	NERROR
+;
+S12C:	ld	a,(IDLEN)
+	or	a
+	jr	z,NERROR	; error exit
+
+	call	FNDMAC		; lookup macro
+	jp	nc,EXPMAC	; if found, expand it (switch context)
+
+	call	FNDOPC		; lookup opcode
+	jr	nc,S16		; branch if found
+NERROR:	ld	a,'N'
+	ld	(ERRFLG),a
+	ret			; error if undefined opcode
+;
+S16:	ld	a,(EVFLGS)	; check if CPU-specific instruction
+	ld	c,a
+	and	Z180
+	jr	z,S16A
+	ld	a,(CPU)
+	cp	1
+	jr	nz,NERROR	; error if wrong CPU - undefined opcode
+	jr	S16B
+
+S16A:	ld	a,c
+	and	Z280
+	jr	z,S16B
+	ld	a,(CPU)
+	cp	2
+	jr	nz,NERROR	; error if wrong CPU - undefined opcode
+
+S16B:	ld	e,(hl)
+	inc	hl
+	ld	d,(hl)
+	ld	(OPCODE),de	; save opcode
+	inc	hl
+	ld	a,(hl)		; get type byte
+	or	a
+	jp	z,NERROR	; error if out of range
+	cp	27+1
+	jp	nc,NERROR
+	cp	27		; if pseudo-op
+	jr	nz,S17		; just test state if not
+	ld	a,(OPCODE)	; get opcode
+	cp	8		; is it IF?
+	jr	z,S17A		; let through always
+	cp	9		; is it ELSE?
+	jr	z,S17A		; let through always
+	cp	10		; is it ENDIF?
+	jr	z,S17A		; let through always
+S17:	ld	de,(CONDSP)	; get conditional state
+	ld	a,(de)		; get state
+	rra			;  into carry: C=true, NC=false
+	jr	c,S17A		; if true, process the opcode
+	jp	GNC		; go past separator and finish if false
+;
+S17A:	ld	a,(hl)		; get type byte
+	dec	a		; -1
+	ld	hl,TYPTBL
+SWITCH:	add	a,a		; double for table index
+	ld	e,a
+	ld	d,0
+	add	hl,de
+	ld	a,(hl)
+	inc	hl
+	ld	h,(hl)
+	ld	l,a
+	jp	(hl)		; dispatch to proper instruction type
+
+;-----------------------------------------------------------------------
+;
+;	Instruction class dispatch table
+;
+TYPTBL:	dw	CL1	; Class  1 - Opcode only
+	dw	CL2	; Class  2 - Rotates
+	dw	CL3	; Class  3 - Jumps (non relative) calls
+	dw	CL4	; Class  4 - Relative jumps (JR and DJNZ)
+	dw	CL5	; Class  5 - RST
+	dw	CL6	; Class  6 - Arithmetic instructions
+	dw	CL7	; Class  7 - I/O
+	dw	CL8	; Class  8 - LD instructions
+	dw	CL9	; Class  9 - PUSH, POP
+	dw	CL10	; Class 10 - Exchange (EX)
+	dw	CL11	; Class 11 - Returns
+	dw	CL12	; Class 12 - BIT, SET, RES
+	dw	CL13	; Class 13 - INC, DEC
+	dw	CL14	; Class 14 - MLT, TST (Z180)
+	dw	CL15	; Class 15 - ADDW, CPW, SUBW, MULTW, MULTUW (Z280)
+	dw	CL16	; Class 16 - INCW, DECW (Z280)
+	dw	CL17	; Class 17 - DIV, DIVU (Z280)
+	dw	CL18	; Class 18 - DIVW, DIVUW (Z280)
+	dw	CL19	; Class 19 - LDA (Z280)
+	dw	CL20	; Class 20 - LDCTL (Z280)
+	dw	CL21	; Class 21 - LDUD, LDUP (Z280)
+	dw	CL22	; Class 22 - MULT, MULTU (Z280)
+	dw	CL23	; Class 23 - CPL, NEG, EXTS
+	dw	CL24	; Class 24 - DI, EI
+	dw	CL25	; Class 25 - SC (Z280)
+	dw	CL26	; Class 26 - EPUM, MEPU (Z280)
+	dw	CL27	; Class 27 - Pseudo operators
+
+	SUBTTL	Instruction Class 1 - Opcode only
+;
+;	Class 1 - Opcode only
+;
+CL1:	ld	hl,(OPCODE)
+	ld	a,l
+	call	EMITB
+	ld	a,h
+	cp	0FFh		; IM set?
+	jr	z,S18
+	or	a
+	call	nz,EMITB	; emit second byte, if any
+	ret
+;
+S18:	call	GNC
+	sub	'0'
+	ld	b,46h		; IM 0
+	jr	z,S19
+	dec	a
+	ld	b,56h		; IM 1
+	jr	z,S19
+	dec	a
+	ld	b,5Eh		; IM 2
+	jr	z,S19
+	ld	c,a
+	ld	a,(CPU)
+	cp	2		; Z280?
+	jp	nz,OERROR
+	dec	c
+	ld	b,4Eh		; IM 3
+	jp	nz,OERROR
+S19:	ld	a,b
+	jp	EMITB
+
+	SUBTTL	Instruction Class 2 - Rotates
+;
+;	Class 2 - Rotates
+;
+CL2:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S30		; branch if () form
+	call	BACKUP
+	call	EVALREG		; must be a single register
+	cp	RNAME
+	jp	nz,OERROR
+	ld	a,0CBh
+	call	EMITB
+	ld	a,(OPCODE)
+	ld	b,a
+	ld	a,(VAL)
+	or	b
+	jp	EMITB
+;
+S30:	call	EVALREG
+	cp	RPNAME
+	jp	nz,OERROR	; must be rpair
+	ld	a,l
+	cp	4		; only HL,IX,IY allowed
+	jp	nz,OERROR
+	ld	a,h
+	or	a
+	jp	z,S40		; branch if (HL)
+	call	EMITB		; do IX and IY similarly
+	ld	a,0CBh
+	call	EMITB
+	call	EVALNEW		; evaluate index
+	call	REQCHR		; bypass )
+	db	')'
+	ld	a,(EVMODE)
+	call	REQ8U		; ensure 8-bit index (REQ8S?)
+	ld	a,l
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,6
+	jp	EMITB
+;
+S40:	call	REQCHR
+	db	')'
+	ld	a,0CBh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,6
+	jp	EMITB
+
+	SUBTTL	Instruction Class 3 - Absolute Jumps & Calls
+;
+;	Class 3 - Jumps - Calls
+;
+CL3:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S53		; branch if () form
+	cp	'<'
+	jp	z,S57		; branch if <> form
+	call	BACKUP
+	call	EVALCND		; try conditional
+	cp	COND
+	jr	nz,S44		; jump if not conditional
+	call	REQCHR
+	db	','
+	ld	a,l
+	rlca
+	rlca
+	rlca
+	ld	b,a
+	ld	a,(OPCODE)
+	and	0C6h
+	or	b
+	ld	b,a
+	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S56
+	cp	'<'
+	jp	z,S58
+	ld	a,b
+	call	EMITB
+	call	BACKUP
+	call	EVALNEW
+	jp	EMITV		; emit address
+;
+S44:	ld	a,(OPCODE)
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	JP	(HL/IX/IY)
+;
+S53	equ	$		; process () form
+	call	EVALSRG
+	cp	RSNAME
+	jr	z,S57A		; branch if special reg (Z280)
+	cp	RPNAME		; else must be rpair
+	jp	nz,OERROR
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; must be HL,IX,IY
+	ld	a,(OPCODE)
+	cp	0CDh		; branch if 'CALL (HL)' (Z280)
+	ld	b,a
+	jr	z,S54
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	a,0E9h
+	jr	S55
+;
+;	CALL/JP	cond,(HL) 	; Z280
+;
+S56:	push	bc
+	call	EVALSRG
+	pop	bc
+	cp	RSNAME
+	jr	z,S58A		; branch if special reg
+	cp	RPNAME		; else must be rpair
+	jp	nz,OERROR
+	ld	a,l
+	cp	4
+	jp	nz,OERROR
+S54:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; IX/IY not allowed
+	ld	a,0DDh
+	call	EMITB
+	ld	a,b
+S55:	call	EMITB
+	call	REQCHR
+	db	')'
+	ret
+;
+;	CALL/JP	cond,(PC+addr) 	; Z280
+;
+S57A:	ld	a,(OPCODE)
+	ld	b,a
+S58A:	push	bc
+	call	EVALNEW
+	pop	bc
+	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,0FDh
+	call	EMITB
+	ld	a,b
+	call	EMITB
+	call	EMITV		; emit relative address
+	call	REQCHR
+	db	')'
+	ret
+;
+;	CALL/JP	cond,<addr> 	; Z280
+;
+S57:	ld	a,(OPCODE)
+	ld	b,a
+S58:	push	bc
+	call	EVALNEW
+	pop	bc
+	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,0FDh
+	call	EMITB
+	ld	a,b
+	call	EMITB
+	ld	de,0
+	call	EMITVR		; emit relative address
+	call	REQCHR
+	db	'>'
+	ret
+
+	SUBTTL	Instruction Class 4 - Relative Jumps
+;
+;	Class 4 - Relative jumps (JR and DJNZ, also Z280's JAF and JAR)
+;
+CL4:	ld	a,(OPCODE+1)
+	or	a
+	jr	nz,S67		; branch if JAF or JAR
+	call	EVALCND		; try conditional
+	cp	COND
+	jp	nz,S68		; jump if not conditional
+	ld	a,l
+	cp	4		; only Z, NZ, C and NC are legal
+	jp	nc,OERROR
+	rlca
+	rlca
+	rlca
+	add	a,20h
+	call	EMITB
+	call	REQCHR
+	db	','
+	call	EVALNEW		; get target address
+	jr	S68A		; now go process like non-conditional
+;
+S67:	call	EMITB		; emit prefix for JAF/JAR
+	call	EVALNEW		; get target address
+S68:	ld	a,(OPCODE)
+	call	EMITB		; emit opcode
+S68A:	ld	hl,(VAL)
+	ld	a,(PCFLAG)	; fetch PC relative flag
+	or	a		; PC relative value?
+	jr	z,S68B		; skip PC relative
+	ex	de,hl
+	call	GETPPC		; get effective PC value
+	ex	de,hl
+	or	a
+	sbc	hl,de		; subtract effective PC
+S68B:	dec	hl
+	dec	hl		; -2
+	ld	a,(OPCODE+1)
+	or	a
+	jr	z,S68C
+	dec	hl		; -3 if JAF/JAR
+S68C:	ld	a,l
+	call	EMITB
+	ld	a,(EVMODE)
+	and	0C0h+EXTSYM
+	ld	c,a
+	ld	a,(CURSEG)
+	cp	c
+	jp	nz,RELERR	; inter-segment/external not allowed as dest
+	ld	a,h		; else check if within range
+	or	a
+	jr	z,POSTST
+	inc	a
+	jr	nz,DERROR
+NEGTST:	ld	a,l
+	or	a
+	ret	m
+	jr	DERROR
+POSTST:	ld	a,l
+	or	a
+	ret	p
+DERROR:	ld	a,'D'		; range error
+	ld	(ERRFLG),a
+	ret
+
+	SUBTTL	Instruction Class 5 - Restarts
+;
+;	Class 5 - Restarts
+;
+CL5:	call	EVALNEW
+	ld	a,(VAL)		; fetch op-code value
+	ld	c,a
+	and	0C7h		; mask RST bits out
+	jp	nz,OERROR	; out of value error
+	ld	a,c		; fetch op-code value
+	and	38h		; mask to RST bits
+	or	0C7h		; make RST code
+	jp	EMITB
+
+	SUBTTL	Instruction Class 6 - Arithmetic & Logical
+;
+;	Class 6 - Arithmetic opcodes
+;
+;	ADD, SUB, ADC, SBC, AND, OR, XOR, CP
+;
+CL6:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S85		; branch if () form
+	cp	'<'
+	jp	z,S85		; branch if <> form (Z280)
+	call	BACKUP
+	call	EVALREG
+	cp	RNAME		; single reg
+	jr	z,S84
+	cp	RPNAME		; double reg
+	jp	z,S96B
+;
+;	Immediate value - ADD nn
+;
+S82:	ld	a,(OPCODE)
+	add	a,0C6h
+	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB
+;
+;	Single-register name - ADD A,...
+;
+S84:	call	GNC
+	cp	','		; check for A,xx form
+	jr	nz,S84A
+	ld	a,(VAL)
+	cp	7
+	jp	nz,OERROR	; first operand can be only A
+	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S85		; jump if A,(rp)
+	cp	'<'
+	jp	z,S85		; jump if A,<nnnn> (Z280)
+	call	BACKUP
+	call	EVALREG
+	cp	RPNAME
+	jp	z,OERROR	; rpair illegal here
+	cp	RNAME
+	jr	nz,S82		; process immediate value
+S84A:	ld	a,(VAL+1)
+	ld	c,a
+	or	a		; check for index register
+	jr	z,S84B
+	ld	a,(CPU)
+	dec	a
+	jp	z,OERROR	; IXH/IXL/IYH/IYL not supported by Z180
+	ld	a,c
+	call	EMITB		; emit prefix
+S84B:	ld	a,(OPCODE)
+	add	a,80h
+	ld	b,a
+	ld	a,(VAL)		; get register value
+	add	a,b
+	jp	EMITB
+;
+;	ADD	(xx)
+;
+S85:	call	EVBRKT		; evaluate expression in ()
+	ld	hl,ADTBL
+	jp	SWITCH
+;
+ADTBL:	dw	S92		; (addr)
+	dw	OERROR		; (r)
+	dw	S87		; (rp)
+	dw	S91		; (rp+d8)
+	dw	S87A		; (rp+d16)  Z280
+	dw	S88		; (x+y)     Z280
+	dw	S86		; (PC+d16)  Z280
+	dw	S86		; <addr>    Z280
+;
+;	ADD	(addr)
+;
+S92:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	c,87h
+	jr	S93A
+;
+;	ADD	(rp)
+;
+S87:	ld	a,(REGVAL)
+	cp	6
+	jr	z,S93		; branch if (SP) (Z280)
+	cp	4
+	jp	nz,OERROR	; error if not (HL)
+	ld	a,(OPCODE)
+	add	a,86h
+	jp	EMITB
+;
+;	ADD	(IX/IY+d8)
+;
+S91:	ld	a,(REGVAL+1)
+	call	EMITB		; emit index register prefix
+	ld	a,(OPCODE)
+	add	a,86h
+	call	EMITB
+	ld	a,(VAL)		; index type/mode already checked
+	jp	EMITB		; emit index
+;
+;	ADD	(rp+d16)	; Z280
+;
+S87A:	ld	hl,(REGVAL)
+	ld	a,l
+	cp	6
+	jr	z,S93		; branch if SP (Z280)
+	ld	a,h
+	or	a
+	ld	c,83h		; HL
+	jr	z,S90
+	cp	0DDh
+	ld	c,81h		; IX
+	jr	z,S90
+	inc	c		; IY
+S90:	ld	a,0FDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,c
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	ADD	(SP+d16)
+;
+S93:	ld	a,(CPU)
+	cp	2		; Z280 only
+	jp	nz,OERROR
+	ld	c,80h
+S93A:	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,c
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	ADD	(x+y)		; Z280
+;
+S88:	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,b
+	add	a,80h
+	jp	EMITB
+;
+;	ADD	<nnnn>		; Z280
+;	ADD	(PC+nnnn)	; Z280
+;
+S86:	ld	a,0FDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,80h
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITV		; emit index if (PC+nnnn)
+	ld	de,0
+	jp	EMITVR		; else emit relative address
+;
+;	Process register pair ADD,SUB,ADC,SBC
+;
+S96B:	ld	a,l
+	cp	4
+	jp	nz,OERROR	; 1st operand can be only HL, IX or IY
+	call	REQCHR
+	db	','		; check for legal delimiter
+	ld	a,(OPCODE+1)
+	or	a
+	jp	z,OERROR	; error if AND, OR, XOR, CP, etc.
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	a,(OPCODE+1)
+	cp	9
+	jr	z,S96C		; branch if ADD
+	ld	a,h
+	or	a
+	jr	z,S96D		; branch if not an index register
+	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; ADC/SBC IX/IY supported only by Z280
+S96D:	ld	a,0EDh		; prefix for ADC and SBC
+	call	EMITB
+S96C:	push	hl
+	call	EVALREG
+	pop	de
+	cp	RNAME		; jump if single register
+	jr	z,S96F
+	cp	RPNAME		; ensure register pair
+	jp	nz,OERROR
+	ld	a,l
+	cp	4
+	jr	nz,S96E
+	ld	a,h
+	cp	d		; can't be 'IX,IY' or 'IY,IX'
+	jp	nz,OERROR	;       or 'IX,HL' or 'IY,HL'
+S96E:	ld	a,l
+	rlca
+	rlca
+	rlca
+	ld	b,a
+	ld	a,(OPCODE+1)
+	add	a,b
+	jp	EMITB
+;
+;	ADD	HL/IX/IY,A 	; Z280
+;
+S96F:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,(VAL)
+	cp	7
+	jp	nz,OERROR	; only reg A allowed
+	ld	a,(OPCODE+1)
+	cp	9
+	jp	nz,OERROR	; error if not ADD
+	ld	a,0EDh
+	call	EMITB
+	ld	a,6Dh
+	jp	EMITB
+
+	SUBTTL	Instruction Class 7 - I/O instructions
+;
+;	Class 7 - I/O Instructions
+;
+CL7:	ld	a,(OPCODE)
+	ld	hl,IOTBL
+	jp	SWITCH
+;
+IOTBL:	dw	ZIN		; IN
+	dw	ZOUT		; OUT
+	dw	ZIN0		; IN0   (Z180)
+	dw	ZOUT0		; OUT0  (Z180)
+	dw	ZTSTIO		; TSTIO (Z180)
+	dw	ZTSTI		; TSTI  (Z280)
+	dw	ZINW		; INW   (Z280)
+	dw	ZOUTW		; OUTW  (Z280)
+;
+;	IN instruction
+;
+ZIN:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S100		; branch if () form (Z280)
+	cp	'<'
+	jp	z,S100		; branch if <> form (Z280)
+	call	BACKUP
+	call	EVALREG
+	cp	RPNAME
+	jp	z,S102		; branch if rpair (Z280)
+	cp	RNAME
+	jp	nz,OERROR
+	push	hl
+	call	REQCHR
+	db	','
+	call	GNC
+	cp	'('
+	jp	nz,OERROR
+	call	EVBRKT		; get second operand
+	pop	bc
+	or	a
+	jr	z,S98		; branch if (addr)
+	dec	a
+	jp	nz,OERROR	; else only reg C allowed
+;
+;	IN	r,(C)
+;
+S97:	ld	a,b
+	or	a
+	jr	z,S97B
+	ld	a,(CPU)
+	dec	a
+	jp	z,OERROR	; IXH/IXL/IYH/IYL not supported by Z180
+	ld	a,b
+	call	EMITB		; emit prefix
+S97B:	ld	a,0EDh
+	call	EMITB
+	ld	a,c
+	rlca
+	rlca
+	rlca
+	ld	c,a
+	ld	a,(OPCODE+1)
+	add	a,c
+	jp	EMITB
+;
+;	IN	A,(nn)
+;
+S98:	ld	a,c
+	cp	7
+	jp	nz,OERROR	; only reg A allowed
+	ld	a,0DBh
+	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB
+;
+;	IN	(...),(C)	; Z280
+;
+S100:	ld	c,a
+	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,c
+	call	EVBRKT
+	push	af
+	call	CHKIOC
+	pop	af
+	ld	hl,IOTBL1
+	jp	SWITCH
+;
+IOTBL1:	dw	S103		; (addr)
+	dw	OERROR		; (r)
+	dw	S100A		; (rp)
+	dw	S100A		; (rp+d8)
+	dw	S100A		; (rp+d16)  Z280
+	dw	S100B		; (x+y)     Z280
+	dw	S101		; (PC+d16)  Z280
+	dw	S101		; <addr>    Z280
+;
+S100A:	ld	a,(REGVAL)
+	cp	6
+	jr	z,S104		; branch if SP
+	cp	4
+	jp	nz,OERROR	; else only HL/IX/IY allowed
+	jr	S105		; branch if no match
+;
+S100B:	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	ld	c,a
+	ld	a,(OPCODE+1)
+	add	a,c
+	jp	EMITB
+;
+S103:	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE+1)
+	add	a,38h
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	IN	(SP+nnn),(C)	; Z280
+;
+S104:	ld	c,0
+	ld	a,0DDh
+	jr	S107
+;
+S105:	ld	a,(REGVAL+1)
+	cp	0DDh
+	ld	c,08h
+	jr	z,S106
+	cp	0FDh
+	ld	c,10h
+	jr	z,S106
+	ld	c,18h
+S106:	ld	a,0FDh
+S107:	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE+1)
+	add	a,c
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	IN	<addr>,(C)	; Z280
+;	IN	(PC+addr),(C)	; Z280
+;
+S101:	ld	a,0FDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE+1)
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITV		; emit index if (PC+addr)
+	ld	de,0
+	jp	EMITVR		; else emit relative address
+;
+;	IN	HL,(C)		; Z280
+;
+S102:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	hl,(VAL)
+	ld	de,4
+	call	CMPHD		; only HL allowed
+	jp	nz,OERROR
+	call	CHKIOC
+	ld	a,0EDh
+	call	EMITB
+	ld	a,0B7h
+	jp	EMITB
+;
+;	Test for ',(C)' operand
+;
+CHKIOC:	call	REQCHR
+	db	','
+CHKCC:	call	REQCHR
+	db	'('
+	call	REQCHR
+	db	'C'
+	call	REQCHR
+	db	')'
+	ret
+;
+;	OUT instruction
+;
+ZOUT:	call	GNC
+	cp	'('
+	jp	nz,OERROR
+	call	EVBRKT		; evaluate expression in brackets
+	or	a
+	jr	z,S109		; branch if (addr)
+	dec	a
+	jp	nz,OERROR	; else must be (C)
+;
+;	OUT	(C),r
+;
+	call	REQCHR
+	db	','
+	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S108		; branch if () form (Z280)
+	cp	'<'
+	jr	z,S108		; branch if <> form (Z280)
+	call	BACKUP
+	call	EVALREG
+	cp	RPNAME
+	jr	z,S109A		; branch if rpair (Z280)
+	cp	RNAME
+	jp	nz,OERROR	; ensure single register
+	ld	bc,(VAL)
+	jp	S97
+;
+;	OUT	(C),HL		; Z280
+;
+S109A:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	de,4
+	call	CMPHD
+	jp	nz,OERROR	; only HL is valid
+	ld	a,0EDh
+	call	EMITB
+	ld	a,0BFh
+	jp	EMITB
+;
+;	OUT	(nn),A
+;
+S109:	call	REQCHR
+	db	','
+	call	REQCHR
+	db	'A'
+	ld	a,0D3h
+	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB
+;
+;	OUT	(C),(...)	; Z280
+;
+S108:	ld	c,a
+	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR
+	ld	a,c
+	call	EVBRKT		; evaluate expression in brackets
+	ld	hl,IOTBL1	; process via common code
+	jp	SWITCH
+;
+;	IN0	r,(p)		; Z180
+;
+ZIN0:	call	EVALREG
+	cp	RNAME		; ensure single register
+	jp	nz,OERROR
+	ld	hl,(VAL)
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; IXH,IXL,IYH,IYL not permitted
+	ld	a,0EDh
+	call	EMITB
+	ld	a,l
+	rlca
+	rlca
+	rlca
+	call	EMITB
+	call	REQCHR
+	db	','
+	call	REQCHR
+	db	'('
+	call	EVALNEW		; get port number
+	ld	a,l
+	call	EMITB
+	call	REQCHR
+	db	')'
+	ret
+;
+;	OUT0	(p),r		; Z180
+;
+ZOUT0:	call	REQCHR
+	db	'('
+	call	EVALNEW		; get port number
+	push	hl
+	call	REQCHR
+	db	')'
+	call	REQCHR
+	db	','
+	call	EVALREG
+	cp	RNAME		; ensure single register
+	jp	nz,OERROR
+	ld	hl,(VAL)
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; IXH,IXL,IYH,IYL not permitted
+	ld	a,0EDh
+	call	EMITB
+	ld	a,l
+	rlca
+	rlca
+	rlca
+	or	01h
+	call	EMITB
+	pop	hl
+	ld	a,l
+	jp	EMITB
+;
+;	TSTIO	p		; Z180
+;
+ZTSTIO:	call	EVALNEW		; get port number
+	ld	a,0EDh
+	call	EMITB
+	ld	a,74h
+	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB
+;
+;	TSTI	(C)		; Z280
+;
+ZTSTI:	call	CHKCC		; test for (C) oerand
+	ld	a,0EDh
+	call	EMITB
+	ld	a,70h
+	jp	EMITB
+;
+;	INW	HL,(C)		; Z280
+;
+ZINW:	call	EVALREG
+	cp	RPNAME
+	jp	nz,OERROR
+	jp	S102		; continue via common IN code
+;
+;	OUTW	(C),HL
+;
+ZOUTW:	call	CHKCC		; syntax requires (C)
+	call	REQCHR
+	db	','
+	call	EVALREG
+	cp	RPNAME
+	jp	nz,OERROR
+	jp	S109A		; continue via common OUT code
+
+	SUBTTL	Instruction Class 8 - LD Instructions
+;
+;	Class 8 - LD instructions
+;
+CL8:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S186		; branch if () first operand
+	cp	'<'
+	jp	z,S186		; or <>
+	call	BACKUP
+	call	EVALREG
+	call	REQCHR
+	db	','
+	ld	a,(UFLAG)	; valid name?
+	or	a
+	jp	nz,S120		; jump if not - try special cases
+	ld	a,(EVFLGS)
+	cp	RPNAME
+	jp	z,S147		; branch if rpair name
+	cp	RNAME
+	jp	nz,OERROR	; error if not a reg
+;
+;	LD	r,...
+;
+	call	NOLDW		; can't be LDW
+	ld	(SAVVAL),hl	; save reg value
+	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S130		; branch if () or <> second operand
+	cp	'<'
+	jp	z,S130
+	call	BACKUP
+	call	EVALREG		; get second operand
+	cp	RNAME
+	jp	z,S128		; branch if single reg
+	cp	RPNAME
+	jp	z,OERROR	; register pair is illegal here
+	ld	a,(IDLEN)
+	dec	a		; check for special cases
+	jr	nz,S116B
+	ld	a,(IDBUF)
+	cp	'I'
+	jp	z,S171		; LD A,I
+	cp	'R'
+	jp	z,S173		; LD A,R
+S116B:	ld	hl,(SAVVAL)
+	ld	a,h
+	or	a
+	jp	z,S116C
+	ld	a,(CPU)
+	dec	a
+	jp	z,OERROR	; IXH,IXL,IYH,IYL not supported by Z180
+	ld	a,h
+	call	EMITB
+S116C:	ld	a,l
+	rlca
+	rlca
+	rlca
+	add	a,6
+	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB		; immed operand
+;
+;	LD	I,A
+;	LD	R,A
+;
+S120:	call	NOLDW		; can't be LDW
+	ld	a,(IDLEN)
+	dec	a
+	jp	nz,OERROR
+	ld	(UFLAG),a
+	ld	a,(IDBUF)
+	cp	'I'
+	ld	c,47h		; LD I,A
+	jr	z,S121
+	cp	'R'
+	jp	nz,OERROR
+	ld	c,4Fh		; LD R,A
+S121:	push	bc
+	call	EVALREG
+	pop	bc
+	cp	RNAME
+	jp	nz,OERROR
+	ld	a,l
+	cp	7		; only A allowed
+	jp	nz,OERROR
+	jp	S171A
+;
+;	LD	r,r
+;
+S128	equ	$		; process rname
+	ld	bc,(SAVVAL)	; get 1st operand
+	ld	a,b
+	or	a
+	jp	z,S128A
+	ld	a,(CPU)
+	dec	a
+	jp	z,OERROR	; IXH,IXL,IYH,IYL not supported by Z180
+S128A:	ld	hl,(VAL)	; get 2nd operand
+	ld	a,h
+	or	a
+	jp	z,S128B
+	ld	a,(CPU)
+	dec	a
+	jp	z,OERROR	; IXH,IXL,IYH,IYL not supported by Z180
+S128B:	ld	a,c
+	and	6
+	xor	4		; 0 if H or L
+	ld	e,a
+	ld	a,l
+	and	6
+	xor	4
+	or	e		; 0 if both H or L
+	jp	nz,S128C
+	ld	a,b
+	cp	h
+	jp	nz,OERROR	; can't mix HL/IX/IY in the same instruction
+S128C:	ld	a,b
+	or	h
+	call	nz,EMITB	; emit prefix
+	ld	a,c
+	rlca
+	rlca
+	rlca
+	add	a,l
+	add	a,40h		; for r-r type inst
+	jp	EMITB		; reg-reg operand
+;
+;	LD	r,(...)
+;
+S130:	call	EVBRKT		; evaluate ()
+	ld	hl,LDTBL1
+	jp	SWITCH
+;
+LDTBL1:	dw	S134		; (addr)
+	dw	OERROR		; (r)
+	dw	S135		; (rp)
+	dw	S140		; (rp+d8)
+	dw	S136		; (rp+d16)  Z280
+	dw	S144		; (x+y)     Z280
+	dw	S150		; (PC+d16)  Z280
+	dw	S150		; <addr>    Z280
+;
+;	LD	A,(addr)
+;
+S134:	ld	a,(SAVVAL)
+	cp	07h		; only A allowed as first operand
+	jp	nz,OERROR
+	ld	a,3Ah
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	LD	r,(rp)
+;
+S135:	ld	a,(REGVAL)
+	cp	4
+	jr	z,S138		; branch if (HL)
+	cp	6
+	jr	z,S142		; branch if (SP) (Z280)
+	ld	b,a
+	ld	a,(SAVVAL)
+	cp	7		; else 2nd operand is (BC) or (DE)
+	jp	nz,OERROR	;  and only A is legal 1st operand
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	add	a,0Ah
+	jp	EMITB
+;
+;	LD	r,(HL)
+;
+S138:	ld	hl,(SAVVAL)
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; IXH,IXL,IYH,IYL not allowed
+	ld	a,l
+	rlca
+	rlca
+	rlca
+	add	a,46h
+	jp	EMITB
+;
+;	LD	r,(IX/IY+d8)
+;
+S140:	ld	a,(REGVAL+1)
+	call	EMITB		; emit prefix
+	ld	hl,(SAVVAL)
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; IXH,IXL,IYH,IYL not allowed
+	ld	a,l
+	rlca
+	rlca
+	rlca
+	add	a,46h
+	call	EMITB
+	ld	a,(VAL)		; emit displ (type/mode already checked)
+	jp	EMITB
+;
+;	LD	r,(rp+d16)	; Z280
+;
+S136:	ld	hl,(REGVAL)
+	ld	a,l
+	cp	6
+	jr	z,S142		; jump if SP (Z280)
+	ld	a,(SAVVAL)
+	cp	7
+	jp	nz,OERROR	; only A legal 1st operand
+	ld	a,h
+	ld	c,79h		; IX
+	cp	0DDh
+	jr	z,S143
+	inc	c		; IY
+	cp	0FDh
+	jr	z,S143
+	inc	c		; HL
+S143:	ld	a,0FDh
+	call	EMITB
+	ld	a,c
+	call	EMITB
+	jp	EMITV
+;
+;	LD	A,(SP+dd)	; Z280
+;
+S142:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,(SAVVAL)
+	cp	7
+	jp	nz,OERROR	; only A legal 1st operand
+	ld	a,0DDh
+	call	EMITB
+	ld	a,78h
+	call	EMITB
+	jp	EMITV
+;
+;	LD	A,(x+y)		; Z280
+;
+S144:	ld	a,(SAVVAL)
+	cp	7
+	jp	nz,OERROR	; only A legal 1st operand
+	ld	a,0DDh
+	call	EMITB
+	ld	a,b
+	add	a,78h
+	jp	EMITB
+;
+;	LD	A,<addr>	; Z280
+;	LD	A,(PC+addr)	; Z280
+;
+S150:	call	NOLDW		; LDW not allowed
+	ld	a,(SAVVAL)
+	cp	07h		; only A allowed as first operand
+	jp	nz,OERROR
+	ld	a,0FDh
+	call	EMITB
+	ld	a,78h
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITV		; emit address if (PC+addr)
+	ld	de,0
+	jp	EMITVR		; else emit relative address
+;
+;	LD	rp,...
+;
+S147:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S159		; branch if () or <> second operand
+	cp	'<'
+	jp	z,S159
+	ld	hl,(VAL)
+	ld	(SAVVAL),hl	; save register value
+	call	BACKUP
+	call	EVALREG
+	cp	RPNAME
+	jr	z,S170		; branch if second operand is rpair
+	cp	RNAME
+	jp	z,OERROR	; single register is illegal
+	ld	a,(SAVVAL+1)
+	or	a
+	call	nz,EMITB	; emit prefix if first operand is index reg
+	ld	a,(SAVVAL)
+	rlca
+	rlca
+	rlca
+	inc	a
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	LD	SP,HL/IX/IY
+;
+S170:	ld	a,(SAVVAL)
+	cp	6		; first operand can only be SP
+	jp	nz,OERROR
+	ld	a,l
+	cp	4		; second can only be HL/IX/IY
+	jp	nz,OERROR
+	ld	a,h
+	or	a
+	call	nz,EMITB
+	ld	a,0F9h
+	jp	EMITB
+;
+S173:	ld	c,5Fh		; LD A,R
+	jr	S171A
+;
+S171:	ld	c,57h		; LD A,I
+S171A:	xor	a
+	ld	(UFLAG),a
+	ld	a,0EDh
+	call	EMITB
+	ld	a,c
+	jp	EMITB
+;
+;	LD	rp,(...)
+;
+S159:	ld	hl,(VAL)
+	ld	(SAVVAL),hl	; save 1st operand (rpair name)
+	call	EVBRKT		; evaluate ()
+	ld	hl,LDTBL2
+	jp	SWITCH
+;
+LDTBL2:	dw	S160		; (addr)
+	dw	OERROR		; (r)
+	dw	S161		; (rp)      Z280
+	dw	S162		; (rp+d8)   Z280
+	dw	S163		; (rp+d16)  Z280
+	dw	S164 		; (x+y)     Z280
+	dw	S166		; (PC+d16)  Z280
+	dw	S166		; <addr>    Z280
+;
+;	LD	rp,(addr)
+;
+S160:	ld	hl,(SAVVAL)	; test 1st operand
+	ld	a,l
+	cp	4		; HL,IX,IY
+	jr	nz,S165		; branch if BC,DE,SP
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if IX or IY
+	ld	a,2Ah
+	call	EMITB
+	jp	EMITV		; emit address
+;
+S165:	ld	a,0EDh
+	call	EMITB
+	ld	a,(SAVVAL)
+	rlca
+	rlca
+	rlca
+	add	a,4Bh
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	LD	rp,(rp)		; Z280
+;
+S161:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,(REGVAL)
+	cp	6
+	ld	c,04h
+	jr	z,S163A		; branch if (SP)
+	cp	4
+	jp	nz,OERROR	; else must be (HL)
+;
+;	LD	rp,(HL)		; Z280
+;
+	ld	hl,(SAVVAL)	; get first operand
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; can't be index register
+S161A:	ld	a,0EDh
+	call	EMITB
+	ld	a,l
+	rlca
+	rlca
+	rlca
+	add	a,06h
+	jp	EMITB
+;
+;	LD	rp,(IX/IY+d8)	; Z280
+;
+S162:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	hl,(SAVVAL)	; get first operand
+	ld	a,h
+	or	a
+	jr	nz,S163		; argument is d16 for index register
+	ld	a,(REGVAL+1)
+	call	EMITB		; emit prefix
+	call	S161A		; emit instruction bytes
+	ld	a,(VAL)
+	jp	EMITB		; emit displacement
+;
+;	LD	rp,(rp+d16)	; Z280
+;
+S163:	ld	hl,(REGVAL)
+	ld	a,l
+	cp	6
+	ld	c,04h
+	jr	z,S163A		; branch if (SP)
+	ld	a,h
+	ld	c,2Ch		; IX
+	cp	0DDh
+	jr	z,S163A
+	ld	c,34h		; IY
+	cp	0FDh
+	jr	z,S163A
+	ld	c,3Ch		; HL
+S163A:	ld	de,(SAVVAL)
+	ld	a,e
+	cp	4
+	jp	nz,OERROR	; 1st operand can be only HL/IX/IY
+	ld	a,d
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	a,0EDh
+	call	EMITB
+	ld	a,c
+	call	EMITB
+	jp	EMITV
+;
+;	LD	rp,(x+y)	; Z280
+;
+S164:	ld	de,(SAVVAL)
+	ld	a,e
+	cp	4
+	jp	nz,OERROR	; 1st operand can be only HL/IX/IY
+	ld	a,d
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	a,0EDh
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	add	a,04h
+	jp	EMITB
+;
+;	LD	rp,<addr>	; Z280
+;	LD	rp,(PC+addr)	; Z280
+;
+S166:	ld	hl,(SAVVAL)	; test 1st operand
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL/IX/IY allowed
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if IX or IY
+	ld	a,0EDh
+	call	EMITB
+	ld	a,24h
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITV		; emit address if (PC+addr)
+	ld	de,0
+	jp	EMITVR		; else emit relative address
+;
+;	LD	(...)
+;
+S186:	call	EVBRKT		; evaluate ()
+	call	SAVVARS		; SAVVAL,SAVMOD,SAVCHN <- VAL,EVMODE,EXTCHN
+	ld	hl,LDTBL3
+	ld	a,c
+	jp	SWITCH
+;
+LDTBL3:	dw	S187		; (addr)
+	dw	OERROR		; (r)
+	dw	S200		; (rp)
+	dw	S210		; (rp+d8)
+	dw	S202		; (rp+d16)  Z280
+	dw	S197		; (x+y)     Z280
+	dw	S219		; (PC+d16)  Z280
+	dw	S219		; <addr>    Z280
+;
+;	LD	(addr),...
+;
+S187:	call	REQCHR
+	db	','
+	call	EVALREG
+	cp	RPNAME
+	jr	z,S190		; branch if second operand rpair
+	cp	RNAME
+	jr	nz,S187A	; branch if not single reg
+;
+;	LD	(addr),A
+;
+	call	NOLDW		; can't be LDW
+	ld	a,l
+	cp	07h		; only A allowed
+	jp	nz,OERROR
+	ld	a,32h
+	call	EMITB
+	jp	EMITSV		; emit address
+;
+;	LD	(addr),val	; Z280
+;
+S187A:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,(OPCODE)
+	or	a
+	jr	nz,S188		; LDW specified, use long form
+	ld	a,(EVMODE)
+	call	CHK8U
+	jr	nz,S188
+	ld	a,0DDh
+	call	EMITB
+	ld	a,03Eh
+	call	EMITB
+	call	EMITSV		; emit address
+	ld	a,(VAL)
+	jp	EMITB		; emit value
+;
+S188:	ld	a,0DDh
+	call	EMITB
+	ld	a,11h
+	call	EMITB
+	call	EMITSV		; emit address
+	jp	EMITV		; emit value
+;
+;	LD	(addr),rp
+;
+S190:	ld	a,l
+	cp	4		; test for HL
+	jr	nz,S196		; branch if BC,DE,SP
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if IX or IY
+	ld	a,22h
+	call	EMITB
+	jp	EMITSV		; emit address
+;
+S196:	ld	a,0EDh
+	call	EMITB
+	ld	a,(VAL)
+	rlca
+	rlca
+	rlca
+	add	a,43h
+	call	EMITB
+	jp	EMITSV		; emit address
+;
+;	LD	(x+y),...	; Z280
+;
+S197:	call	REQCHR
+	db	','
+	push	bc
+	call	EVALREG
+	pop	bc
+	cp	RPNAME
+	jr	z,S198		; branch if second operand rpair
+	cp	RNAME
+	jr	nz,S199		; branch if not single reg
+;
+;	LD	(x+y),A		; Z280
+;
+	call	NOLDW		; can't be LDW
+	ld	a,l
+	cp	07h		; only A allowed
+	jp	nz,OERROR
+	ld	a,0EDh
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	add	a,03h
+	jp	EMITB
+;
+;	LD	(x+y),rp	; Z280
+;
+S198:	ld	a,l
+	cp	4
+	jp	nz,OERROR	; must be HL/IX/IY
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	a,0EDh
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	add	a,05h
+	jp	EMITB
+;
+;	LD	(x+y),n		; Z280
+;
+S199:	call	NOLDW		; can't be LDW
+	ld	a,0DDh
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	add	a,06h
+	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	CHK8U
+	call	nz,VALERR	; must be 8-bit value
+	ld	a,l
+	jp	EMITB
+;
+;	LD	(rp),...
+;
+S200:	call	SAVVARS		; SAVVAL,SAVMOD,SAVCHN <- VAL,EVMODE,EXTCHN
+	call	REQCHR
+	db	','
+	call	EVALREG		; evaluate second operand
+	ld	a,(REGVAL)
+	cp	4
+	jp	z,S204		; branch if first operand is (HL)
+	cp	6
+	jp	z,S201		; branch if (SP) (Z280)
+;
+;	LD	(rp),A
+;
+	call	NOLDW		; LDW not allowed
+	ld	a,(EVFLGS)
+	cp	RNAME
+	jp	nz,OERROR
+	ld	a,(VAL)
+	cp	7		; only reg A allowed as 2nd operand
+	jp	nz,OERROR
+	ld	a,(REGVAL)
+	cp	2+1
+	jp	nc,OERROR	; only BC and DE allowed as 1st operand
+	rlca
+	rlca
+	rlca
+	add	a,2
+	jp	EMITB
+;
+;	LD	(rp+d16),...	; Z280
+;
+S202:	call	SAVVARS		; SAVVAL,SAVMOD,SAVCHN <- VAL,EVMODE,EXTCHN
+	call	REQCHR
+	db	','
+	call	EVALREG		; evaluate second operand
+	ld	hl,(REGVAL)
+	ld	a,l
+	cp	6
+	jp	z,S201		; branch if 1st operand (SP) (Z280)
+	ld	a,(EVFLGS)	; test 2nd operand
+	cp	RNAME
+	jr	z,S203A		; branch if single reg
+	cp	RPNAME
+	jr	z,S203B		; branch if rpair
+;
+;	LD	(rp+d16),n8
+;
+	call	NOLDW		; 8-bit immediate value, LDW not allowed
+	ld	a,(REGVAL+1)
+	cp	0DDh
+	ld	c,0Eh		; IX
+	jr	z,S203C
+	cp	0FDh
+	ld	c,16h		; IY
+	jr	z,S203C
+	ld	c,1Eh		; HL
+S203C:	ld	a,0FDh
+S213C:	call	EMITB
+	ld	a,c
+	call	EMITB
+	call	EMITSV		; emit displacement
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB
+;
+;	LD	(rp+d16),A	; Z280
+;
+S203A:	call	NOLDW		; LDW not allowed
+	ld	a,(VAL)
+	cp	7
+	jp	nz,OERROR	; only A is legal
+	ld	a,(REGVAL+1)
+	cp	0DDh
+	ld	c,2Bh		; IX
+	jr	z,S203D
+	cp	0FDh
+	ld	c,33h		; IY
+	jr	z,S203D
+	ld	c,3Bh		; HL
+S203D:	ld	a,0EDh
+	call	EMITB
+	ld	a,c
+	call	EMITB
+	jp	EMITSV
+;
+;	LD	(rp+d16),rp	; Z280
+;
+S203B:	ld	hl,(VAL)
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL/IX/IY allowed
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+S203F:	ld	a,(REGVAL+1)
+	cp	0DDh
+	ld	c,2Dh		; IX
+	jr	z,S203E
+	cp	0FDh
+	ld	c,35h		; IY
+	jr	z,S203E
+	ld	c,3Dh		; HL
+S203E:	ld	a,0EDh
+	call	EMITB
+	ld	a,c
+	call	EMITB
+	jp	EMITSV
+;
+;	LD	(SP+d16),...	; Z280 only
+;
+S201:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,(EVFLGS)	; test 2nd operand
+	cp	RNAME
+	jr	z,S201A		; branch if single reg
+	cp	RPNAME
+	jr	z,S201B		; branch if rpair
+;
+;	LD	(SP+d16),n8
+;
+	call	NOLDW		; 8-bit immediate value, LDW not allowed
+	ld	c,06h
+	ld	a,0DDh
+	jp	S213C
+;
+;	LD	(SP+d16),A	; Z280
+;
+S201A:	call	NOLDW		; LDW not allowed
+	ld	a,(VAL)
+	cp	7
+	jp	nz,OERROR	; only A is legal
+	ld	c,03h
+	jp	S203E
+;
+;	LD	(SP+d16),rp	; Z280
+;
+S201B:	ld	hl,(VAL)
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL/IX/IY allowed
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	c,05h
+	ld	a,0EDh
+	jp	S203E
+;
+;	LD	(HL),...
+;
+S204:	ld	a,(EVFLGS)
+	cp	RNAME
+	jr	z,S209		; branch if single register
+	cp	RPNAME
+	jr	z,S208		; branch if rpair (Z280)
+;
+;	LD	(HL),n
+;
+	ld	a,(OPCODE)
+	or	a
+	jr	nz,S206		; LDW specified, use long form
+	ld	a,(CPU)
+	cp	2
+	jr	nz,S205		; branch if Z80/Z180 mode
+	ld	a,(EVMODE)
+	ld	hl,(VAL)
+	call	CHK8U		; test for short/long form
+	jr	z,S205		; branch if short
+;
+;	LD	(HL),n16	; Z280
+;
+S206:	ld	a,0DDh
+	call	EMITB
+	ld	a,01h
+	call	EMITB
+	jp	EMITV
+;
+;	LD	(HL),n8
+;
+S205:	ld	a,36h
+	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB
+;
+;	LD	(HL),rp		; Z280
+;
+S208:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; index register not allowed
+S208A:	ld	a,0EDh
+	call	EMITB
+	ld	a,l
+	rlca
+	rlca
+	rlca
+	add	a,0Eh
+	jp	EMITB
+;
+;	LD	(HL),r
+;
+S209:	call	NOLDW		; LDW not allowed
+	ld	hl,(VAL)
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; IXH,IXL,IYH,IYL not allowed
+	ld	a,l
+	add	a,70h
+	jp	EMITB
+;
+;	LD	(IX/IY+d8),...
+;
+S210:	ld	hl,(VAL)
+	ld	(SAVVAL),hl	; save index
+	call	REQCHR
+	db	','
+	call	EVALREG		; evaluate second operand
+	cp	RPNAME
+	jr	z,S215		; branch if rpair (Z280)
+	cp	RNAME
+	jr	z,S218		; branch if single register
+	call	NOLDW		; LDW not allowed (8-bit operand)
+	ld	a,(REGVAL+1)
+	call	EMITB		; emit prefix
+	ld	a,36h
+	call	EMITB
+	ld	a,(SAVVAL)
+	call	EMITB		; output index (type/mode already checked)
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB		; output byte value
+;
+;	LD	(IX/IY+d8),rp	; Z280
+;
+S215:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,h
+	or	a
+	jp	nz,S203B	; use d16 form if 2nd operand is index register
+	ld	a,(REGVAL+1)
+	call	EMITB		; emit prefix
+	call	S208A
+	jr	S218A
+;
+;	LD	(IX/IY+d8),r
+;
+S218:	call	NOLDW		; LDW not allowed
+	ld	a,(REGVAL+1)
+	call	EMITB		; emit prefix
+	ld	hl,(VAL)
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; IXH,IXL,IYH,IYL not allowed
+	ld	a,l
+	add	a,70h
+	call	EMITB
+S218A:	ld	a,(SAVVAL)
+	jp	EMITB		; output index (type/mode already checked)
+;
+;	LD	<addr>,...	; Z280
+;	LD	(PC+addr),...	; Z280
+;
+S219:	push	bc		; remember <addr> or (PC+addr) code
+	call	REQCHR
+	db	','
+	call	EVALREG
+	pop	bc
+	cp	RPNAME
+	jr	z,S219A		; branch if second operand rpair
+	cp	RNAME
+	jr	nz,S219B	; branch if not single reg
+;
+;	LD	<addr>,A	; Z280
+;	LD	(PC+addr),A	; Z280
+;
+	call	NOLDW		; can't be LDW
+	ld	a,l
+	cp	07h		; only A allowed
+	jp	nz,OERROR
+	ld	a,0EDh
+	call	EMITB
+	ld	a,23h
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITSV	; emit address if (PC+addr)
+	ld	de,0
+	jp	EMITSR		; else emit relative address
+;
+;	LD	<addr>,val	; Z280
+;	LD	(PC+addr),val	; Z280
+;
+S219B:	ld	a,(OPCODE)
+	or	a
+	jr	nz,S219E	; LDW specified, use long form
+	ld	a,(EVMODE)
+	call	CHK8U		; else check operand size
+	jr	nz,S219E	; branch if long
+	ld	a,0FDh		; else use short form
+	call	EMITB
+	ld	a,06h
+	call	EMITB
+	ld	a,c
+	cp	6
+	jr	z,S219C		; branch if (PC+addr)
+	ld	de,-1
+	call	EMITSR		; emit relative address if <addr>
+	jr	S219D
+S219C:	call	EMITSV		; else emit unmodified address
+S219D:	ld	a,(VAL)
+	jp	EMITB
+;
+S219E:	ld	a,0DDh
+	call	EMITB
+	ld	a,31h
+	call	EMITB
+	ld	a,c
+	cp	6
+	jr	z,S219F		; branch if (PC+addr)
+	ld	de,-2
+	call	EMITSR		; emit relative address if <addr>
+	jp	EMITV
+S219F:	call	EMITSV		; else emit unmodified address
+	jp	EMITV
+;
+;	LD	<addr>,rp	; Z280
+;	LD	(PC+addr),rp	; Z280
+;
+S219A:	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL/IX/IY allowed
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	a,0EDh
+	call	EMITB
+	ld	a,25h
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITSV	; emit address if (PC+addr)
+	ld	de,0
+	jp	EMITSR		; else emit relative address
+;
+;	Set syntax error flag if the instruction is LDW
+;
+NOLDW:	ld	a,(OPCODE)
+	or	a
+	ret	z
+	jp	OERROR
+
+	SUBTTL	Instruction Class 9 - PUSH & POP
+;
+;	Class 9 - PUSH, POP
+;
+CL9:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S225		; branch if () form (Z280)
+	cp	'<'
+	jp	z,S227		; branch if <> form (Z280)
+	call	BACKUP
+	call	EVALSRG		; include special regs 
+	cp	RSNAME
+	jr	nz,S221
+	ld	a,l
+	cp	6
+	jp	nz,OERROR	; must be AF
+	jr	S222
+S221:	cp	RPNAME
+	jp	nz,S223		; branch if not rpair (Z280)
+	ld	a,l
+	cp	6
+	jp	z,OERROR	; can't be SP
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+S222:	ld	a,l
+	rlca
+	rlca
+	rlca
+	ld	b,a
+	ld	a,(OPCODE)
+	add	a,b
+	jp	EMITB
+;
+S223:	cp	RNAME
+	jp	z,OERROR	; can't be single reg
+	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	a,(OPCODE)
+	cp	0C1h
+	jp	z,OERROR	; PUSH only
+	ld	a,0FDh
+	call	EMITB
+	ld	a,0F5h
+	call	EMITB
+	jp	EMITV
+;
+;	PUSH	(rp)		; Z280
+;
+S225:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	call	EVALSRG
+	cp	RSNAME
+	jr	z,S228		; branch if special reg
+	cp	RNAME
+	jp	z,OERROR	; can't be single reg
+	cp	RPNAME
+	jr	nz,S226
+	ld	de,4
+	call	CMPHD		; only (HL) allowed
+	jp	nz,OERROR
+	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE)
+	call	EMITB
+	call	REQCHR
+	db	')'
+	ret
+;
+;	PUSH	(addr)		; Z280
+;
+S226:	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,10h
+	call	EMITB
+	call	EMITV
+	call	REQCHR
+	db	')'
+	ret
+;
+;	PUSH	<addr>		; Z280
+;
+S227:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR
+	call	EVALNEW
+	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,30h
+	call	EMITB
+	ld	de,0
+	call	EMITVR		; emit relative address
+	call	REQCHR
+	db	'>'
+	ret
+;
+;	PUSH	(PC+addr)	; Z280
+;
+S228:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR
+	ld	a,l
+	cp	3
+	jp	nz,OERROR	; only PC allowed
+	call	EVALNEW
+	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,30h
+	call	EMITB
+	call	EMITV		; emit address
+	call	REQCHR
+	db	')'
+	ret
+
+	SUBTTL	Instruction Class 10 - Exchange Instructions
+;
+;	Class 10 - Exchange (EX)
+;
+CL10:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S235		; branch if () form
+	call	BACKUP
+	call	EVALSRG		; get first operand, include special regs
+	cp	RPNAME
+	jr	nz,S230		; branch if not rpair
+	ld	a,l
+	cp	2		; must be DE
+	jp	nz,OERROR
+	call	REQCHR
+	db	','
+	call	EVALREG		; get second operand
+	cp	RPNAME
+	jp	nz,OERROR	; must be rpair
+	ld	a,h
+	or	a
+	ld	c,a
+	jr	z,S231		; index register allowed only for Z280
+	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR
+	ld	a,c
+	call	EMITB
+S231:	ld	a,(VAL)
+	cp	4		; must be HL
+	jp	nz,OERROR
+	ld	a,0EBh
+	jp	EMITB
+;
+S230:	cp	RNAME
+	jr	z,S236		; branch if single register (Z280)
+	call	S233		; must be AF
+	jp	nz,OERROR
+	call	REQCHR
+	db	','
+	call	EVALSRG
+	call	S233		; second operand must be AF'
+	jp	nz,OERROR
+	ld	hl,(PTR1)
+	ld	a,(hl)
+	cp	"'"
+	jp	nz,OERROR
+	inc	hl
+	ld	(PTR1),hl
+	ld	a,8
+	jp	EMITB
+;
+S233:	cp	RSNAME
+	ret	nz
+	ld	a,l
+	cp	6		; if AF, return Z=1
+	ret
+;
+S235:	call	EVALREG
+	cp	RPNAME
+	jp	nz,OERROR	; must be rpair
+	ld	a,l
+	cp	6
+	jp	nz,OERROR	; only (SP) allowed
+	call	REQCHR
+	db	')'
+	call	REQCHR
+	db	','
+	call	EVALREG
+	cp	RPNAME
+	jp	nz,OERROR
+	ld	a,l
+	cp	4		; only HL,IX,IY allowed
+	jp	nz,OERROR
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	a,0E3h
+	jp	EMITB
+;
+S236:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	call	REQCHR
+	db	','
+	ld	hl,(VAL)
+	ld	a,l
+	cp	7
+	jr	z,S237		; branch if A
+	cp	4
+	jp	nz,OERROR
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; else only H allowed
+	call	EVALREG
+	cp	RNAME
+	jp	nz,OERROR
+	ld	a,l
+	cp	5
+	jp	nz,OERROR
+	ld	a,h
+	or	a
+	jp	nz,OERROR	; second operand must be L
+	ld	a,0EDh
+	call	EMITB
+	ld	a,0EFh
+	jp	EMITB
+;
+;	EX	A,... 		; Z280
+;
+S237:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S238		; branch if () form
+	cp	'<'
+	jp	z,S238		; branch if <> form
+	call	BACKUP
+	call	EVALREG
+	cp	RNAME
+	jp	nz,OERROR	; error if not single register
+	ld	a,h
+	or	a
+	call	nz,EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(VAL)
+	rlca
+	rlca
+	rlca
+	add	a,07h
+	jp	EMITB
+;
+;	EX	A,(...)
+;
+S238:	call	EVBRKT		; evaluate ()
+	ld	hl,EXTBL
+	jp	SWITCH
+;
+EXTBL:	dw	S238M		; (addr)
+	dw	OERROR		; (r)
+	dw	S238A		; (rp)
+	dw	S238B		; (rp+d8)
+	dw	S238E		; (rp+d16)
+	dw	S238D		; (x+y)
+	dw	S239		; (PC+d16)
+	dw	S239		; <addr>
+;
+;	EX	A,(addr)	; Z280
+;
+S238M:	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,3Fh
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	EX	A,(rp)		; Z280
+;
+S238A:	ld	a,(REGVAL)
+	cp	6
+	jp	z,S238C		; branch if SP
+	cp	4
+	jp	nz,OERROR	; else must be HL/IX/IY
+;
+;	EX	A,(HL)		; Z280
+;
+	ld	a,0EDh		; else use short form
+	call	EMITB
+	ld	a,37h
+	jp	EMITB
+;
+;	EX	A,(IX/IY+d8)
+;
+S238B:	ld	a,(REGVAL+1)
+	call	EMITB		; emit prefix
+	ld	a,0EDh
+	call	EMITB
+	ld	a,37h
+	call	EMITB
+	ld	a,(VAL)
+	jp	EMITB		; output index (type/mode already checked)
+;
+;	EX	A,(rp+d16)
+;
+S238E:	ld	hl,(REGVAL)
+	ld	a,l
+	cp	6
+	jr	z,S238C		; branch if (SP)
+	ld	a,h
+	cp	0DDh
+	ld	c,08h		; IX
+	jr	z,S238H
+	cp	0FDh
+	ld	c,10h		; IY
+	jr	z,S238H
+	ld	c,18h		; HL
+S238H:	ld	a,0FDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,c
+	add	a,07h
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	EX	A,(SP+d16)	; Z280
+;
+S238C:	ld	b,00h
+	call	S238D
+	jp	EMITV		; emit address
+;
+;	EX	A,(x+y)		; Z280
+;
+S238D:	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	add	a,07h
+	jp	EMITB
+;
+;	EX	A,<addr> 	; Z280
+;	EX	A,(PC+addr)	; Z280
+;
+S239:	ld	a,0FDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,07h
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITV		; emit address if (PC+addr)
+	ld	de,0
+	jp	EMITVR		; else emit relative address
+
+	SUBTTL	Instruction Class 11 - Returns
+;
+;	Class 11 - RETURNS
+;
+CL11:	call	GNC
+	or	a
+	jr	z,S248		; branch if no operand
+	call	BACKUP
+	call	EVALCND
+	cp	COND
+	jp	nz,OERROR
+	ld	a,(VAL)
+	rlca
+	rlca
+	rlca
+	and	38h
+	add	a,0C0h
+	jp	EMITB
+;
+S248:	ld	a,(OPCODE)
+	jp	EMITB
+
+	SUBTTL	Instruction Class 12 - Bit Manipulation
+;
+;	Class 12 - BIT, SET, RES
+;
+CL12:	call	EVALNEW		; get bit no
+	ld	de,7		; max bit number is 7
+	call	CMPHD
+	jp	c,OERROR
+	ld	a,(EVMODE)
+	or	a
+	jp	nz,RELERR
+	ld	(SAVVAL),hl	; save bit number
+	call	REQCHR
+	db	','		; ensure legal separator
+	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S257		; jump if () form
+	call	BACKUP
+	call	EVALREG		; get register
+	cp	RNAME		; must be single register
+	jp	nz,OERROR
+	ld	a,0CBh
+	call	EMITB
+	ld	a,(SAVVAL)
+	rlca
+	rlca
+	rlca
+	ld	b,a
+	ld	a,(OPCODE)
+	add	a,b
+	ld	b,a
+	ld	a,(VAL)
+	add	a,b
+	jp	EMITB
+;
+S257:	call	EVALREG
+	cp	RPNAME
+	jp	nz,OERROR	; must be register pair
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL,IX,DE allowed
+	ld	a,h
+	or	a
+	jr	nz,S260		; branch if index register
+	ld	a,0CBh
+	call	EMITB
+	ld	a,(SAVVAL)
+	rlca
+	rlca
+	rlca
+	add	a,6
+	ld	b,a
+	ld	a,(OPCODE)
+	add	a,b
+	call	EMITB
+	call	REQCHR
+	db	')'		; bypass )
+	ret
+
+S260:	call	EMITB
+	call	EVALNEW		; get index
+	call	REQCHR
+	db	')'		; bypass )
+	ld	a,0CBh
+	call	EMITB
+	ld	a,(EVMODE)
+	call	REQ8U		; ensure 8-bit index (REQ8S?)
+	ld	a,l
+	call	EMITB
+	ld	a,(SAVVAL)
+	rlca
+	rlca
+	rlca
+	add	a,6
+	ld	b,a
+	ld	a,(OPCODE)
+	add	a,b
+	jp	EMITB
+;
+	SUBTTL	Instruction Class 13 - INC & DEC
+;
+;	Class 13 - INC, DEC
+;
+CL13:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S290		; branch if () form
+	cp	'<'
+	jp	z,S290		; branch if <> form
+	call	BACKUP
+	call	EVALREG
+	cp	RNAME
+	jr	z,S280		; branch if single register
+	cp	RPNAME
+	jp	nz,OERROR
+S270:	ld	a,h
+	or	a
+	jr	nz,S276		; branch if index register
+	ld	a,l
+	rlca
+	rlca
+	rlca
+	ld	b,a
+	ld	a,(OPCODE+1)
+	add	a,b
+	jp	EMITB
+;
+;	INC	IX/IY
+;
+S276:	call	EMITB		; emit prefix
+	ld	a,(OPCODE+1)
+	add	a,20h
+	jp	EMITB
+;
+;	INC	r
+;
+S280:	ld	hl,(VAL)
+	ld	a,h
+	or	a
+	jr	z,S280B
+	ld	a,(CPU)
+	dec	a
+	jp	z,OERROR	; IXH,IXL,IYH,IYL not supported by Z180
+	ld	a,h
+	call	EMITB		; emit prefix
+S280B:	ld	a,l
+	rlca
+	rlca
+	rlca
+	ld	b,a
+	ld	a,(OPCODE)
+	add	a,b
+	jp	EMITB
+;
+;	INC	(...)
+;
+S290:	call	EVBRKT		; evaluate ()
+	ld	hl,INCTBL
+	jp	SWITCH
+;
+INCTBL:	dw	S295		; (addr)
+	dw	OERROR		; (r)
+	dw	S291		; (rp)
+	dw	S294		; (rp+d8)
+	dw	S297		; (rp+d16)
+	dw	S292		; (x+y)
+	dw	S271		; (PC+d16)
+	dw	S271		; <addr>
+;
+;	INC	(addr)		; Z280
+;
+S295:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	c,38h
+	jp	S296A
+;
+;	INC	(rp)
+;
+S291:	ld	a,(REGVAL)
+	cp	6
+	jr	z,S296		; branch if (SP) (Z280)
+	cp	4
+	jp	nz,OERROR	; error if not (HL)
+;
+;	INC	(HL)
+;
+	ld	a,(OPCODE)
+	add	a,30h
+	jp	EMITB
+;
+;	INC	(IX/IY+d8)
+;
+S294:	ld	a,(REGVAL+1)
+	call	EMITB		; emit index register prefix
+	ld	a,(OPCODE)
+	add	a,30h
+	call	EMITB
+	ld	a,(VAL)
+	jp	EMITB
+;
+;	INC	(rp+d16)
+;
+S297:	ld	hl,(REGVAL)
+	ld	a,l
+	cp	6
+	jr	z,S296		; branch if (SP)
+	ld	a,0FDh
+	call	EMITB
+	ld	a,(REGVAL+1)
+	ld	c,01h		; IX
+	cp	0DDh
+	jr	z,S293
+	inc	c		; IY
+	cp	0FDh
+	jr	z,S293
+	inc	c		; HL
+S293:	ld	a,c
+	rlca
+	rlca
+	rlca
+	ld	c,a
+	ld	a,(OPCODE)
+	add	a,c
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	INC	(SP+nnnn)	; Z280
+;
+S296:	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	c,00h
+S296A:	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,c
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	INC	(x+y)		; Z280
+;
+S292:	ld	a,0DDh
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	ld	c,a
+	ld	a,(OPCODE)
+	add	a,c
+	jp	EMITB
+;
+;	INC	<addr>		; Z280
+;	INC	(PC+addr)	; Z280
+;
+S271:	ld	a,0FDh
+	call	EMITB
+	ld	a,(OPCODE)
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITV		; emit address if (PC+addr)
+	ld	de,0
+	jp	EMITVR		; else emit relative address
+
+	SUBTTL	Instruction Class 14 - MLT, TST
+;
+;	Class 14 - Extra Z180 instructions: MLT, TST
+;
+CL14:	ld	a,(OPCODE)
+	or	a
+	jr	nz,S452		; branch if TST
+	call	EVALREG
+	cp	RPNAME		; ensure rpair
+	jp	nz,OERROR
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(VAL)
+	rlca
+	rlca
+	rlca
+	and	30h
+	add	a,4Ch
+	jp	EMITB
+;
+;	TST
+;
+S452:	ld	a,0EDh
+	call	EMITB
+	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S454		; branch if '(' form
+	call	BACKUP
+	call	EVALREG
+	cp	RNAME
+	jr	z,S453		; branch if single register
+	cp	RPNAME		; register pair is illegal
+	jp	z,OERROR
+;
+;	TST	nn
+;
+	ld	a,64h
+	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB
+;
+;	TST	r
+;
+S453:	ld	a,(VAL)
+	rlca
+	rlca
+	rlca
+	add	a,04h
+	jp	EMITB
+;
+;	TST	(HL)
+;
+S454:	call	EVALREG
+	cp	RPNAME
+	jp	nz,OERROR	; must be rpair
+	ld	de,4
+	call	CMPHD		; only HL allowed
+	jp	nz,OERROR
+	call	REQCHR
+	db	')'
+	ld	a,34h
+	jp	EMITB
+
+	SUBTTL	Instruction Class 15 - ADDW, CPW, SUBW, MULTW
+;
+;	Class 15 - ADDW, CPW, SUBW, MULTW, MULTUW (Z280)
+;
+CL15:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S461		; branch if () form
+	cp	'<'
+	jp	z,S464		; branch if <> form
+	call	BACKUP
+	call	EVALREG
+	cp	RPNAME
+	jp	nz,S460A	; branch if not rpair
+	ld	c,a
+	ld	de,4
+	call	CMPHD
+	ld	a,c
+	jp	nz,S460A	; branch if not HL
+	call	GNC
+	cp	','
+	jr	z,S460B		; branch if it was the optional HL
+	or	a
+	jr	z,S462		; else branch to process HL as 2nd operand
+	jp	OERROR
+S460B:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S461		; branch if () form
+	cp	'<'
+	jp	z,S464		; branch if <> form
+	call	BACKUP
+	call	EVALREG		; get second operand
+S460A:	cp	RNAME
+	jp	z,OERROR	; can't be single register
+	cp	RPNAME
+	jr	z,S462		; branch if rpair
+	ld	a,0FDh
+	ld	b,30h
+S460:	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,b
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	ADDW	HL,rpair
+;
+S462:	ld	a,h
+	or	a
+	call	nz,EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	ld	b,a
+	ld	a,(VAL)
+	rlca
+	rlca
+	rlca
+	add	a,b
+	jp	EMITB
+;
+;	ADDW	HL,(...)
+;
+S461:	call	EVALSRG
+	cp	RSNAME
+	jr	z,S466		; branch if special reg
+	cp	RNAME
+	jp	z,OERROR
+	cp	RPNAME
+	jr	nz,S463		; branch if not rpair
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL, IX and IY allowed
+	ld	a,h
+	or	a
+	jr	z,S465		; branch if HL
+	rrca
+	and	10h		; DD -> 00, FD -> 10
+	ld	b,a
+	push	bc
+	call	EVALNEW
+	call	REQCHR
+	db	')'
+	pop	bc
+	ld	a,0FDh
+	jr	S460
+;
+;	ADDW	HL,(HL)
+;
+S465:	call	REQCHR
+	db	')'
+	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	jp	EMITB
+;
+S463:	call	REQCHR
+	db	')'
+	ld	a,0DDh
+	ld	b,10h
+	jr	S460
+;
+;	ADDW	HL,<addr>
+;
+S464:	call	EVALNEW
+	call	REQCHR
+	db	'>'
+	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,30h
+	call	EMITB
+	ld	de,0
+	jp	EMITVR		; emit relative address
+;
+;	ADDW	HL,(PC+addr)
+;
+S466:	ld	a,l
+	cp	3
+	jp	nz,OERROR	; special reg can only be PC
+	call	EVALNEW		; get index
+	call	REQCHR
+	db	')'
+	ld	a,0DDh
+	ld	b,30h
+	jp	S460
+
+	SUBTTL	Instruction Class 16 - INCW, DECW
+;
+;	Class 16 - INCW, DECW (Z280)
+;
+CL16:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S471		; branch if () form
+	cp	'<'
+	jp	z,S475		; branch if <> form
+	call	BACKUP
+	call	EVALREG
+	cp	RPNAME
+	jp	nz,OERROR	; must be rpair
+	jp	S270		; handle like INC, DEC
+;
+S471:	call	EVALSRG
+	cp	RSNAME
+	jr	z,S476		; branch if special reg
+	cp	RNAME
+	jp	z,OERROR
+	cp	RPNAME
+	jr	nz,S472
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL,IX,IY allowed
+	ld	a,h
+	or	a
+	jr	z,S473		; branch if HL
+	ld	c,a
+	ld	a,0FDh
+	call	EMITB
+	ld	a,c
+	rrca
+	and	10h		; DD becomes 00h, FD becomes 10h
+	ld	c,a
+	ld	a,(OPCODE+1)
+	add	a,c
+	call	EMITB
+	call	EVALNEW
+	call	EMITV		; emit address
+	call	REQCHR
+	db	')'
+	ret
+;
+;	INCW	(addr)
+;
+S472:	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE+1)
+	add	a,10h
+	call	EMITB
+	call	EMITV		; emit address
+	call	REQCHR
+	db	')'
+	ret
+;
+;	INCW	(HL)
+;
+S473:	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE+1)
+	call	EMITB
+	call	REQCHR
+	db	')'
+	ret
+;
+;	INCW	<addr>
+;
+S475:	call	EVALNEW
+	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE+1)
+	add	a,30h
+	call	EMITB
+	ld	de,0
+	call	EMITVR		; emit relative address
+	call	REQCHR
+	db	'>'
+	ret
+;
+;	INCW	(PC+addr)
+;
+S476:	ld	a,l
+	cp	3
+	jp	nz,OERROR	; only PC allowed
+	call	EVALNEW		; get index
+	ld	a,0DDh
+	call	EMITB
+	ld	a,(OPCODE+1)
+	add	a,30h
+	call	EMITB
+	call	EMITV		; emit address
+	call	REQCHR
+	db	')'
+	ret
+
+	SUBTTL	Instruction Class 17 - DIV, DIVU
+;
+;	Class 17 - DIV, DIVU (Z280)
+;
+CL17:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S1003		; branch if () form
+	cp	'<'
+	jp	z,S1003		; branch if <> form
+	call	BACKUP
+	call	EVALREG
+	cp	RNAME
+	jr	z,S1002		; branch if single register
+	cp	RPNAME
+	jp	nz,S1001	; branch if not register
+	ld	de,4
+	call	CMPHD		; if rpair, only HL is legal
+	jp	nz,OERROR
+	call	GNC
+	cp	','
+	jp	nz,OERROR	; and must be the form HL,...
+	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S1003		; branch if () form
+	cp	'<'
+	jp	z,S1003		; branch if <> form
+	call	BACKUP
+	call	EVALREG
+	cp	RNAME
+	jr	z,S1002		; branch if single register
+	cp	RPNAME
+	jp	z,OERROR
+S1001:	ld	a,0FDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,38h
+	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U		; ensure 8-bit value
+	ld	a,l
+	jp	EMITB
+;
+S1002:	ld	a,(VAL+1)
+	or	a
+	call	nz,EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(VAL)
+	rlca
+	rlca
+	rlca
+	ld	c,a
+	ld	a,(OPCODE)
+	add	a,c
+	jp	EMITB
+;
+;	DIV	(...)
+;
+S1003:	call	EVBRKT		; evaluate ()
+	ld	hl,DVTBL
+	jp	SWITCH
+;
+DVTBL:	dw	S1012		; (addr)
+	dw	OERROR		; (r)
+	dw	S1004		; (rp)
+	dw	S1016		; (rp+d8)
+	dw	S1018		; (rp+d16)
+	dw	S1014		; (x+y)
+	dw	S1010		; (PC+d16)
+	dw	S1010		; <addr>
+;
+;	DIV	(addr)
+;
+S1012:	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,038h
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	DIV	(rp)
+;
+S1004:	ld	a,(REGVAL)
+	cp	6
+	jr	z,S1008		; branch if (SP)
+	cp	4
+	jp	nz,OERROR	; else must be (HL)
+;
+;	DIV	(HL)
+;
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,30h
+	jp	EMITB
+;
+;	DIV	(IX/IY+d8)
+;
+S1016:	ld	a,(REGVAL+1)
+	call	EMITB		; emit prefix
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,30h
+	call	EMITB
+	ld	a,(VAL)
+	jp	EMITB
+;
+;	DIV	(rp+d16)
+;
+S1018:	ld	hl,(REGVAL)
+	ld	a,l
+	cp	6
+	jr	z,S1008		; branch if (SP)
+	ld	e,0FDh
+	ld	a,h
+	cp	0DDh
+	ld	c,08h		; IX
+	jr	z,S1005
+	cp	0FDh
+	ld	c,10h		; IY
+	jr	z,S1005
+	ld	c,18h		; HL
+S1005:	ld	a,e
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,c
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	DIV	(SP+d16)
+;
+S1008:	ld	c,00h
+	ld	e,0DDh
+	jr	S1005
+;
+;	DIV	(x+y)
+;
+S1014:	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	ld	c,a
+	ld	a,(OPCODE)
+	add	a,c
+	jp	EMITB
+;
+;	DIV	<addr>
+;	DIV	(PC+addr)
+;
+S1010:	ld	a,0FDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITV		; emit address if (PC+addr)
+	ld	de,0
+	jp	EMITVR		; else emit relative address
+
+	SUBTTL	Instruction Class 18 - DIVW, DIVUW
+;
+;	Class 18 - DIVW, DIVUW (Z280)
+;
+CL18:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S1140		; branch if () form
+	cp	'<'
+	jp	z,S1150		; branch if <> form
+	call	BACKUP
+	call	EVALSRG		; include special registers
+	cp	RSNAME
+	jr	nz,S1101	; jump if not special reg
+	ld	a,l
+	dec	a
+	jp	nz,OERROR	; else must be DEHL
+	call	REQCHR
+	db	','
+	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S1140		; branch if () form
+	cp	'<'
+	jp	z,S1150		; branch if <> form
+	call	BACKUP
+	call	EVALREG
+S1101:	cp	RNAME
+	jp	z,OERROR	; can't be single reg
+	cp	RPNAME
+	jr	z,S1102		; branch if rpair
+;
+;	DIVW	nnn
+;
+	ld	a,0FDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,30h
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	DIVW	rpair
+;
+S1102:	ld	hl,(VAL)
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix for index register
+	ld	a,0EDh
+	call	EMITB
+	ld	a,l
+	rlca
+	rlca
+	rlca
+	ld	l,a
+	ld	a,(OPCODE)
+	add	a,l
+	jp	EMITB
+;
+;	DIVW	(...)
+;
+S1140:	call	EVALSRG
+	cp	RSNAME
+	jr	z,S1151		; branch if special reg
+	cp	RNAME
+	jp	z,OERROR	; can't be single reg
+	cp	RPNAME
+	jr	z,S1142		; branch if rpair
+	ld	a,0DDh
+	ld	c,10h
+S1141:	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,c
+	call	EMITB
+	call	EMITV		; emit address
+	call	REQCHR
+	db	')'
+	ret
+;
+;	DIVW	(rpair)
+;
+S1142:	ld	hl,(VAL)
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; must be HL/IX/IY
+	ld	a,h
+	or	a
+	jr	z,S1143		; branch if HL
+	push	hl
+	call	EVALNEW
+	pop	bc
+	ld	a,b
+	cp	0DDh
+	ld	c,0
+	jr	z,S1142A
+	ld	c,10h
+S1142A:	ld	a,0FDh
+	jr	S1141
+;
+;	DIVW	(HL)
+;
+S1143:	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	call	EMITB
+	call	REQCHR
+	db	')'
+	ret
+;
+;	DIVW	<...>
+;
+S1150:	call	EVALNEW
+	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,30h
+	call	EMITB
+	ld	de,0
+	call	EMITVR		; emit relative address
+	call	REQCHR
+	db	'>'
+	ret
+;
+;	DIVW	(PC+addr)
+;
+S1151:	ld	a,l
+	cp	3
+	jp	nz,OERROR	; only PC allowed
+	call	EVALNEW
+	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,30h
+	call	EMITB
+	call	EMITV		; emit address
+	call	REQCHR
+	db	')'
+	ret
+
+	SUBTTL	Instruction Class 19 - LDA (Z280)
+;
+;	Class 19 - LDA (Z280)
+;
+CL19:	call	EVALREG
+	cp	RPNAME
+	jp	nz,OERROR
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; must be HL/IX/IY
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	call	REQCHR
+	db	','
+	call	GNC
+	cp	'<'
+	jr	z,S1203		; branch if <> form
+	cp	'('
+	jp	nz,OERROR	; else must be () form
+S1203:	call	EVBRKT		; evaluate ()
+	ld	hl,LDATBL
+	jp	SWITCH
+;
+LDATBL:	dw	S1201		; (addr)
+	dw	OERROR		; (r)
+	dw	S1212		; (rp)
+	dw	S1212		; (rp+d8)
+	dw	S1212		; (rp+d16)
+	dw	S1210		; (x+y)
+	dw	S1200		; (PC+d16)
+	dw	S1200		; <addr>
+;
+;	LDA	rp,(addr)
+;
+S1201:	ld	a,21h
+	call	EMITB
+	jp	EMITV
+;
+;	LDA	rp,(rp[+d16])
+;
+S1212:	ld	hl,(REGVAL)
+	ld	a,l
+	cp	6
+	ld	c,02h
+	jr	z,S1204		; branch if SP
+	cp	4
+	jp	nz,OERROR	; else must be HL/IX/IY
+	ld	a,h
+	cp	0DDh		; IX
+	ld	c,2Ah
+	jr	z,S1204
+	cp	0FDh		; IY
+	ld	c,32h
+	jr	z,S1204
+	ld	c,3Ah		; else is HL
+S1204:	ld	a,0EDh
+	call	EMITB
+	ld	a,c
+	call	EMITB
+	jp	EMITV
+;
+;	LDA	rp,(x+y)
+;
+S1210:	ld	a,0EDh
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	add	a,02h
+	jp	EMITB
+;
+;	LDA	rp,<addr>
+;	LDA	rp,(PC+addr)
+;
+S1200:	ld	a,0EDh
+	call	EMITB
+	ld	a,22h
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITV		; emit address if (PC+addr)
+	ld	de,0
+	jp	EMITVR		; else emit relative address
+
+	SUBTTL	Instruction Class 20 - LDCTL (Z280)
+;
+;	Class 20 - LDCTL (Z280)
+;
+CL20:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S1301		; branch if () form
+	call	BACKUP
+	call	EVALSRG		; include special regs
+	cp	RSNAME
+	jr	z,S1310		; branch if special register
+	cp	RPNAME
+	jp	nz,OERROR	; else must be rpair
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL/IX/IY allowed
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	call	REQCHR
+	db	','
+	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S1320		; branch if () form
+	call	BACKUP
+	call	EVALSRG
+	cp	RSNAME
+	jp	nz,OERROR	; must be special reg
+	ld	a,l
+	cp	2
+	jp	nz,OERROR	; only USP allowed
+	ld	a,0EDh
+	call	EMITB
+	ld	a,87h
+	jp	EMITB
+;
+;	LDCTL	rp,(C)
+;
+S1320:	call	EVALREG
+	cp	RNAME
+	jp	nz,OERROR
+	ld	a,l
+	dec	a
+	jp	nz,OERROR	; only C reg allowed
+	call	REQCHR
+	db	')'
+	ld	a,0EDh
+	call	EMITB
+	ld	a,66h
+	jp	EMITB
+;
+;	LDCTL	USP,rp
+;
+S1310:	ld	a,(VAL)
+	cp	2
+	jp	nz,OERROR	; only USP allowed
+	call	REQCHR
+	db	','
+	call	EVALREG
+	cp	RPNAME
+	jp	nz,OERROR	; must be rpair
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL/IX/IY allowed
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	a,0EDh
+	call	EMITB
+	ld	a,8Fh
+	jp	EMITB
+;
+;	LDCTL	(C),rp
+;
+S1301:	call	EVALREG
+	cp	RNAME
+	jp	nz,OERROR
+	ld	a,l
+	dec	a
+	jp	nz,OERROR	; only C reg allowed
+	call	REQCHR
+	db	')'
+	call	REQCHR
+	db	','
+	call	EVALREG		; get second operand
+	cp	RPNAME
+	jp	nz,OERROR
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL/IX/IY allowed
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	a,0EDh
+	call	EMITB
+	ld	a,6Eh
+	jp	EMITB
+
+	SUBTTL	Instruction Class 21 - LDUD, LDUP (Z280)
+;
+;	Class 21 - LDUD, LDUP (Z280)
+;
+CL21:	call	GNC
+	cp	'('
+	jr	z,S1401		; jump if ()
+	cp	'A'
+	jp	nz,OERROR	; else first op must be reg A
+	call	REQCHR
+	db	','
+	call	REQCHR
+	db	'('
+	ld	c,0
+S1400:	push	bc
+	call	EVALREG
+	pop	bc
+	cp	RPNAME
+	jp	nz,OERROR	; second op must be rpair
+	ld	a,l
+	cp	4
+	jp	nz,OERROR	; only HL/IX/IY allowed
+	ld	a,h
+	or	a
+	call	nz,EMITB	; emit prefix if index register
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,c
+	call	EMITB
+	ld	a,h
+	or	a
+	jr	z,S1402		; finish if HL
+	call	EVALNEW		; else get displacement
+	ld	a,(EVMODE)
+	call	REQ8U		; ensure 8-bit value (REQ8S?)
+	ld	a,l
+	call	EMITB
+S1402:	call	REQCHR
+	db	')'
+	ret
+;
+S1401:	ld	c,08h
+	call	S1400		; process () via common code
+	call	REQCHR
+	db	','
+	call	REQCHR
+	db	'A'
+	ret
+
+	SUBTTL	Instruction Class 22 - MULT, MULTU (Z280)
+;
+;	Class 22 - MULT, MULTU (Z280)
+;
+CL22:	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jp	z,S1505		; branch if () form
+	cp	'<'
+	jp	z,S1505		; branch if <> form
+	call	BACKUP
+	call	EVALREG
+	cp	RPNAME
+	jp	z,OERROR	; rpair illegal here
+	cp	RNAME
+	jp	nz,S1502	; process immediate value
+;
+;	MULT A,...
+;
+	call	GNC
+	cp	','		; check for A,xx form
+	jr	nz,S1504
+	ld	a,(VAL)
+	cp	7
+	jp	nz,OERROR	; first operand can be only A
+	call	GNC
+	or	a
+	jp	z,OERROR
+	cp	'('
+	jr	z,S1505		; jump if A,(rp)
+	cp	'<'
+	jp	z,S1505		; jump if A,<nnnn>
+	call	BACKUP
+	call	EVALREG
+	cp	RPNAME
+	jp	z,OERROR	; rpair illegal here
+	cp	RNAME
+	jr	nz,S1502	; process immediate value
+S1504:	ld	a,(VAL+1)
+	or	a		; check for index register
+	call	nz,EMITB	; emit prefix
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(VAL)
+	rlca
+	rlca
+	rlca
+	ld	c,a
+	ld	a,(OPCODE)
+	add	a,c
+	jp	EMITB
+;
+;	Immediate value - MULT nn
+;
+S1502:	ld	a,0FDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,38h
+	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB
+;
+;	MULT	(xx)
+;
+S1505:	call	EVBRKT		; evaluate expression in brackets
+	ld	hl,MULTBL
+	jp	SWITCH
+;
+MULTBL:	dw	S1512		; (addr)
+	dw	OERROR		; (r)
+	dw	S1501		; (rp)
+	dw	S1511		; (rp+d8)
+	dw	S1503		; (rp+d16)
+	dw	S1507		; (x+y)
+	dw	S1516		; (PC+d16)
+	dw	S1516		; <addr>
+;
+;	MULT	(addr)
+;
+S1512:	ld	c,38h
+	jr	S1514
+;
+;	MULT	(rp)
+;
+S1501:	ld	a,(REGVAL)
+	cp	6
+	jr	z,S1513		; branch if (SP)
+	cp	4
+	jp	nz,OERROR	; else only (HL) allowed
+;
+;	MULT	(HL)
+;
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,30h
+	jp	EMITB
+;
+;	MULT	(IX/IY+d8)
+;
+S1511:	ld	a,(REGVAL+1)
+	call	EMITB		; emit prefix for index register
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	add	a,30h
+	call	EMITB
+	ld	a,(VAL)
+	jp	EMITB
+;
+;	MULT	(rp+d16)
+;
+S1503:	ld	hl,(REGVAL)
+	ld	a,l
+	cp	6
+	jr	z,S1513		; branch if (SP)
+	ld	a,0FDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,h
+	ld	c,08h		; IX
+	cp	0DDh
+	jr	z,S1510
+	ld	c,10h		; IY
+	cp	0FDh
+	jr	z,S1510
+	ld	c,18h
+	jp	S1510
+;
+;	MULT	(SP+nnnn)
+;
+S1513:	ld	c,00h
+S1514:	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+S1510:	ld	a,(OPCODE)
+	add	a,c
+	call	EMITB
+	jp	EMITV		; emit address
+;
+;	MULT	(x+y)
+;
+S1507:	ld	a,0DDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	ld	c,a
+	ld	a,(OPCODE)
+	add	a,c
+	jp	EMITB
+;
+;	MULT	<nnnn>
+;	MULT	(PC+nnnn)
+;
+S1516:	ld	a,0FDh
+	call	EMITB
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITV		; emit address if (PC+addr)
+	ld	de,0
+	jp	EMITVR		; else emit relative address
+
+	SUBTTL	Instruction Class 23 - CPL, NEG, EXTS
+;
+;	Class 23 - CPL, NEG, EXTS
+;
+CL23:	call	GNC
+	or	a		; any operand?
+	jp	z,CL1		; handle like Class 1 (simple opcode)
+				;  if not (assume reg A)
+	call	BACKUP
+	call	EVALREG		; get operand
+	cp	RNAME
+	jp	z,S1601		; branch if single reg
+	cp	RPNAME
+	jp	nz,OERROR	; else must be rpair
+	ld	a,(CPU)
+	cp	2
+	jp	nz,OERROR	; Z280 only
+	ld	de,4
+	call	CMPHD
+	jp	nz,OERROR	; only HL is valid here
+	ld	de,(OPCODE)
+	ld	a,e
+	cp	2Fh
+	jp	z,OERROR	; instruction can't be CPL
+	call	EMITB
+	ld	a,d
+	add	a,08h
+	jp	EMITB
+;
+S1601:	ld	a,l
+	cp	7
+	jp	nz,OERROR	; only A is valid here
+	jp	CL1		; emit opcode via Class 1 code
+
+	SUBTTL	Instruction Class 24 - DI, EI
+;
+;	Class 24 - DI, EI
+;
+CL24:	ld	a,(CPU)
+	cp	2		; Z280 mode?
+	jp	nz,CL1		; emit opcode via Class 1 code if not
+	call	GNC
+	or	a		; any operand?
+	jp	z,CL1		; emit opcode via Class 1 code if not
+	call	BACKUP
+	call	EVALNEW		; get argument
+	ld	a,0EDh
+	call	EMITB
+	ld	a,(OPCODE)
+	cp	0F3h		; DI?
+	ld	a,77h
+	jr	z,S1701
+	ld	a,7Fh
+S1701:	call	EMITB
+	ld	hl,(VAL)
+	ld	a,(EVMODE)
+	call	REQ8U
+	ld	a,l
+	jp	EMITB
+
+	SUBTTL	Instruction Class 25 - SC (Z280)
+;
+;	Class 25 - SC (Z280)
+;
+CL25:	call	EVALNEW
+	ld	hl,(OPCODE)
+	call	EMITW
+	jp	EMITV
+
+	SUBTTL	Instruction Class 26 - EPUM, MEPU (Z280)
+;
+;	Class 26 - EPUM, MEPU (Z280)
+;
+CL26:	call	GNC
+	cp	'('
+	jr	z,S1801
+	cp	'<'
+	jp	nz,OERROR
+S1801:	call	EVBRKT		; evaluate ()
+	ld	hl,EPTBL
+	jp	SWITCH
+;
+EPTBL:	dw	S1810		; (addr)
+	dw	OERROR		; (r)
+	dw	S1815		; (rp)
+	dw	S1820		; (rp+d8)
+	dw	S1820		; (rp+d16)
+	dw	S1830		; (x+y)
+	dw	S1840		; (PC+d16)
+	dw	S1840		; <addr>
+;
+;	EPUM	(addr)
+;
+S1810:	ld	hl,(OPCODE)
+	ld	a,h
+	cp	84h
+	ld	h,0A7h
+	jr	z,S1811		; the Z280 is inconsistent here
+	ld	h,0AFh
+S1811:	call	EMITW
+	jp	EMITV
+;
+;	EPUM	(rp)
+;
+S1815:	ld	a,(REGVAL)
+	cp	6
+	jr	z,S1820		; branch if (SP)
+	cp	4
+	jp	nz,OERROR	; else must be (HL)
+;
+;	EPUM	(HL)
+;
+	ld	hl,(OPCODE)
+	ld	a,l
+	call	EMITB
+	ld	a,h
+	cp	84h
+	ld	a,0A6h
+	jp	z,EMITB
+	ld	a,0AEh
+	jp	EMITB
+;
+;	EPUM	(rp+d16)
+;
+S1820:	ld	hl,(REGVAL)
+	ld	a,l
+	cp	6
+	ld	c,00h
+	jr	z,S1821		; branch if SP
+	cp	4
+	jp	nz,OERROR	; else must be HL/IX/IY
+	ld	a,h
+	cp	0DDh
+	ld	c,28h		; IX
+	jr	z,S1821
+	cp	0FDh
+	ld	c,30h		; IY
+	jr	z,S1821
+	ld	c,38h		; HL
+S1821:	ld	hl,(OPCODE)
+	ld	a,l
+	call	EMITB
+	ld	a,h
+	add	a,c
+	call	EMITB
+	jp	EMITV
+;
+;	EPUM	(x+y)
+;
+S1830:	ld	hl,(OPCODE)
+	ld	a,l
+	call	EMITB
+	ld	a,b
+	rlca
+	rlca
+	rlca
+	add	a,h
+	jp	EMITB
+;
+;	EPUM	<addr>
+;	EPUM	(PC+addr)
+;
+S1840:	ld	hl,(OPCODE)
+	ld	a,l
+	call	EMITB
+	ld	a,h
+	add	a,20h
+	call	EMITB
+	ld	a,c
+	cp	6
+	jp	z,EMITV		; emit address if (PC+addr)
+	ld	de,0
+	jp	EMITVR		; else emit relative address
+
+	SUBTTL	Instruction Class 27 - Pseudo-operators
+;
+;	Class 27 - Pseudo operators
+;
+CL27:	ld	a,(OPCODE)
+	dec	a
+	ld	hl,PSDTAB
+	jp	SWITCH
+;
+PSDTAB:	dw	S300		; EQU,ASET,DEFL
+	dw	S307		; DEFS,DS
+	dw	S308		; DEFB,DEFC,DEFM,DEFZ,DB,DC
+	dw	S317		; DEFW,DW
+	dw	S320		; END
+	dw	S323		; ORG
+	dw	S324		; FORM,PAGE,EJECT
+	dw	S330		; IF
+	dw	S340		; ELSE
+	dw	S350		; ENDIF
+	dw	S360		; LIST,.LIST,.XLIST,.LALL,.XALL,.SALL,etc.
+	dw	S370		; TITLE,SUBTTL
+	dw	S390		; CSEG
+	dw	S391		; DSEG
+	dw	S380		; ASEG
+	dw	S392		; COMMON
+	dw	S500		; PUBLIC
+	dw	S520		; EXTERN
+	dw	S530		; .Z80,.Z180,.Z280
+	dw	S540		; .EVEN,.ODD
+	dw	S550		; NAME
+	dw	S560		; IDENT
+	dw	S570		; INCLUDE,MACLIB
+	dw	S580		; MACRO,RETP,IRP,IRPC
+	dw	S590		; ENDM
+	dw	S600		; EXITM
+	dw	S610		; LOCAL
+	dw	S620		; RQST,.REQUEST
+	dw	S630		; .PHASE,.DEPHASE
+	dw	S640		; .RADIX
+	dw	S650		; .PRINTX
+	dw	S660		; .COMMENT
+;
+;	EQU, ASET, DEFL
+;
+S300:	ld	hl,(IDADR)	; check for preceding symbol
+	ld	a,h
+	or	l
+	jp	z,OERROR	; error if not present
+	ld	c,(hl)		; save identity char
+	push	bc
+	call	EVALNEW		; get value
+	pop	bc
+
+	ld	a,(OPCODE+1)
+	or	a		; ASET/DEFL?
+	ld	b,DFLNAME
+	jr	nz,S301		; branch if yes
+	ld	b,EQUNAME	; else type is EQU
+
+S301:	ld	a,(NEWSYM)
+	or	a		; new symbol?
+	jr	nz,S305		; branch if yes
+
+	ld	a,c		; fetch identity char
+	and	0F0h
+	cp	MULTDEF		; multiple defined?
+	jr	z,S304		; multi defined error if yes
+
+	ld	hl,(SYMADR)
+	inc	hl
+	inc	hl
+	ld	a,(hl)
+	and	UNDEF		; UNDEF bit set?
+	jr	nz,S305		; handle like new symbol if yes
+
+	ld	a,(hl)
+	and	EXTSYM		; External bit set?
+	jr	nz,S304		; multi-defined error if yes
+
+	ld	a,c
+	and	0F0h
+	cp	b		; same type? (EQU or DEFL)
+	jr	nz,S304		; multi defined error if not
+	cp	DFLNAME		; DEFL?
+	jr	z,S305		; set/modify value if yes
+
+	call	CMPSYM		; same value and mode?
+	jr	nc,S306		; return if yes, else is multi def error
+
+S304:	ld	a,(PASSNO)
+	or	a
+	jr	z,S303		; branch if pass 1
+	call	MERROR		; else output multi defined error
+	jr	S306
+S303:	call	SETMDF		; set multi defined flag
+	jr	S306
+;
+;	New symbol
+;
+S305:	ld	a,(OPCODE+1)
+	or	a		; ASET/DEFL?
+	ld	b,DFLNAME
+	jr	nz,S305A	; branch if yes
+	ld	b,EQUNAME	; else type is EQU
+S305A:	ld	hl,(SYMADR)
+	ld	de,(VAL)
+	ld	(hl),e		; store value
+	inc	hl
+	ld	(hl),d
+	inc	hl
+	ld	a,(EVMODE)
+	ld	(hl),a		; set mode
+	inc	hl
+	ld	de,(CMNPTR)
+	ld	(hl),e		; set pointer to COMMON block
+	inc	hl
+	ld	(hl),d
+
+	ld	hl,(IDADR)
+	ld	a,(hl)
+	and	0Fh
+	or	b		; set type to EQUNAME or DFLNAME
+	ld	(hl),a
+
+	ld	c,a
+	ld	a,(UFLAG)
+	or	a
+	ld	a,c
+	jr	z,S306		; branch if UFLAG not set
+
+	ld	hl,(SYMADR)
+	inc	hl
+	inc	hl
+	ld	a,(hl)
+	or	UNDEF		; else set UNDEF bit (if UFLAG is set
+	ld	(hl),a		;  on pass 2, 'U' error will be automatically
+				;   generated by LSTOUT.)
+
+S306:	ld	a,1
+	ld	(EQUFLG),a
+	ret
+;
+;	Check if symbol matches expected value. Used by EQU, DEFL and label
+;	definition routines.
+;
+CMPSYM:	ld	hl,(SYMADR)
+	ld	e,(hl)
+	inc	hl
+	ld	d,(hl)
+	push	hl
+	ld	hl,(VAL)
+	call	CMPHD
+	pop	hl
+	scf
+	ret	nz		; values differ
+	inc	hl
+	ld	a,(EVMODE)
+	xor	(hl)
+	and	0C0h OR EXTSYM	; ignore PUBLIC and UNDEF bits
+	scf
+	ret	nz		; mode differs
+	and	0C0h
+	cp	0C0h
+	ccf
+	ret	nz		; not COMMON, OK
+	inc	hl
+	ld	e,(hl)
+	inc	hl
+	ld	d,(hl)
+	ld	hl,(CMNPTR)
+	call	CMPHD
+	ret	z		; same COMMON, OK
+	scf
+	ret			; COMMONs differ
+;
+;	DEFS, DS
+;
+S307:	call	EVALNEW
+	ld	(LENDS),hl
+	ld	a,1
+	ld	(DSFLAG),a
+	ld	a,(EVMODE)
+	or	a
+	jp	nz,RELERR
+	ret
+;
+;	DEFB, DEFC, DEFM, DEFZ, DB, DC
+;
+S308:	ld	a,1
+	ld	(DBWFLG),a
+	ld	a,(OPCODE+1)
+	dec	a
+	jp	z,S310		; branch if DC
+S308A:	call	GNC		; get next non-blank char
+	or	a
+	jp	z,OERROR
+	ld	hl,(PTR1)
+	ld	c,a		; save possible quote char in reg C
+	cp	"'"		; quote?
+	jr	z,S308Q
+	cp	'"'		; both single and double allowed
+	jr	nz,S308C
+S308Q:	push	hl
+	call	CCONST		; character constant?
+	pop	hl
+	jr	c,S314		; branch if not to process string
+	ld	a,d
+	or	a
+	jr	nz,S314
+S308C:	dec	hl		; point to prev char
+	ld	(PTR1),hl
+	call	EVALNEW		; evaluate expression
+	ld	a,(EVMODE)
+	call	REQ8U		; require 8-bit value
+	ld	a,l
+	call	EMITB		; output value
+S308B:	call	GNC		; fetch next non-blank char from record
+	or	a		; end of record?
+	jr	z,S308D		; done
+	cp	','		; separator?
+	jp	z,S308A		; process next item if yes
+	jp	DEBEND		; else expression error
+S308D:	ld	a,(OPCODE+1)
+	or	a		; test for DEFZ
+	ret	z
+	xor	a
+	jp	EMITB		; if DEFZ, emit an extra zero byte
+;
+S313:	call	EMITB		; output char
+	inc	hl
+S314:	ld	a,(hl)
+	or	a
+	jr	z,ERRQ		; end without another quote?
+	cp	c		; quote?
+	jr	nz,S313		; loop until found
+	inc	hl		; incr record ptr
+	ld	a,(hl)
+	cp	c
+	jr	z,S313		; double quotes
+	ld	(PTR1),hl
+	jr	S308B		; process terminator/separators
+;
+DEBEND:	ld	a,'E'		; load expression error
+	ld	(ERRFLG),a	; set flag
+	ret			; done
+;
+ERRQ:	ld	a,'Q'
+	ld	(ERRFLG),a
+	ret
+;
+;	DC, DEFC
+;
+S310:	call	GNC		; get next non-blank char
+	or	a
+	jp	z,OERROR
+	ld	hl,(PTR1)
+	ld	c,0
+	ld	b,a		; save possible quote char in reg B
+	cp	"'"		; quote?
+	jr	z,S312
+	cp	'"'		; both single and double allowed
+	jr	z,S312
+	jp	OERROR		; error if no quote
+S311:	ld	e,a
+	ld	a,c
+	ld	c,e
+	or	a
+	call	nz,EMITB	; output char
+	inc	hl
+S312:	ld	a,(hl)
+	or	a
+	jr	z,ERRQ		; end without another quote?
+	cp	b		; quote?
+	jr	nz,S311		; loop until found
+	inc	hl		; incr record ptr
+	ld	a,(hl)
+	cp	b
+	jr	z,S311		; double quotes
+	ld	a,c
+	or	80h
+	cp	80h
+	call	nz,EMITB
+	ld	(PTR1),hl
+	call	GNC		; fetch next non-blank char from record
+	or	a		; end of record?
+	ret	z		; done
+	cp	','		; separator?
+	jr	z,S310		; process next item if yes
+	jp	DEBEND		; else expression error
+;
+;	DW, DEFW
+;
+S317:	ld	a,1
+	ld	(DBWFLG),a
+S317A:	call	GNC
+	or	a
+	jp	z,OERROR
+	ld	hl,(PTR1)
+	ld	c,a		; save possible quote in reg C
+	ld	b,0		; char counter
+	cp	"'"		; quote?
+	jr	z,S317Q
+	cp	'"'		; both single and double allowed
+	jr	nz,S317C
+S317Q:	push	hl
+	call	CCONST		; test for character constant
+	pop	hl
+	jr	c,S318
+S317C:	dec	hl		; point to prev char
+	ld	(PTR1),hl	; restore new ptr
+	call	EVALNEW
+	call	EMITV		; output value
+S317B:	call	GNC		; fetch next non-blank char from record
+	or	a		; end of record?
+	ret	z		; done
+	cp	','		; separator?
+	jp	z,S317A		; process next item if yes
+	jp	DEBEND		; else expression error
+;
+S318A:	call	EMITB
+	inc	hl
+	inc	b		; chars in this string
+S318:	ld	a,(hl)
+	or	a
+	jp	z,ERRQ		; end without another quote?
+	cp	c
+	jr	nz,S318A
+	inc	hl		; incr record ptr
+	ld	a,(hl)
+	cp	c
+	jr	z,S318A		; double quotes
+	ld	(PTR1),hl
+	ld	a,b		; get length of string
+	rra			; is it even?
+	jr	nc,S317B	; finished if so
+	xor	a		; else load upper byte with 0
+	call	EMITB		;  to make a word
+	jr	S317B		; process terminator/separators
+;
+;	END
+;
+S320:	call	GNC		; argument present (program start address)?
+	or	a
+	ld	hl,0
+	ld	a,0
+	jr	z,S320A		; branch if not
+	call	BACKUP
+	call	EVALNEW		; else get argument
+	ld	a,(EVMODE)
+S320A:	ld	(ENDADR),hl
+	ld	(VAL),hl
+	ld	(ENDMOD),a
+	ld	(EVMODE),a
+	ld	a,1
+	ld	(EQUFLG),a
+S321:	ld	a,1
+	ld	(EFLG),a
+	ld	a,(CLEVEL)	; check conditionals stack level
+	or	a		; at zero?
+	call	nz,S322		; error if not
+	ld	a,(MDFLVL)	; check MACRO def level
+	or	a		; at zero?
+	ret	z		; return if yes
+	xor	a		; else an ENDM is missing somewhere
+	ld	(MDFLVL),a	; reset level
+	ld	hl,(SYMPTR)
+	ld	(hl),a		; restore end of symbol table marker
+S322:	ld	a,'T'+80h	; and force error output
+	ld	(ERRFLG),a
+	ret	
+;
+;	ORG
+;
+S323:	ld	a,(PHFLAG)
+	or	a
+	jp	nz,PERROR	; not allowed within .PHASE
+	call	UPDSIZ		; update current segment size
+	call	EVALNEW
+	ld	(PC),hl
+	ld	a,(PASSNO)
+	or	a
+	push	af
+	push	hl
+	ld	hl,(CURCMN)
+	call	nz,SELCMN
+	pop	hl
+	pop	af
+	ld	a,(CURSEG)
+	ld	e,a
+	call	nz,WLOC
+	ld	a,1
+	ld	(EQUFLG),a
+	ret
+;
+;	FORM, PAGE, EJECT
+;
+S324:	ld	a,(OPCODE+1)
+	or	a		; PAGE?
+	jr	z,S325		; branch if not
+	call	GNC
+	or	a		; argument follows?
+	jr	z,S325		; branch if not
+	call	BACKUP
+	call	EVALNEW		; else evaluate expression
+	ld	a,(EVMODE)
+	call	REQ8U		; result must be 8-bit unsigned, non-reloc
+	ld	a,h
+	or	a
+	jr	nz,S325
+	ld	a,l
+	cp	10		; in the range 10..255
+	call	c,VALERR
+	ld	(MAXLNE),a	; set new page length
+S325:	ld	a,(MAXLNE)
+	ld	(CURLNE),a	; cause hof on record after FORM/PAGE/EJECT
+	ld	(NOLIST),a	; suppress listing of FORM, PAGE, EJECT
+	ret
+;
+;	IFxxx
+;
+S330:	ld	hl,(CONDSP)
+	ld	a,(hl)		; check current state
+	rra
+	jr	nc,S333		; if false, simply inc depth level and return
+	ld	a,(OPCODE+1)
+	ld	hl,IFTBL
+	jp	SWITCH
+
+IFTBL:	dw	ZIF		; IF
+	dw	ZIF1		; IF1
+	dw	ZIF2		; IF2
+	dw	ZIF		; IFT
+	dw	ZIFF		; IFF
+	dw	ZIFDEF		; IFDEF
+	dw	ZIFNDF		; IFNDEF
+	dw	ZIFB		; IFB
+	dw	ZIFNB		; IFNB
+	dw	ZIFIDN		; IFIDN
+	dw	ZIFDIF		; IFDIF
+	dw	ZIF80		; IFZ80
+	dw	ZIF180		; IFZ180
+	dw	ZIF280		; IFZ280
+;
+;	IF, IFT
+;
+ZIF:	ld	c,0
+	jr	S331
+;
+;	IFF
+;
+ZIFF:	ld	c,0FFh
+S331:	push	bc
+	call	EVALNEW		; evaluate the expression
+	pop	bc
+	ld	a,(ERRFLG)
+	cp	' '
+	jr	nz,S332		; on error, force true state
+	ld	a,l		; test for zero
+	or	h		; zero = false, non zero = true
+S332:	add	a,0FFh
+	sbc	a,a		; make value 0FFh or 00h
+	xor	c		; complement result if IFF
+S333:	ld	hl,(CONDSP)	; get conditional stack pointer
+	and	(hl)		; include current state
+	and	7Fh		; clear ELSE bit
+	ld	c,a		; and save for later as new state
+	ld	a,(CLEVEL)	; get the stack depth
+	cp	CSTKSZ		; test for maximum level
+	jr	nc,S334		; error if already at max depth
+	inc	a		; inc to next depth
+	ld	(CLEVEL),a	; and store
+	dec	hl		; push stack
+	ld	(CONDSP),hl	; save new SP
+	ld	(hl),c		; put new state in stack
+	ld	a,0FFh		; suppress IF, ELSE, ENDIF
+	ld	(IFLIST),a	;  if "NOCOND"
+	ret			;   & finish off
+;
+S334:	ld	a,'A'		; stack ov'flow
+S335:	ld	(ERRFLG),a
+	ret			; finish off
+;
+;	IF1
+;
+ZIF1:	ld	a,(PASSNO)	; 00h = pass 1, 0FFh = pass 2
+	cpl
+	jr	S333
+;
+;	IF2
+;
+ZIF2:	ld	a,(PASSNO)	; 00h = pass 1, 0FFh = pass 2
+	jr	S333
+;
+;	IFZ80
+;
+ZIF80:	ld	c,0
+	jr	S341
+;
+;	IFZ180
+;
+ZIF180:	ld	c,1
+	jr	S341
+;
+;	IFZ280
+;
+ZIF280:	ld	c,2
+S341:	ld	a,(CPU)
+	sub	c		; 00h if CPU matches
+	ld	c,0FFh
+	jr	S332	
+;
+;	IFDEF
+;
+ZIFDEF:	ld	c,0
+	jr	S336
+;
+;	IFNDEF
+;
+ZIFNDF:	ld	c,0FFh
+S336:	push	bc
+	call	ID		; get symbol name
+	ld	de,(SYMTBL)	; start of symbol table
+	ld	c,5
+	call	SYMLUK		; lookup symbol
+	pop	bc
+	ld	a,0
+	jr	c,S332
+	inc	hl
+	inc	hl
+	ld	a,(hl)		; get mode bits
+	cpl
+	and	EXTSYM
+	jr	S332
+;
+;	IFB
+;
+ZIFB:	ld	c,0FFh
+S337:	push	bc
+	ld	bc,RECMAX
+	call	MCHECK		; ensure enough memory for the string
+	pop	bc
+	jp	c,WERROR
+	call	GNC
+	cp	'<'		; angle brackets are required
+	jp	nz,OERROR
+	call	BACKUP
+	ld	de,(SYMPTR)
+	inc	de		; leave the end marker intact
+	push	de
+	push	bc
+	call	GETSTR		; get the string
+	pop	bc
+	ex	de,hl
+	pop	de
+	or	a
+	sbc	hl,de		; compute string length
+	ld	a,h
+	or	l
+	jp	S332		; length zero means TRUE
+;
+;	IFNB
+;
+ZIFNB:	ld	c,0
+	jr	S337
+;
+;	IFIDN
+;
+ZIFIDN:	ld	c,0FFh
+S338:	push	bc
+	ld	bc,RECMAX
+	call	MCHECK		; ensure enough memory for the strings
+	pop	bc
+	jp	c,WERROR
+	call	GNC
+	cp	'<'		; angle brackets are required
+	jp	nz,OERROR
+	call	BACKUP
+	ld	de,(SYMPTR)
+	inc	de		; leave the end marker intact
+	push	de
+	push	bc
+	call	GETSTR		; get the string
+	pop	bc
+	xor	a
+	ld	(de),a
+	inc	de
+	pop	hl
+	call	GNC
+	cp	','
+	jp	nz,OERROR
+	call	GNC
+	cp	'<'
+	jp	nz,OERROR
+	push	bc
+	push	de
+	push	hl
+	call	BACKUP
+	call	GETSTR
+	xor	a
+	ld	(de),a
+	pop	hl
+	pop	de
+	pop	bc
+S339:	ld	a,(de)
+	ld	b,a
+	sub	(hl)
+	jp	nz,S332
+	ld	a,b
+	or	a
+	jp	z,S332
+	inc	hl
+	inc	de
+	jr	S339
+;
+;	IFDIF
+;
+ZIFDIF:	ld	c,0
+	jr	S338
+;
+;	ELSE
+;
+S340:	ld	a,(CLEVEL)	; get stack depth
+	or	a		; test if empty
+	jr	z,S342
+	ld	hl,(CONDSP)	; get stack pointer
+	ld	a,(hl)		; get current state
+	or	a		; test ELSE bit
+	jp	m,S343		; error if set
+	cpl			; flip state
+	inc	hl		; point to previous state
+	and	(hl)		; include in test
+	dec	hl		; point to current state again
+	or	80h		; set ELSE bit
+	ld	(hl),a		; and save new state
+	ld	a,0FFh		; suppress IF, ELSE, ENDIF
+	ld	(IFLIST),a	;  if "NOCOND"
+	ret
+;
+S343:	inc	hl
+	ld	a,(hl)
+	rrca
+	and	80h		; force error if prev cond state is true
+S342:	or	'C'		; misplaced ELSE error
+	jp	S335
+;
+;	ENDIF
+;
+S350:	ld	a,(CLEVEL)	; get stack depth
+	or	a		; test if empty
+	jr	z,S352
+	dec	a		; reduce depth
+	ld	(CLEVEL),a	; save new depth
+	ld	hl,(CONDSP)	; get conditional stack pointer
+	inc	hl		; pop a state
+	ld	(CONDSP),hl	; and put back
+	ld	a,0FFh		; suppress IF, ELSE, ENDIF
+	ld	(IFLIST),a	;  if "NOCOND"
+	ret			; finish off
+;
+S352:	ld	a,'B'		; stack underflow
+	jp	S335
+;
+;	LIST control operator
+;
+;	ON	 Enable listing
+;	OFF	 Disable listing
+;	COND	 Display FALSE conditional code
+;	NOCOND	 Don't display FALSE conditional code
+;	SYMBOL	 Produce symbols in output
+;	NOSYMBOL Don't produce symbols in output
+;	SORT	 Sort symbols in output
+;	NOSORT	 Don't sort symbols in output
+;	MACROS	 Display full MACRO expansions
+;	XMACROS	 Display only MACRO lines that generate code
+;	NOMACROS Don't display MACRO expansions
+;
+S360:	ld	ix,LSTOPT	; IX points to LIST options byte
+	ld	a,(OPCODE+1)	; test for shortcuts
+	dec	a
+	jp	p,S362
+S361:	call	ID		; else get operand
+	ld	a,(IDLEN)
+	or	a		; valid?
+	jp	z,OERROR	; early error exit
+	ld	de,LSTOPS	; LIST operands
+	ld	c,1
+	call	SYMLUK		; lookup name
+	jp	c,OERROR	; error if not found
+	ld	a,(hl)		; get value
+	ld	hl,S363
+	push	hl		; push return address
+S362:	ld	hl,LSTTAB
+	jp	SWITCH
+S363:	call	GNC
+	cp	','		; more options?
+	jr	z,S361		; loop if yes
+	ret
+;
+LSTOPS:	db	2,'ON',0
+	db	3,'OFF',1
+	db	4,'COND',2
+	db	6,'NOCOND',3
+	db	6,'SYMBOL',4
+	db	8,'NOSYMBOL',5
+	db	4,'SORT',6
+	db	6,'NOSORT',7
+	db	6,'MACROS',8
+	db	7,'XMACROS',9
+	db	8,'NOMACROS',10
+	db	0
+;
+LSTTAB:	dw	LST10		; ON 		.LIST
+	dw	LST20		; OFF		.XLIST
+	dw	LST30		; COND		.LFCOND
+	dw	LST40		; NOCOND	.SFCOND
+	dw	LST50		; SYMBOL
+	dw	LST60		; NOSYMBOL
+	dw	LST70		; SORT
+	dw	LST80		; NOSORT
+	dw	LST90		; MACROS	.LALL
+	dw	LST91		; XMACROS	.XALL
+	dw	LST92		; NOMACROS	.SALL
+;
+;	ON
+;
+LST10:	set	LISTFL,(ix)
+	ret
+;
+;	OFF
+;
+LST20:	res	LISTFL,(ix)
+	ret
+;
+;	COND
+;
+LST30:	set	CONDFL,(ix)
+	ret
+;
+;	NOCOND
+;
+LST40:	res	CONDFL,(ix)
+	ret
+;
+;	SYMBOL
+;
+LST50:	set	SYMBLS,(ix)
+	ret
+;
+;	NOSYMBOL
+;
+LST60:	res	SYMBLS,(ix)
+	ret
+;
+;	SORT
+;
+LST70:	set	SORTFL,(ix)
+	ret
+;
+;	NOSORT
+;
+LST80:	res	SORTFL,(ix)
+	ret
+;
+;	MACROS
+;
+LST90:	set	MACRFL,(ix)
+	res	XMACFL,(ix)
+	ret
+;
+;	XMACROS
+;
+LST91:	set	MACRFL,(ix)
+	set	XMACFL,(ix)
+	ret
+;
+;	NOMACROS
+;
+LST92:	res	MACRFL,(ix)
+	ret
+;
+;	TITLE, SUBTTL
+;
+S370:	ld	a,(OPCODE+1)
+	or	a
+	ld	hl,TITLEB	; point to title buffer
+	ld	b,80		; maximum count
+	jr	z,S371		; branch if TITLE
+	ld	hl,SBTTLB	; else is SUBTTL
+	ld	b,60		; maximum count
+S371:	call	GNC		; get next non blank
+	ld	de,(PTR1)	; get REC pointer into DE
+	or	a		; null title?
+	jr	z,S374		; finish if so
+	ld	c,a
+	cp	'"'
+	jr	z,S372		; quotes are optional,
+	cp	"'"		;  and removed if present
+	jr	z,S372
+	ld	c,0
+	dec	de
+S372:	ld	a,(de)		; get a char
+	or	a		; end of line
+	jr	z,S374		; exit if so
+	inc	de		; update REC pointer
+	cp	c
+	jr	z,S374
+	ld	(hl),a		; store character
+	inc	hl		; update buffer pointer
+	djnz	S372		; count down chars
+S374:	cp	c
+	call	nz,ERRQ
+	ld	(hl),0		; end with a null
+	ld	(PTR1),de	; update REC pointer
+	ld	a,(OPCODE+1)
+	or	a
+	ret	nz		; return if SUBTTL
+	ld	a,(MAXLNE)	; else cause hof on record after title
+	ld	(CURLNE),a
+	ld	(NOLIST),a	; suppress listing of 'TITLE'
+	ret
+;
+;	ASEG
+;
+S380:	ld	a,(PHFLAG)
+	or	a
+	jp	nz,PERROR	; not allowed within .PHASE
+	ld	a,(CURSEG)
+	or	a
+	ret	z		; current segment is Absolute, ignore
+	call	UPDSIZ		; update current segment size
+	call	SAVEPC		; save PC for current segment
+	ld	hl,(ASEGPC)
+	ld	(PC),hl		; and load PC with latest Absolute PC
+	ld	a,(PASSNO)
+	or	a
+	ld	a,0
+	ld	(CURSEG),a	; set current segment type to Absolute
+	ld	e,a
+	call	nz,WLOC		; if Pass 2, write loc counter
+	ret
+;
+;	CSEG
+;
+S390:	ld	a,(PHFLAG)
+	or	a
+	jp	nz,PERROR	; not allowed within .PHASE
+	ld	a,(CURSEG)
+	cp	40h
+	ret	z		; current segment is Code, ignore
+	call	UPDSIZ		; update current segment size
+	call	SAVEPC		; save PC for current segment
+	ld	hl,(CSEGPC)
+	ld	(PC),hl		; and load PC with latest Code PC
+	ld	a,(PASSNO)
+	or	a
+	ld	a,40h
+	ld	(CURSEG),a	; set current segment type to Code
+	ld	e,a
+	call	nz,WLOC		; if Pass 2, write loc counter
+	ret
+;
+;	DSEG
+;
+S391:	ld	a,(PHFLAG)
+	or	a
+	jp	nz,PERROR	; not allowed within .PHASE
+	ld	a,(CURSEG)
+	cp	80h
+	ret	z		; current segment is Data, ignore
+	call	UPDSIZ		; update current segment size
+	call	SAVEPC		; save PC for current segment
+	ld	hl,(DSEGPC)
+	ld	(PC),hl		; and load PC with latest Data PC
+	ld	a,(PASSNO)
+	or	a
+	ld	a,80h
+	ld	(CURSEG),a	; set current segment type to Data
+	ld	e,a
+	call	nz,WLOC		; if Pass 2, write loc counter
+	ret
+;
+;	COMMON
+;
+S392:	ld	a,(PHFLAG)
+	or	a
+	jp	nz,PERROR	; not allowed within .PHASE
+	call	GNC
+	cp	'/'
+	jp	nz,OERROR
+	call	ID		; get COMMON name
+	cp	'/'
+	jp	nz,OERROR
+	call	GNC
+	ld	a,CMNSYM
+	ld	(SYMMOD),a	; set address mode to COMMON
+	call	ADDSYM		; enter symbol (COMMON segment definition)
+	ret	c		; on error, return
+	jr	z,S394		; jump if already defined
+
+	push	hl
+	call	UPDSIZ		; update current segment size
+	call	SAVEPC		; save PC for current segment
+	ld	hl,(IDADR)
+	ld	(CURCMN),hl	; set current COMMON segment
+	ld	a,(hl)
+	or	COMNAME		; set symbol type to COMMON name
+	ld	(hl),a
+	pop	hl
+
+	xor	a
+	ld	(hl),a		; clear COMMON segment length
+	inc	hl
+	ld	(hl),a
+	inc	hl
+S395:	ld	(hl),CMNSYM	; mode is COMMON
+	inc	hl
+	ld	(hl),a		; always reset PC value to zero, even
+	inc	hl		;  for existing COMMON (they overlay)
+	ld	(hl),a
+
+	ld	hl,0
+	ld	(PC),hl		; init PC
+
+	push	hl
+	ld	hl,(CURCMN)
+	call	SELCMN		; select COMMON block
+	pop	hl
+	ld	a,(PASSNO)
+	or	a
+	ld	a,0C0h
+	ld	(CURSEG),a	; set current segment type to COMMON
+	ld	e,a
+	call	nz,WLOC		; if Pass 2, write loc counter
+	ret
+
+S394:	ld	de,(IDADR)
+	ld	a,(de)
+	and	0F0h
+	cp	COMNAME		; ensure symbol type is COMNAME
+	jp	nz,VALERR
+	ld	(CURCMN),de	; set current COMMON segment
+
+	push	hl
+	call	UPDSIZ		; update current segment size
+	call	SAVEPC		; save PC for current segment
+	pop	hl
+
+	xor	a
+	inc	hl		; skip segment length
+	inc	hl
+	jr	S395		; exit via common code
+;
+;	ENTRY, GLOBAL, PUBLIC
+;
+S500:	call	ID		; get label name
+	ld	a,(ERRFLG)
+	cp	' '
+	ret	nz		; on error, return
+	ld	hl,0
+	ld	(VAL),hl
+	ld	a,GBLSYM OR UNDEF
+	ld	(SYMMOD),a
+	call	ADDSYM		; enter symbol as Undefined PUBLIC label
+	ret	c		; on error, return
+	jr	nz,S501		; branch if new symbol
+	inc	hl		; skip over value
+	inc	hl
+	ld	a,(hl)		; get mode bits
+	or	GBLSYM		; set PUBLIC bit
+	ld	(hl),a
+	ld	c,a
+	and	EXTSYM		; EXTRN bit set?
+	jr	nz,S501		; set error flag if yes
+	ld	a,c
+	and	UNDEF		; UNDEF bit set?
+	jr	z,S502		; branch if not
+S501:	ld	a,1
+	ld	(UFLAG),a	; else set flag for LSTOUT
+S502:	call	GNC
+	cp	','
+	jr	z,S500		; loop for more
+	ret
+;
+;	EXT, EXTRN
+;
+S520:	call	ID		; get label name
+	ld	a,(ERRFLG)
+	cp	' '
+	ret	nz		; on error, return
+	call	ADDEXT		; else add External symbol
+	call	GNC
+	cp	','
+	jr	z,S520		; loop to process more
+	ret
+;
+;	Add external symbol reference. Also called by CHKEXT from the
+;	expression evaluation routine when a symbol of type LABEL## is
+;	encountered.
+;
+ADDEXT:	ld	hl,0
+	ld	(VAL),hl
+	ld	a,EXTSYM	; set mode to External
+	ld	(SYMMOD),a
+	call	ADDSYM		; enter symbol as External label
+	ret	c		; on error, return
+	ret	nz		; return if new symbol
+
+	ld	a,(EVFLGS)	; symbol exists, check flags
+	and	0F0h
+	cp	MULTDEF
+	jp	z,MERROR	; error if multiple defined
+
+	cp	EQUNAME
+	jp	z,SETMDF	; type can't be EQU or DEFL
+	cp	DFLNAME
+	jp	z,SETMDF
+
+	inc	hl		; skip over value
+	inc	hl
+	ld	a,(hl)		; get mode bits
+	ld	c,a
+	and	EXTSYM		; External?
+ 	ret	nz		; return if yes
+	ld	a,c
+	and	GBLSYM OR UNDEF
+	cp	UNDEF		; undefined?
+	jp	nz,SETMDF	; error if not
+	or	EXTSYM		; else set mode to External
+	ld	(hl),a
+	ret
+;
+;	.Z80, .Z180, .Z280
+;
+S530:	ld	a,(OPCODE+1)
+	ld	(CPU),a		; set CPU type
+	ret
+;
+;	.EVEN, .ODD
+;
+S540:	ld	a,(OPCODE+1)
+	ld	hl,(PC)
+	xor	l
+	rra
+	ret	nc
+	xor	a
+	jp	EMITB
+;
+;	NAME
+;
+S550:	ld	hl,MODNAM
+S551:	ld	bc,RECMAX
+	call	MCHECK
+	jp	c,WERROR
+	push	hl
+	ld	de,(SYMPTR)
+	inc	de
+	push	de
+	call	S561		; get name
+	ld	a,' '
+	ld	(de),a
+	pop	de
+	pop	hl
+	ld	a,(PASSNO)
+	or	a
+	ret	nz		; ignore if pass 2
+	ld	a,(hl)
+	or	a
+	jp	nz,MERROR	; allowed only once
+S552:	push	hl
+	inc	hl		; point to name buffer
+	ld	c,0		; init char count
+S553:	ld	a,(de)
+	call	UCASE
+	cp	' '
+	jr	z,S554
+	ld	(hl),a		; store name
+	inc	hl
+	inc	de
+	inc	c
+	ld	a,(NAMLEN)
+	cp	c
+	jr	nz,S553
+S554:	pop	hl
+	ld	(hl),c		; store length of name
+	ret
+;
+;	IDENT
+;
+S560:	ld	hl,MODIDN
+	jr	S551
+;
+;	INCLUDE, MACLIB
+;
+S570:	call	GNC		; skip blanks
+	ld	hl,(PTR1)
+	dec	hl
+	call	OPNLIB		; open include file
+	ld	(PTR1),hl
+	ret
+;
+;	MACRO, REPT, IRP, IRPC
+;
+S580:	ld	hl,MTBL
+	ld	a,(OPCODE+1)
+	jp	SWITCH
+
+MTBL:	dw	DEFMAC		; MACRO
+	dw	DFREPT		; REPT
+	dw	DFIRP		; IRP
+	dw	DFIRPC		; IRPC
+;
+;	ENDM
+;
+S590:	jp	OERROR		; ENDM without MACRO/REPT/IRP/IRPC
+;
+;	EXITM
+;
+S600:	ld	a,(MACLVL)
+	or	a
+	jp	nz,ENDMAC
+	jp	OERROR		; EXITM outside MACRO
+;
+;	LOCAL
+;
+S610:	jp	OERROR		; LOCAL outside MACRO
+;
+;	RQST, .REQUEST
+;
+S620:	ld	a,(PASSNO)
+	or	a
+	ret	z		; ignore if pass 1
+S621:	call	ID		; get operand
+	ld	a,(IDLEN)	; valid?
+	ld	e,a
+	or	a
+	call	z,VALERR	; error if yes
+	ld	hl,IDBUF
+	ld	a,e
+	or	a
+	call	nz,WRQST	; output request library search
+	call	GNC
+	cp	','		; more names?
+	jr	z,S621		; loop if yes
+	ret
+;
+;	.PHASE, .DEPHASE
+;
+S630:	ld	a,(OPCODE+1)
+	or	a
+	jr	nz,S635		; branch if .DEPHASE
+	ld	a,(PHFLAG)
+	or	a
+	jp	nz,PERROR	; error if already in .PHASE
+	call	EVALNEW		; get address
+	ld	a,(UFLAG)
+	or	a
+	ret	nz		; 'U' error
+	ld	a,(EVMODE)
+	ld	c,a
+	and	EXTSYM
+	jp	nz,PERROR	; can't be External ref
+	ld	a,(CURSEG)
+	or	01h
+	ld	(PHFLAG),a	; use PHFLAG to remember old segment
+	ld	a,c
+	and	0C0h
+	ld	(CURSEG),a	;!!!TODO: set CURCMN if addr is COMMON ref?
+	ld	de,(PC)
+	or	a
+	sbc	hl,de
+	ld	(PHDIFF),hl	; compute offset from current PC
+	ret
+;
+S635:	ld	a,(PHFLAG)
+	or	a
+	jp	z,PERROR	; .DEPHASE without .PHASE
+	and	0C0h
+	ld	(CURSEG),a
+	xor	a
+	ld	(PHFLAG),a
+	ret
+;
+;	Get effective (.PHASE'd) PC value.
+;
+GETPPC:	ld	hl,(PC)
+	ld	a,(PHFLAG)	; .PHASE active?
+	or	a
+	ret	z		; return PC if not
+	push	de
+	ld	de,(PHDIFF)
+	add	hl,de		; else add offset
+	pop	de
+	ret
+;
+;	.RADIX
+;
+S640:	ld	hl,10		; argument to .RADIX is always in decimal,
+	ld	(RADIX),hl	;  regardless of the previous radix
+	call	EVALNEW		; get value
+	ld	a,(EVMODE)
+	call	CHK8U
+	jp	nz,VALERR
+	ld	a,l
+	cp	2		; only 2, 8, 10 and 16 allowed
+	jr	z,S641
+	cp	8
+	jr	z,S641
+	cp	10
+	jr	z,S641
+	cp	16
+	jp	nz,VALERR
+S641:	ld	(RADIX),hl
+	ret
+;
+;	.PRINTX
+;
+S650:	ld	bc,RECMAX
+	call	MCHECK		; ensure there is enough memory for string
+	jp	c,WERROR
+	ld	de,(SYMPTR)
+	inc	de		; don't touch end of symbol table marker
+	push	de
+	call	S561		; get string
+	xor	a
+	ld	(de),a
+	pop	hl
+	jp	CLINE		; display line on console
+;
+S561:	call	GNC
+	or	a
+	ret	z
+	cp	'('
+	jr	nz,S563
+	call	GNC
+	cp	"'"
+	jr	z,S562
+	cp	'"'
+	jp	nz,ERRQ
+S562:	call	S563
+	call	GNC
+	cp	')'
+	jp	nz,ERRQ
+	ret
+;
+S563:	ld	c,a		; C = quote char
+	ld	hl,(PTR1)
+S564:	ld	a,(hl)
+	or	a
+	jr	z,S565
+	inc	hl
+	cp	c
+	jr	z,S566
+	ld	(de),a
+	inc	de
+	jr	S564
+S565:	call	ERRQ		; string not properly closed
+S566:	ld	(PTR1),hl
+	ret
+;
+;	.COMMENT
+;
+S660:	call	GNC		; get delimiter char
+	or	a
+	jp	z,OERROR	; must be present
+	ld	(COMNTC),a	; save it
+	ret
+;
+S662:	ld	c,a
+	ld	hl,(PTR1)
+S663:	ld	a,(hl)		; get char
+	or	a		; end of line?
+	jr	z,S664		; exit loop if yes
+	inc	hl
+	sub	c		; delimiter found?
+	jr	nz,S663		; loop if not
+	ld	(COMNTC),a	; else clear flag/delimiter
+S664:	ld	(PTR1),hl
+	ret
+;
+;	Require char following call.
+;	Set error flag otherwise and return with CY flag set.
+;
+REQCHR:	call	GNC
+	ex	(sp),hl
+	cp	(hl)
+	inc	hl
+	ex	(sp),hl
+	ret	z
+OERROR:	ld	a,'O'
+	ld	(ERRFLG),a
+	scf
+	ret
+;
+;	Require signed 8-bit value in HL, A = mode.
+;
+REQ8S:	call	CHK8S
+	ret	z
+	jp	c,RELERR
+VALERR:	ld	a,'V'
+	ld	(ERRFLG),a
+	ret
+;
+;	Check if value in HL is signed 8-bit, A = mode.
+;
+CHK8S:	or	a
+	scf
+	ret	nz
+	ld	a,l		; check low byte
+	or	a
+	ld	a,h
+	jp	m,CHKM
+	or	a		; if positive, high byte must be zero
+	ret			; NZ means error
+CHKM:	inc	a		; if negative, high byte must be 0FFh
+	ret			; NZ means error
+;
+;	Require unsigned 8-bit value in HL, A = mode.
+;
+REQ8U:	call	CHK8U
+	ret	z
+	jp	c,RELERR
+	jr	VALERR
+;
+;	Check if value in HL is unsigned 8-bit, A = mode.
+;
+CHK8U:	or	a
+	scf			; return with CY set if reloc value
+	ret	nz
+	ld	a,h		; check high byte
+	or	a
+	ret	z		; can be either 00h or 0FFh
+	inc	a
+	ret			; NZ means error
+;
+;	Save variables VAL, EVMODE, EXTCHN and CMNPTR to
+;	SAVVAL, SAVMOD, SAVCHN and SAVCMN.
+;
+SAVVARS:push	bc
+	push	de
+	ld	hl,VAL
+	ld	de,SAVVAL
+	ld	bc,7
+	ldir
+	pop	de
+	pop	bc
+	ret
+;
+;	Save current segment PC
+;
+SAVEPC:	ld	hl,(PC)
+	ld	a,(CURSEG)
+	cp	40h		; Code segment?
+	jr	z,SAVPC1
+	cp	80h		; Data segment?
+	jr	z,SAVPC2
+	cp	0C0h		; COMMON segment?
+	jr	nz,SAVPC3	; jump if not (Absolute)
+	ex	de,hl
+	ld	hl,(CURCMN)	; get pointer to current COMMON segment
+	ld	a,(hl)		; get name length
+	and	0Fh
+	ld	c,a
+	ld	b,0
+	add	hl,bc
+	inc	hl		; point past name
+	inc	hl		; skip segment length
+	inc	hl
+	inc	hl		; skip address mode byte
+	ld	(hl),e		; save COMMON segment PC
+	inc	hl
+	ld	(hl),d
+	ret
+SAVPC3:	ld	(ASEGPC),hl	; save PC for current segment
+	ret
+SAVPC2:	ld	(DSEGPC),hl
+	ret
+SAVPC1:	ld	(CSEGPC),hl
+	ret
+;
+;	Update current segment size
+;
+UPDSIZ:	ld	hl,(PC)
+	ld	a,(CURSEG)
+	cp	40h		; Code segment?
+	jr	z,UPD1
+	cp	80h		; Data segment?
+	jr	z,UPD2
+	cp	0C0h		; COMMON segment?
+	ret	nz
+	push	hl
+	ld	hl,(CURCMN)	; get pointer to current COMMON segment
+	ld	a,(hl)		; get name length
+	and	0Fh
+	ld	e,a
+	ld	d,0
+	add	hl,de
+	inc	hl		; point past name
+	ld	e,(hl)		; get segment size field
+	inc	hl
+	ld	d,(hl)
+	ex	(sp),hl
+	call	CMPHD		; CY if HL > DE
+	ex	de,hl
+	pop	hl
+	ret	nc
+	ld	(hl),d		; update COMMON size
+	dec	hl
+	ld	(hl),e
+	ret
+UPD2:	ld	de,(DSSIZE)
+	call	CMPHD		; CY if HL > DE
+	ret	nc
+	ld	(DSSIZE),hl
+	ret
+UPD1:	ld	de,(CSSIZE)
+	call	CMPHD		; CY if HL > DE
+	ret	nc
+	ld	(CSSIZE),hl
+	ret
+;
+;	Select COMMON block
+;
+SELCMN:	ld	a,h
+	or	l
+	ret	z
+	ld	de,(LASTCM)
+	call	CMPHD		; same as last selected?
+	ret	z		; return if yes
+	ld	(LASTCM),hl
+	ld	a,(PASSNO)
+	or	a
+	ret	z
+	ld	a,(hl)
+	and	0Fh		; get name length
+	ld	e,a		;  into reg E
+	inc	hl
+	jp	WSELCM		; write selected COMMON to object file
+;
+;	Emit absolute byte in A to object file
+;
+EMITB:	push	hl
+	ld	hl,PASSNO
+	bit	0,(hl)
+	jr	z,EMTB1		; return if pass 1
+	push	bc
+	push	af
+	call	LSTB		; output to listing
+	pop	af
+	call	WOBJ		; output to object file
+	pop	bc
+EMTB1:	pop	hl
+	ld	a,(LEN)
+	inc	a
+	ld	(LEN),a
+	ret
+;
+;	Emit absolute word in HL to object file
+;
+EMITW:	ld	a,l
+	call	EMITB
+	ld	a,h
+	jp	EMITB
+;
+;	Emit word value in SAVVAL with segment type in SAVMOD to object file
+;
+EMITSV:	ld	ix,SAVVAL	; point to SAVVAL, SAVMOD, SAVCHN
+	jr	EMTV0		; continue below
+;
+;	Emit word value in VAL with segment type in EVMODE to object file
+;
+EMITV:	ld	ix,VAL		; point to VAL, EVMODE, EXTCHN
+EMTV0:	ld	a,(PASSNO)
+	or	a
+	jp	z,EMTV2		; return if pass 1
+EMTV1:	ld	a,(ix+2)	; get mode
+	bit	4,a		; External?
+	jr	z,EMTV3		; branch if not
+
+	push	bc
+	ld	l,(ix+0)	; get value (offset)
+	ld	h,(ix+1)
+	ld	a,h		; test for zero
+	or	l
+	ld	e,(ix+2)
+	call	nz,WEOFFS	; if zero, output 'ext+offset' reloc item
+	ld	hl,(PC)
+	ld	a,(LEN)
+	ld	e,a
+	ld	d,0
+	add	hl,de		; get current PC
+	ex	de,hl
+	ld	l,(ix+3)	; get chain pointer
+	ld	h,(ix+4)
+	ld	a,(hl)		; get chain address
+	ld	(hl),e		; and replace it with current PC
+	ld	e,a
+	inc	hl
+	ld	a,(hl)
+	ld	(hl),d
+	ld	d,a
+	inc	hl
+	ld	a,(hl)		; get segment of chain address
+	and	0C0h		; mask segment type bits
+	ld	c,a		; save in reg C for function call below
+	ld	a,(PHFLAG)
+	or	a
+	jr	nz,EMTV7
+	ld	a,(CURSEG)
+EMTV7:	and	0C0h
+	or	EXTSYM
+	ld	(hl),a		; replace with current segment bits
+	ld	a,c
+	cp	CMNSYM		; COMMON segment?
+	jr	nz,EMTV5	; branch if not
+	push	de
+	ld	l,(ix+5)
+	ld	h,(ix+6)
+	call	SELCMN		; else select COMMON block
+	pop	de
+	ld	c,CMNSYM
+EMTV5:	ex	de,hl
+	call	WOBJ16		; output chain address
+	ld	hl,0		; External always appears as 0000 on listing
+	jr	EMTV4
+
+EMTV3:	push	bc
+	and	0C0h		; mask segment bits
+	ld	c,a
+	cp	CMNSYM		; COMMON segment?
+	jr	nz,EMTV6	; branch if not
+	push	bc
+	ld	l,(ix+5)
+	ld	h,(ix+6)
+	call	SELCMN		; else select COMMON block
+	pop	bc
+EMTV6:	ld	l,(ix+0)	; get value into HL
+	ld	h,(ix+1)
+	push	hl
+	call	WOBJ16		; output relocatable value
+	pop	hl
+EMTV4:	ld	a,(ix+2)	; get mode
+	and	0F0h		; mask segment bits
+	ld	c,a
+	call	LSTW		; output to listing
+	pop	bc
+EMTV2:	ld	a,(LEN)		; update instr length
+	inc	a
+	inc	a
+	ld	(LEN),a
+	ret
+;
+;	Emit displacement SAVVAL-PC with segment type to object file.
+;	Used by Z280 <addr> operands. On entry, DE contains an
+;	additional offset to add to the displacement, as required
+;	by some commands.
+;
+EMITSR:	ld	ix,SAVVAL
+	jr	EMTVR0
+;
+;	Emit displacement VAL-PC with segment type to object file.
+;	Used by Z280 <addr> operands. On entry, DE contains an
+;	additional offset to add to the displacement, as required
+;	by some commands.
+;
+EMITVR:	ld	ix,VAL
+EMTVR0:	ld	a,(PASSNO)
+	or	a
+	jr	z,EMTV2
+	ld	l,(ix+0)	; get value
+	ld	h,(ix+1)
+	dec	de		; account for word length
+	dec	de
+	add	hl,de		; add additional offset
+	ld	de,(LEN)
+	or	a
+	sbc	hl,de
+	ex	de,hl
+	call	GETPPC		; get effective PC value
+	ex	de,hl		;  into DE
+	or	a
+	sbc	hl,de		; obtain relative displacement
+	ld	(ix+0),l
+	ld	(ix+1),h
+	call	SUBVM		; apply subtraction reloc rules
+	jp	EMTV1
+;
+SUBVM:	ld	a,(CURSEG)	; !!!check GETPPC
+	and	11000000b	; check current PC mode (2nd op)
+	ret	z		; return if Absolute
+	ld	c,a
+	ld	a,(ix+2)
+	and	11000000b	; else check VAL mode (1st op)
+	cp	c
+	jp	nz,RELERR	; error if not same mode
+	xor	a
+	ld	(ix+2),a	; else result just became Absolute
+	ret
+
+	SUBTTL	Opcode Table
+;-----------------------------------------------------------------------
+;
+;	O P C O D E   T A B L E
+;
+;-----------------------------------------------------------------------
+;
+;	In order to enable binary searches, the opcode table has been
+;	divided into several sections, each section containing entries
+;	of equal length sorted alphabetically.
+
+OPCODES:dw	OPCOD2,OPCOD3,OPCOD4,OPCOD5,OPCOD6,OPCOD7,OPCOD8
+OPLEN:	db	NUMOP2,NUMOP3,NUMOP4,NUMOP5,NUMOP6,NUMOP7,NUMOP8
+
+OPCOD2:	db	2,'CP',38h,0,6
+	db	2,'DB',3,0,27
+	db	2,'DC',3,1,27
+	db	2,'DI',0F3h,0,24
+	db	2,'DS',2,0,27
+	db	2,'DW',4,0,27
+	db	2,'EI',0FBh,0,24
+	db	2,'EX',0EBh,0,10
+	db	2,'IF',8,0,27
+	db	2,'IM',0EDh,0FFh,1
+	db	2,'IN',0,40h,7
+	db	2,'JP',0C3h,0,3
+	db	2,'JR',18h,0,4
+	db	2,'LD',0,0,8
+	db	2,'OR',30h,0,6
+	db	2,'RL',10h,0,2
+	db	2,'RR',18h,0,2
+	db	2+Z280,'SC',0EDh,71h,25
+NUMOP2	equ	($ - OPCOD2)/(2+4)
+
+OPCOD3:	db	3,'ADC',8,4Ah,6
+	db	3,'ADD',0,9,6
+	db	3,'AND',20h,0,6
+	db	3,'BIT',040h,0,12
+	db	3,'CCF',03Fh,0,1
+	db	3,'CPD',0EDh,0A9h,1
+	db	3,'CPI',0EDh,0A1h,1
+	db	3,'CPL',2Fh,0,23
+	db	3+Z280,'CPW',0C7h,0,15
+	db	3,'DAA',27h,0,1
+	db	3,'DEC',05h,0Bh,13
+	db	3+Z280,'DIV',0C4h,0,17
+	db	3,'END',5,0,27
+	db	3,'EQU',1,0,27
+	db	3,'EXT',18,0,27
+	db	3,'EXX',0D9h,0,1
+	db	3,'IF1',8,1,27
+	db	3,'IF2',8,2,27
+	db	3,'IFB',8,7,27
+	db	3,'IFF',8,4,27
+	db	3,'IFT',8,3,27
+	db	3+Z180,'IN0',2,0,7
+	db	3,'INC',04h,03h,13
+	db	3,'IND',0EDh,0AAh,1
+	db	3,'INI',0EDh,0A2h,1
+	db	3+Z280,'INW',6,0,7
+	db	3,'IRP',24,2,27
+	db	3+Z280,'JAF',28h,0DDh,4
+	db	3+Z280,'JAR',20h,0DDh,4
+	db	3+Z280,'LDA',0,0,19
+	db	3,'LDD',0EDh,0A8h,1
+	db	3,'LDI',0EDh,0A0h,1
+	db	3+Z280,'LDW',1,0,8
+	db	3+Z180,'MLT',0,0,14
+	db	3,'NEG',0EDh,044h,23
+	db	3,'NOP',0,0,1
+	db	3,'ORG',6,0,27
+	db	3,'OUT',1,41h,7
+	db	3,'POP',0C1h,0,9
+	db	3,'RES',80h,0,12
+	db	3,'RET',0C9h,0,11
+	db	3,'RLA',17h,0,1
+	db	3,'RLC',0,0,2
+	db	3,'RLD',0EDh,06Fh,1
+	db	3,'RRA',1Fh,0,1
+	db	3,'RRC',8,0,2
+	db	3,'RRD',0EDh,067h,1
+	db	3,'RST',0C7h,0,5
+	db	3,'SBC',18h,42h,6
+	db	3,'SCF',037h,0,1
+	db	3,'SET',0C0h,0,12
+	db	3,'SLA',20h,0,2
+	db	3+Z180,'SLP',0EDh,76h,1
+	db	3,'SRA',28h,0,2
+	db	3,'SRL',38h,0,2
+	db	3,'SUB',10h,0,6
+	db	3+Z180,'TST',1,0,14
+	db	3,'XOR',28h,0,6
+NUMOP3	equ	($ - OPCOD3)/(3+4)
+
+OPCOD4:	db	4,'.ODD',20,1,27
+	db	4,'.Z80',19,0,27
+	db	4+Z280,'ADDW',0C6h,0,15
+	db	4,'ASEG',15,0,27
+	db	4,'ASET',1,1,27
+	db	4,'CALL',0CDh,0,3
+	db	4,'CPDR',0EDh,0B9h,1
+	db	4,'CPIR',0EDh,0B1h,1
+	db	4,'CSEG',13,0,27
+	db	4+Z280,'DECW',0,0Bh,16
+	db	4,'DEFB',3,0,27
+	db	4,'DEFC',3,1,27
+	db	4,'DEFL',1,1,27
+	db	4,'DEFM',3,0,27
+	db	4,'DEFS',2,0,27
+	db	4,'DEFW',4,0,27
+	db	4,'DEFZ',3,2,27
+	db	4+Z280,'DIVU',0C5h,0,17
+	db	4+Z280,'DIVW',0CAh,0,18
+	db	4,'DJNZ',10h,0,4
+	db	4,'DSEG',14,0,27
+	db	4,'ELSE',9,0,27
+	db	4,'ENDM',25,0,27
+	db	4+Z280,'EPUF',0EDh,97h,1
+	db	4+Z280,'EPUI',0EDh,9Fh,1
+	db	4+Z280,'EPUM',0EDh,84h,26
+	db	4+Z280,'EXTS',0EDh,64h,23
+	db	4,'FORM',7,0,27
+	db	4,'HALT',76h,0,1
+	db	4,'IFNB',8,8,27
+	db	4+Z280,'INCW',0,03h,16
+	db	4,'INDR',0EDh,0BAh,1
+	db	4+Z280,'INDW',0EDh,8Ah,1
+	db	4,'INIR',0EDh,0B2h,1
+	db	4+Z280,'INIW',0EDh,82h,1
+	db	4,'IRPC',24,3,27
+	db	4,'LDDR',0EDh,0B8h,1
+	db	4,'LDIR',0EDh,0B0h,1
+	db	4+Z280,'LDUD',86h,0,21
+	db	4+Z280,'LDUP',96h,0,21
+	db	4,'LIST',11,0,27
+	db	4+Z280,'MEPU',0EDh,85h,26
+	db	4+Z280,'MULT',0C0h,0,22
+	db	4,'NAME',21,0,27
+	db	4+Z180,'OTDM',0EDh,8Bh,1
+	db	4,'OTDR',0EDh,0BBh,1
+	db	4+Z180,'OTIM',0EDh,83h,1
+	db	4,'OTIR',0EDh,0B3h,1
+	db	4+Z180,'OUT0',3,0,7
+	db	4,'OUTD',0EDh,0ABh,1
+	db	4,'OUTI',0EDh,0A3h,1
+	db	4+Z280,'OUTW',7,0,7
+	db	4,'PAGE',7,1,27
+	db	4,'PUSH',0C5h,0,9
+	db	4,'REPT',24,1,27
+	db	4,'RETI',0EDh,4Dh,1
+	db	4,'RETN',0EDh,45h,1
+	db	4,'RLCA',07h,0,1
+	db	4,'RQST',28,0,27
+	db	4,'RRCA',0Fh,0,1
+	db	4+Z280,'SUBW',0CEh,0,15
+	db	4+Z280,'TSET',30h,0,2
+	db	4+Z280,'TSTI',5,0,7
+NUMOP4	equ	($ - OPCOD4)/(4+4)
+
+OPCOD5:	db	5,'.EVEN',20,0,27
+	db	5,'.LALL',11,9,27
+	db	5,'.LIST',11,1,27
+	db	5,'.SALL',11,11,27
+	db	5,'.XALL',11,10,27
+	db	5,'.Z180',19,1,27
+	db	5,'.Z280',19,2,27
+	db	5+Z280,'DIVUW',0CBh,0,18
+	db	5,'EJECT',7,0,27
+	db	5,'ENDIF',10,0,27
+	db	5,'ENTRY',17,0,27
+	db	5,'EXITM',26,0,27
+	db	5,'EXTRN',18,0,27
+	db	5,'IDENT',22,0,27
+	db	5,'IFDEF',8,5,27
+	db	5,'IFDIF',8,10,27
+	db	5,'IFIDN',8,9,27
+	db	5,'IFZ80',8,11,27
+	db	5+Z280,'INDRW',0EDh,9Ah,1
+	db	5+Z280,'INIRW',0EDh,92h,1
+	db	5+Z280,'LDCTL',0,0,20
+	db	5,'LOCAL',27,0,27
+	db	5,'MACRO',24,0,27
+	db	5+Z280,'MULTU',0C1h,0,22
+	db	5+Z280,'MULTW',0C2h,0,15
+	db	5+Z180,'OTDMR',0EDh,9Bh,1
+	db	5+Z280,'OTDRW',0EDh,9Bh,1
+	db	5+Z180,'OTIMR',0EDh,93h,1
+	db	5+Z280,'OTIRW',0EDh,93h,1
+	db	5+Z280,'OUTDW',0EDh,8Bh,1
+	db	5+Z280,'OUTIW',0EDh,83h,1
+	db	5+Z280,'RETIL',0EDh,55h,1
+	db	5,'TITLE',12,0,27
+	db	5+Z180,'TSTIO',4,0,7
+NUMOP5	equ	($ - OPCOD5)/(5+4)
+
+OPCOD6:	db	6,'.PHASE',29,0,27
+	db	6,'.RADIX',30,0,27
+	db	6,'.XLIST',11,2,27
+	db	6,'COMMON',16,0,27
+	db	6,'GLOBAL',17,0,27
+	db	6,'IFNDEF',8,6,27
+	db	6,'IFZ180',8,12,27
+	db	6,'IFZ280',8,13,27
+	db	6,'MACLIB',23,1,27
+	db	6+Z280,'MULTUW',0C3h,0,15
+	db	6+Z280,'PCACHE',0EDh,65h,1
+	db	6,'PUBLIC',17,0,27
+	db	6,'SUBTTL',12,1,27
+NUMOP6	equ	($ - OPCOD6)/(6+4)
+
+OPCOD7:	db	7,'.LFCOND',11,3,27
+	db	7,'.PRINTX',31,0,27
+	db	7,'.SFCOND',11,4,27
+	db	7,'INCLUDE',23,0,27
+NUMOP7	equ	($ - OPCOD7)/(7+4)
+
+OPCOD8:	db	8,'.COMMENT',32,0,27
+	db	8,'.DEPHASE',29,1,27
+	db	8,'.REQUEST',28,0,27
+NUMOP8	equ	($ - OPCOD8)/(8+4)
+
+	db	0
+
+	.LIST
+
+	SUBTTL	Common Data Area
+
+	DSEG
+
+;-----------------------------------------------------------------------
+;		COMMON DATA AREA
+;-----------------------------------------------------------------------
+
+HOFMSG:	db	0Ch,'ZSM ',VER1,'.',VER2,TAB,'Source file: '
+HOFNAM:	db	'         ',TAB
+HOFDAT:	db	'             '
+HOFTIM:	db	'        ',TAB,'Page '
+HOFPG:	db	'    '
+HOFEND:	db	0
+
+HDRBUF:	ds	HDRSZ	; line header buffer
+REC:	ds	RECMAX	; input line, must follow HDRBUF
+
+TITLEB:	ds	81	; title buffer (80 chars + trailing null)
+SBTTLB:	ds	61	; subtitle buffer (60 chars + trailing null)
+
+IDLEN:	ds	1	; length of identifier
+IDBUF:	ds	IDMAX	; current identifier
+
+NAMLEN:	db	6	; max REL symbol length (5..8)
+
+MODNAM:	ds	1	; length
+	ds	8	; module name
+MODIDN:	ds	1	; length
+	ds	8	; module ID
+
+CPU:	ds	1	; target CPU type: 0=Z80, 1=Z180, 2=Z280
+DEFCPU:	ds	1	; default CPU type from command line
+PC:	ds	2	; current program counter
+ASEGPC:	ds	2	; current absolute segment counter
+CSEGPC:	ds	2	; current code segment counter
+DSEGPC:	ds	2	; current data segment counter
+LEN:	ds	1	; length of current instruction
+LENDS:	ds	2	; for DEFS
+CURSEG:	ds	1	; current segment: 40h=CODE, 80h=DATA, C0h=COMMON
+CSSIZE:	ds	2	; code segment size
+DSSIZE:	ds	2	; data segment size
+CURCMN:	ds	2	; pointer to current COMMON segemt
+LASTCM:	ds	2	; pointer to last selected COMMON segment
+PTR1:	ds	2	; points to next char in REC
+PASSNO:	ds	1	; current pass: 0=pass 1, FF=pass 2
+CURLNE:	ds	1	; current line number for paging output
+EQUFLG:	ds	1	; if non-zero VAL is used instead of PC for print
+LBLFLG:	ds	1	; if non-zero, force PC output to listing
+DSFLAG:	ds	1	; if non-zero LENDS is used for print
+DBWFLG:	ds	1	; DB/DC/DW flag
+NEWSYM:	ds	1	; new symbol flag
+ENDADR:	ds	2	; expression value on END statement
+ENDMOD:	ds	1	; expression result mode on END statement
+EFLG:	ds	1	; end of program flag (to allow printing of END stmt)
+OPCODE:	ds	2	; current opcode from symbol table
+RADIX:	ds	2	; default radix for numeric conversion
+COMNTC:	ds	1	; .COMMENT delimiter char
+
+VAL:	ds	2	; return from EVAL routine	!   do   !
+EVMODE:	ds	1	; expression result mode	!  not   !
+EXTCHN:	ds	2	; External chain address	! change !
+CMNPTR:	ds	2	; pointer to COMMON segment	! order  !
+
+SAVVAL:	ds	2	; saved contents of VAL		!   do   !
+SAVMOD:	ds	1	; saved contents of EVMODE	!  not   !
+SAVCHN:	ds	2	; saved contents of EXTCHN	! change !
+SAVCMN:	ds	2	; saved contents of CMNPTR	! order  !
+
+LPFLAG:	ds	1	; listing line pending flag
+LSTCNT:	ds	1	; character count of object code field in listing
+LFLAG:	ds	1	; listing flag:'A-D' = PRN file destn drive
+			; 'Z' = no listing; 'X' = listing to screen
+			; 'Y' = listing to screen, errors echoed to printer
+			; 'P' = listing to printer
+OFLAG:	ds	1	; object flag: 'Z' = no obj, 'A-D' = REL file destn drive
+QFLAG:	ds	1	; quiet flag
+UMODE:	ds	1	; if set, treat all undefined symbols as externals
+ZERODS:	ds	1	; if set, initialize DEFS memory to zeros
+ERRFLG:	ds	1	; error character for this line
+ERRCNT:	ds	2	; error count
+MACFLG:	ds	1	; MACRO expansion flag for listing
+SYMPTR:	ds	2	; address of next symbol table entry
+MAXMEM:	ds	2	; maximum usable memory address
+DSPTR:	ds	2	; pointer to start of dynamic storage
+PCFLAG:	ds	1	; PC relative value in EVAL
+UFLAG:	ds	1	; undefined flag from EVAL, 0 = all ok, 1 or >1 = undefined
+EVFLGS:	ds	1	; flag field from last SYMLUK
+LSTOPT:	ds	1	; list options
+IFLIST:	ds	1	; set true to suppress listing on IF, ELSE, ENDIF
+			;  when "LIST NOCOND" is current.
+NOLIST:	ds	1	; set to true to avoid listing TITLE, FORM, PAGE, EJECT
+PHFLAG:	ds	1	; .PHASE flag
+PHDIFF:	ds	2	; .PHASE offset
+
+CONDSP:	dw	CNDSTK	; conditionals stack pointer
+	ds	CSTKSZ	; conditionals stack
+CNDSTK:	db	0FFh	; we always start true
+CLEVEL:	db	0	; conditionals stack level
+
+SYMMOD:	ds	1	; symbol address mode
+SYMADR:	ds	2	; address of data field for last SYMENT
+IDADR:	ds	2	; address of ID field for last SYMENT
+
+;-----------------------------------------------------------------------
+;
+;	Each symbol table entry is of varying length.
+;
+;	The first byte contains the length in the lower 4 bits
+;	and flags in the upper 4 bits.
+;
+;	This limits the max length of an identifier to 16 bytes.
+;
+;	Following the flag/length byte is the name which may be from
+;	1 to IDMAX bytes in length.
+;
+;	Following the name are 2 bytes of value (lo,hi), 1 byte
+;	of address mode and 2 extra value bytes (used. e.g by
+;	COMMON variables).
+;
+;	The table is scanned sequentially and is ended by a 00 byte.
+;
+;-----------------------------------------------------------------------
+
+SYMTBL:	ds	2	; address of first available sym table slot
+
+	END

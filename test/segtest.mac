@@ -1,0 +1,28 @@
+	cseg
+	db	1,2,3
+	db	4,5,6
+	db	7,8,9
+	dseg
+	db	10h,11h,12h,13h,14h
+	aseg
+	db	-1,-2,-3,-4
+	dseg
+d1:	db	10,11,12
+	cseg
+c1:	db	15h,16h,17h,18h,19h
+	aseg
+	db	-5,-6,-7,-8
+	.z280
+	cseg
+	extrn	e1,e2
+	ldw	<c1>,d1
+	ldw	(c1),d1
+	ldw	<d1>,c1
+	ldw	(d1),c1
+	ldw	<e1>,c1
+	ldw	(e1),d1
+	ldw	<c1>,e1
+	ldw	(c1),e1
+	ldw	<e1>,e2
+	ldw	(e1),e2
+	end	1234h

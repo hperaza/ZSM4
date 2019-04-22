@@ -1,0 +1,25 @@
+	cseg
+
+m1	macro
+	db	'abcdefghijklmnopqrstuvwxyz'
+	endm
+
+m2	macro
+	m1
+	db	'0123456789'	;cccccccccccccccccccccccccccccccc
+	endm
+
+m3	macro
+	m2
+	dw	1,2,3,4,5	;wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+	dw	6,7,8,9,0	;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	endm
+
+m	macro
+	m3			;m3m3m3m3m3m3m3m3m3m3m3m3m3m3m3m3
+	endm
+
+	m
+
+	end
+	

@@ -1,0 +1,994 @@
+;**********************************************************************;
+;                                                                      ;
+;   This file is part of ZSM4, a Z80/Z180/Z280 relocatable macro-      ;
+;   assembler in Z80 assembly. Copyright (C) 2017-2019, Hector Peraza. ;
+;                                                                      ;
+;   This program is free software; you can redistribute it and/or      ;
+;   modify it under the terms of the GNU General Public License as     ;
+;   published by the Free Software Foundation; either version 2 of     ;
+;   the License, or (at your option) any later version.                ;
+;                                                                      ;
+;   This program is distributed in the hope that it will be useful,    ;
+;   but WITHOUT ANY WARRANTY; without even the implied warranty of     ;
+;   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      ;
+;   GNU General Public License for more details.                       ;
+;                                                                      ;
+;   You should have received a copy of the GNU General Public License  ;
+;   along with this program; if not, write to the Free Software        ;
+;   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.          ;
+;                                                                      ;
+;**********************************************************************;
+
+	TITLE	Z80 Assembler - System-dependent routines - RSX180 version
+
+	.Z80
+
+	include	ZSM.INC
+
+	include	SYSFN.INC
+	include	FCB.INC
+	include	GCML.INC
+	include	TCB.INC
+	include	FCSLIB.INC
+	include	ERRORS.INC
+
+;	rqst	SYSLIB,FCSLIB
+
+	public	GNB,WNB,WNB2,CLINE,WLINE,REWIND,CLSINP
+	public	CLOSE1,CLOSE2,OPNLIB,CLSLIB,INCLVL,INCMEM
+
+	extrn	Z80ASM,HOFNAM,LFLAG,OFLAG,QFLAG,ERRFLG,CMPHD
+	extrn	MAXMEM,SYMTBL,VALID,MALLOC,MFREE,FNDREC,NAMLEN
+	extrn	FNDNXT,DSPTR,PTR1,HOFDAT,HOFTIM,CNV2HX,UMODE
+	extrn	ZERODS,DEFCPU,RADIX,CMNPTR
+
+	extrn	GCML,RCML,UCASE,PERROR,TTFLSH,PUTCH,PUTSTR
+	extrn	PFN,FOPEN,FCREAT,FGETCH,FPUTCH,FCLOSE,FPOS
+	extrn	INIFCB,FSEEK,HLDEC,BCD2BIN
+
+ESC	equ	1Bh
+
+LUNCML	equ	1		; LUN for command file
+LUNOBJ	equ	2		; LUN for object file
+LUNLST	equ	3		; LUN for listing file
+LUNMAC	equ	6		; LUN 6 is used for source file
+				; and 7,8,9,10,11 for INCLUDE files
+
+	cseg
+
+;-----------------------------------------------------------------------
+
+	SUBTTL	Initializations
+
+;	Command syntax is as follows:
+;
+;	    MAC [objfile][,[lstfile]]=srcfile[/option][/option...]
+;	 or
+;	    MAC @cmdfile
+;
+;       where option can be:
+;
+;	    /L		force generation of listing file
+;	    /Sn		set max length of symbols in REL file (default = 6)
+;	    /U		assume all Undefined symbols are External
+;	    /M		initialize DEFS data areas to zero
+;	    /Zn		set initial processor type to Z80, Z180 or Z280
+;			(n=0, 1 or 2 respectively; defaults to 0 = Z80)
+;	    /Dsym[=val]	define symbol and optionally assign a value to it
+
+START:	ld	sp,STACK
+	call	INIT		; get task name and set prompt
+
+m1:	call	TTFLSH
+	ld	iy,GDAT
+	call	GCML		; get command line tail
+	jr	c,m2		; jump on error
+
+	ld	(PTR1),hl	; save pointer to command tail
+	call	PROCESS		; process the command
+	jr	m1		; loop for more
+
+m2:	cp	E.EOF		; end of file?
+	jr	z,m3		; exit normally if yes
+
+	call	CMLERR		; else display error
+	ld	iy,GDAT
+	call	RCML		; reset command state
+	jr	m1		; and loop
+	
+m3:	call	TTFLSH
+	ld	hl,EX.SUC
+	SC	.EXIT		; exit
+
+;-----------------------------------------------------------------------
+
+; Get task name and setup default prompt
+
+INIT:	ld	hl,0
+	ld	de,TSKTCB
+	SC	.GTSK		; get task info
+	ld	hl,TSKTCB+T.NAME
+	call	ckdots		; skip initial 3 dots if present
+	push	hl
+	ld	de,(GDAT+G.PRM)	; set prompt to our task name
+	inc	de
+	inc	de
+	ld	bc,3
+	ldir
+	pop	hl
+	ld	de,errpfx+2	; set task name in error message prefix
+	ld	bc,3
+	ldir
+	ret
+
+ckdots:	ld	b,3
+	push	hl
+ckd1:	ld	a,(hl)
+	cp	'.'
+	jr	nz,ckd2
+	inc	hl
+	djnz	ckd1
+	inc	sp
+	inc	sp
+	ret
+ckd2:	pop	hl
+	ret
+
+;-----------------------------------------------------------------------
+
+; Print error message in the form 'MAC -- message'.
+
+CMDERR:	ld	hl,snerr
+ERROR:	push	hl
+	ld	hl,errpfx
+	call	PUTSTR
+	pop	hl
+	call	PUTSTR
+	call	ATLINE
+	ld	c,CR
+	call	PUTCH
+	scf
+	ret
+
+snerr:	db	'Command syntax error',0
+
+; Like the above one, but displays a standard error message.
+
+SYSERR:	push	af
+	ld	hl,errpfx
+	call	PUTSTR
+	pop	af
+	call	PERROR
+	call	ATLINE
+	ld	c,CR
+	call	PUTCH
+	scf
+	ret
+
+; Display GCML or system error message
+
+CMLERR:	or	a
+	jp	m,SYSERR
+	ld	hl,ERROR
+	push	hl
+	cp	GE.OK		; check for GCML codes
+	ld	hl,msgok
+	ret	z
+	cp	GE.SN
+	ld	hl,snerr
+	ret	z
+	cp	GE.LEN
+	ld	hl,msglen
+	ret	z
+	cp	GE.NLV
+	ld	hl,msgnlv
+	ret	z
+	pop	hl
+	jp	SYSERR		; else is a system error
+
+msgok:	db	'No error',0
+msglen:	db	'Line too long in command file',0
+msgnlv:	db	'Command nesting level too deep',0
+
+; Display line number of indirect file where error happened
+
+ATLINE:	ld	hl,GDAT+G.ST
+	bit	GS.FIL,(hl)	; command line active?
+	ret	z		; return if not, command is from terminal
+	ld	hl,(GDAT+G.LN)
+	ld	a,h		; ensure line number is valid
+	or	l
+	ret	z
+	push	hl
+	ld	hl,atln
+	call	PUTSTR
+	pop	hl
+	xor	a
+	call	HLDEC
+	ret
+
+atln:	db	' at line ',0
+
+;-----------------------------------------------------------------------
+
+; Get next non-blank char. Returns Z flag set on end of line.
+
+GETNB:	ld	a,(de)
+	call	ISEOL
+	ret	z
+	cp	' '
+	ret	nz
+	inc	de
+	jr	GETNB
+
+; Return Z if char in A is end-of-line.
+
+ISEOL:	or	a
+	ret	z
+	cp	CR
+	ret	z
+	cp	LF
+	ret	z
+	cp	ESC
+	ret	z
+	cp	EOF
+	ret
+
+;-----------------------------------------------------------------------
+
+; Parse the command line, get file names and options
+
+PARSE:	ld	hl,(SYMTBL)
+	ld	(SYMPTR##),hl
+	ld	(hl),0		; reset symbol table
+	ld	hl,(MAXMEM)
+	ld	(DSPTR##),hl
+	ld	(hl),0		; reset dynamic memory storage
+
+	xor	a		; setup default options
+	ld	(UMODE),a	; Undefined symbols do not default to External
+	ld	(ZERODS),a	; no DS zeroing
+	ld	(DEFCPU),a	; CPU is Z80
+	ld	(OPTSW),a
+	ld	a,6
+	ld	(NAMLEN),a	; REL symbol length = 6
+	ld	hl,10
+	ld	(RADIX),hl	; default radix = 10 (for /D option)
+	ld	hl,0
+	ld	(CMNPTR),hl	; clear COMMON pointer (for /D option)
+
+	ld	hl,(PTR1)
+	ld	ix,OFNAME
+	call	PFN		; parse object file name
+	jp	c,CMDERR
+	ld	ix,LFNAME
+	call	INIFCB		; no listing file unless explicitly indicated
+	ld	a,(hl)		; see where PFN stopped
+	cp	','
+	jr	nz,par0
+	ld	a,(OPTSW)
+	or	01h
+	ld	(OPTSW),a
+	inc	hl
+	call	PFN		; parse listing file name
+	jp	c,CMDERR
+	ld	a,(hl)
+par0:	cp	'='
+	jp	nz,CMDERR	; must be equal sign
+	inc	hl
+	ld	ix,IFNAME
+	call	PFN		; parse input file name
+	jp	c,CMDERR
+	ld	(PTR1),hl
+par1:	ld	de,(PTR1)
+par2:	call	GETNB		; get next non-blank char
+	call	ISEOL		; end of line?
+	ret	z		; return if yes
+	cp	'/'		; switch?
+	jp	nz,CMDERR	; error if not
+	inc	de
+	ld	a,(de)		; get switch
+	or	a
+	jp	z,CMDERR
+	inc	de
+	ld	(PTR1),de
+	call	UCASE
+	cp	'L'		; /L (force listing)
+	jr	z,swlst
+	cp	'Z'		; /Zcpu (default CPU type)
+	jr	z,swcpu
+	cp	'D'		; /Dsymbol[=value] (define symbol)
+	jr	z,swdef
+	cp	'S'		; /Sn (set max REL symbol length)
+	jr	z,swlen
+	cp	'X'		; /X (generate cross-ref data)
+	jp	z,swxrf
+	cp	'U'		; /U (assume undefined are externals)
+	jp	z,swuex
+	cp	'M'		; /M (init DS to zeros)
+	jp	z,swzds
+	cp	'I'		; /Idir (define INCLUDE dir)
+	jp	z,swinc
+	jp	CMDERR
+
+swlst:	ld	a,(OPTSW)
+	or	02h
+	ld	(OPTSW),a
+	jr	par1
+
+swcpu:	ld	a,(de)
+	sub	'0'
+	jp	c,CMDERR
+	cp	2+1
+	jp	nc,CMDERR
+	ld	(DEFCPU),a	; set CPU type
+	inc	de
+	jr	par2
+
+swdef:	ld	(PTR1),de	; set text pointer for ID routine
+	call	ID##
+	ld	a,(IDLEN##)
+	or	a
+	jp	z,CMDERR	; symbol name required
+	call	GNC##
+	cp	'='
+	ld	hl,0
+	jr	nz,def0		; if no value specified, assume 0
+	call	INT##		; else convert value
+	ld	hl,(INTBUF##)
+def0:	ld	(VAL##),hl
+	ld	a,GBLSYM	; symbol is Global
+	ld	(SYMMOD##),a
+	call	ADDSYM##	; enter symbol
+;	jp	c,...		; error - can't enter symbol (unlikely)
+;	jp	z,...		; error - multiple defines (ignore/redefine)
+	ld	hl,(IDADR##)
+	ld	a,(hl)
+	and	0Fh		; clear undef bit
+	add	a,EQUNAME	; treat like EQU
+	ld	(hl),a
+	jp	par1
+
+swlen:	ld	a,(de)
+	cp	'5'
+	jp	c,CMDERR
+	cp	'8'+1
+	jp	nc,CMDERR
+	sub	'0'
+	ld	(NAMLEN),a	; set REL symbol length
+	inc	de
+	jp	par2
+
+swuex:	ld	a,1
+	ld	(UMODE),a
+	jp	par1
+
+swzds:	ld	a,1
+	ld	(ZERODS),a
+	jp	par1
+
+swinc:
+	;...
+	jp	par1
+
+swxrf:
+	;...
+	jp	par1
+
+addhla:	add	a,l
+	ld	l,a
+	ret	nc
+	inc	h
+	ret
+
+chkeq:	ld	hl,(PTR1)
+	ld	a,(hl)
+	cp	'='
+	ret	nz
+	inc	hl
+	ld	(PTR1),hl
+	ret
+
+;----------------------------------------------------------------------
+
+; Process the command
+
+PROCESS:
+	; initialize variables
+
+	ld	hl,(TSKTCB+T.END)
+;;	dec	hl
+	ld	(MAXMEM),hl	; save max memory address
+	ld	hl,($MEMRY)
+	ld	(SYMTBL),hl	; save start of symbol table
+;	ld	(SYMPTR),hl
+
+	ld	iy,FFLAGS
+	ld	(iy),0
+
+	; parse the command line and setup header fields
+
+	call	PARSE
+	ret	c		; return on error
+
+	; open input file
+
+	ld	a,(IFNAME+F.ATTR)
+	and	FN.EXT
+	jr	nz,proc1
+
+	ld	hl,MACEXT
+	ld	de,IFNAME+F.EXT
+	ld	bc,3
+	ldir
+
+	ld	a,(IFNAME+F.ATTR)
+	or	FN.EXT
+	ld	(IFNAME+F.ATTR),a
+
+proc1:	ld	ix,IOB1
+	ld	a,LUNMAC
+	ld	(ix+FC.LUN),a
+	ld	(ix+FC.MODE),1 SHL FM.RD
+	call	FOPEN
+	jp	c,SYSERR
+
+	ld	hl,CLSFIL
+	push	hl
+
+	set	0,(iy)
+
+	; create object file
+
+	ld	a,(OFNAME+F.ATTR)
+	or	a		; output file specified?
+	jr	nz,proc2	; branch if yes
+	ld	c,a
+	ld	a,(OPTSW)
+	and	01h		; comma present (no object wanted)?
+	ld	a,'Z'
+	ld	(OFLAG),a
+	jr	nz,proc5	; skip object file creation if yes
+
+	ld	a,'@'
+	ld	(OFLAG),a
+	ld	a,c
+
+proc2:	and	FN.NAME		; name specified?
+	jr	nz,proc3	; branch if yes
+
+	ld	hl,IFNAME+F.NAME
+	ld	de,OFNAME+F.NAME
+	ld	bc,9
+	ldir			; if no output name given use input.OBJ
+
+	ld	a,(OFNAME+F.ATTR)
+	or	FN.NAME
+	ld	(OFNAME+F.ATTR),a
+
+proc3:	ld	a,(OFNAME+F.ATTR)
+	and	FN.EXT		; extension specified?
+	jr	nz,proc4	; branch if yes
+
+	ld	hl,OBJEXT	; else use .OBJ
+	ld	de,OFNAME+F.EXT
+	ld	bc,3
+	ldir
+
+	ld	a,(OFNAME+F.ATTR)
+	or	FN.EXT
+	ld	(OFNAME+F.ATTR),a
+
+proc4:	ld	ix,IOB2
+	ld	(ix+FC.MODE),1 SHL FM.WR
+	ld	de,0
+	ld	c,0		; non-contiguous file
+	call	FCREAT		; create the file
+	jp	c,SYSERR
+
+	set	1,(iy)
+
+	; create listing file
+
+proc5:	ld	a,(LFNAME+F.ATTR)
+	or	a		; listing file specified?
+	jr	nz,proc6
+	ld	c,a
+	ld	a,(OPTSW)
+	and	02h		; /L switch specified?
+	ld	a,'Z'
+	ld	(LFLAG),a
+	jr	z,proc9		; skip listing file creation if not
+
+	ld	a,'@'
+	ld	(LFLAG),a
+	ld	a,c
+
+proc6:	and	FN.NAME
+	jr	nz,proc7
+
+	ld	hl,IFNAME+F.NAME
+	ld	de,LFNAME+F.NAME
+	ld	bc,9
+	ldir			; if no output name given use input.LST
+
+	ld	a,(LFNAME+F.ATTR)
+	or	FN.NAME
+	ld	(LFNAME+F.ATTR),a
+
+proc7:	ld	a,(LFNAME+F.ATTR)
+	and	FN.EXT
+	jr	nz,proc8
+
+	ld	hl,LSTEXT
+	ld	de,LFNAME+F.EXT
+	ld	bc,3
+	ldir
+
+	ld	a,(LFNAME+F.ATTR)
+	or	FN.EXT
+	ld	(LFNAME+F.ATTR),a
+
+proc8:	ld	ix,IOB3
+	ld	(ix+FC.MODE),1 SHL FM.WR
+	ld	de,0
+	ld	c,0		; non-contiguous file
+	call	FCREAT
+	jp	c,SYSERR
+
+	set	2,(iy)
+
+	; header line message
+
+proc9:	ld	hl,IFNAME+F.NAME
+	ld	de,HOFNAM
+	ld	bc,9
+	ldir			; set file name
+
+	ld	hl,-8
+	add	hl,sp		; allocate 8-byte buffer
+	ld	sp,hl
+	SC	.GDAT		; get system time
+	jr	c,dt1
+
+	ld	ix,0
+	add	ix,sp
+
+	ld	hl,HOFDAT	; address to store date
+	ld	a,(ix+3)	; day
+	call	CNV2HX
+	ld	a,(ix+2)	; month
+	call	BCD2BIN
+	dec	a		; make it base 0
+	add	a,a
+	add	a,a		; *4
+	ex	de,hl		; DE = dst
+	ld	hl,MONTHS
+	call	ADDHLA		; HL = src
+	ld	bc,5
+	ldir			; store month name and separators
+	ex	de,hl
+	ld	a,(ix+0)	; year
+	call	CNV2HX
+	ld	a,(ix+1)	; year
+	call	CNV2HX
+
+	ld	hl,HOFTIM	; address to store time
+	ld	a,(ix+4)	; hours
+	call	CNV2HX
+	ld	(hl),':'
+	inc	hl
+	ld	a,(ix+5)	; min
+	call	CNV2HX
+	ld	(hl),':'
+	inc	hl
+	ld	a,(ix+6)	; sec
+	call	CNV2HX
+
+dt1:	ld	hl,8
+	add	hl,sp
+	ld	sp,hl		; cleanup stack
+
+	xor	a
+	ld	(INCLVL),a
+	dec	a
+	ld	(QFLAG),a
+
+	pop	hl		; the assembler will call the
+				;  file close functions
+	jp	Z80ASM		; call the assembler and return
+
+CLSFIL:	bit	0,(iy)
+	jr	z,clsf1
+	ld	ix,IOB1
+	call	FCLOSE
+clsf1:	bit	1,(iy)
+	jr	z,clsf2
+	ld	ix,IOB2
+	call	FCLOSE
+clsf2:	bit	2,(iy)
+	ret	z
+	ld	ix,IOB3
+	call	FCLOSE
+	ret
+
+MACEXT:	db	'MAC'
+OBJEXT:	db	'OBJ'
+LSTEXT:	db	'LST'
+
+MONTHS:	db	'-Jan-Feb-Mar-Apr-May-Jun-Jul-Aug-Sep-Oct-Nov-Dec-'
+
+	SUBTTL	Console, Printer and File I/O
+
+;	WLINE - Write line to list device and append newline
+;	HL -> buffer, term = null
+
+WLINE:	call	PUTSTR
+	ld	c,LF
+	call	PUTCH
+	ld	c,CR
+	jp	PUTCH
+
+;	CLINE - Write line to console and append newline
+;	HL -> buffer, term = null
+
+CLINE:	ld	c,LF
+	call	PUTCH
+	call	PUTSTR
+	ld	c,CR
+	jp	PUTCH
+
+;	GNB - Get next byte (IOB1)
+
+GNB:	push	ix
+	push	hl
+	push	de
+	push	bc
+	ld	ix,IOB1
+	call	FGETCH
+	jr	nc,GNB1
+	cp	E.EOF
+	call	nz,SYSERR
+	ld	a,EOF
+GNB1:	and	7Fh		; strip parity bit
+	bit	FM.TT,(ix+FC.MODE)
+	jr	z,GNB2
+	cp	CR
+	jr	nz,GNB2
+	ld	a,LF
+GNB2:	pop	bc
+	pop	de	
+	pop	hl
+	pop	ix
+	ret
+
+;	REWIND - Rewind input file
+
+REWIND:	ld	a,(INCLVL)
+	or	a
+	jr	z,REW1
+	call	CLSLIB		; close any open INCLUDE files
+	jr	REWIND
+REW1:	push	ix
+	ld	de,0
+	ld	bc,0
+	ld	ix,IOB1
+	call	FSEEK
+	call	c,SYSERR
+	pop	ix
+	ret
+
+;	CLSINP - Close input file
+
+CLSINP:	ld	a,(INCLVL)
+	or	a
+	jr	z,CLS0
+	call	CLSLIB		; close any open INCLUDE files
+	jr	CLSINP
+CLS0:	ld	ix,IOB1
+	jp	FCLOSE
+
+;	WNB - Write next byte (LST)
+;	Byte in A reg
+
+WNB:	push	ix
+	and	7Fh		; strip parity bit
+	ld	ix,IOB3
+	call	FPUTCH
+	call	c,SYSERR
+	pop	ix
+	ret
+
+;	WNB2 - Write next byte (OBJ)
+
+WNB2:	push	ix
+	ld	ix,IOB2
+	call	FPUTCH
+	call	c,SYSERR
+	pop	ix
+	ret
+
+;	CLOSE1 - Close LST file
+
+CLOSE1:	push	ix
+	ld	ix,IOB3
+	jr	CLOSE
+
+;	CLOSE2 - Close OBJ file
+
+CLOSE2:	push	ix
+	ld	ix,IOB2
+CLOSE:	call	FCLOSE
+	call	c,SYSERR
+	pop	ix
+	ret
+
+;	OPNLIB - Open MACLIB or INCLUDE file
+;	HL points to file name
+;
+;	Input file structure as saved in high memory:
+;
+;	db	STINPF		; type = include/input file state
+;	dw	len		; length of the following fields:
+;	ds	4		;  current file position
+;	ds	1		;  current FC.MODE
+;	db	lun		;  current LUN
+;	ds	FINFSZ		;  current file name block
+
+OPNLIB:	ld	a,(INCLVL)
+	cp	5		; check nested include level
+	jp	nc,FNERR1	; error if above maximum
+
+	push	hl
+	ld	bc,4+1+1+FINFSZ	; file pos + LUN + mode + file name
+	ld	e,STINPF	; type = file
+	call	MALLOC		; allocate block
+	pop	de
+	ret	c		; on error, return
+
+	push	hl		; save block address
+	push	de		; save pointer to file name
+
+	ld	ix,IOB1
+	call	FPOS
+	call	c,SYSERR
+
+	ld	(hl),c		; store file position
+	inc	hl
+	ld	(hl),b
+	inc	hl
+	ld	(hl),e
+	inc	hl
+	ld	(hl),d
+	inc	hl
+
+	ld	a,(IOB1+FC.MODE)
+	ld	(hl),a		; store FC.MODE
+	inc	hl
+
+	ld	a,(IOB1+FC.LUN)
+	ld	(hl),a		; store LUN
+	inc	a
+	ld	(IOB1+FC.LUN),a	; new LUN
+	inc	hl
+
+	ex	de,hl		; DE = address to store FDB
+	ld	hl,IFNAME
+	ld	bc,FINFSZ
+	ldir			; store FDB
+	pop	hl		; restore ptr to filename
+	ld	ix,IFNAME	; FDB address in IX
+	call	PFN		; parse file name
+	push	hl
+	jp	c,FNERR		; bad file name
+
+	ld	a,(ix+F.ATTR)
+	and	FN.EXT
+	jr	nz,OPN1
+	ld	de,IFNAME+F.EXT
+	ld	hl,MACEXT	; default include extension is .MAC
+	ld	bc,3
+	ldir
+
+OPN1:	ld	ix,IOB1
+	ld	(ix+FC.MODE),1 SHL FM.RD
+	call	FOPEN
+	jr	c,FNERR
+
+	pop	hl
+	ex	(sp),hl		; drop block address, save record pointer
+	ld	hl,INCLVL
+	inc	(hl)
+	pop	hl		; restore record pointer
+	or	a
+	ret
+
+FNERR:	pop	hl
+	ex	(sp),hl		; restore block address, save record pointer
+	push	hl		; push block address
+	ld	de,4
+	add	hl,de
+	ld	a,(hl)
+	ld	(IOB1+FC.MODE),a
+	inc	hl
+	ld	a,(hl)
+	ld	(IOB1+FC.LUN),a	; restore old LUN
+	inc	hl
+	ld	de,IFNAME
+	ld	bc,FINFSZ
+	ldir			; restore old FDB
+	pop	hl		; pop block address
+	dec	hl
+	dec	hl
+	dec	hl
+	call	MFREE		; free allocated block
+	pop	hl		; restore record pointer
+FNERR1:	ld	a,'V'
+	ld	(ERRFLG),a	; set error flag
+	scf
+	ret
+
+;	CLSLIB - Close current MACLIB or INCLUDE file
+
+CLSLIB:	ld	a,(INCLVL)
+	or	a
+	ret	z		; nothing to do, no INCLUDEs active
+	dec	a
+	ld	(INCLVL),a
+
+	ld	ix,IOB1
+	call	FCLOSE		; close current file
+
+	ld	c,STINPF
+	call	FNDREC		; get previous file record
+;	jp	c,...		; should not happen
+
+	push	hl		; save start of file record
+	inc	hl
+	inc	hl
+	inc	hl
+
+	ld	c,(hl)		; get starting file position
+	inc	hl
+	ld	b,(hl)
+	inc	hl
+	ld	e,(hl)
+	inc	hl
+	ld	d,(hl)
+	inc	hl
+	ld	a,(hl)		; get FC.MODE
+	ld	(IOB1+FC.MODE),a
+	inc	hl
+	ld	a,(hl)		; get LUN
+	ld	(IOB1+FC.LUN),a
+	inc	hl
+
+	push	bc
+	push	de
+
+	ld	de,IFNAME
+	ld	bc,FINFSZ
+	ldir			; restore FDB
+
+	pop	de
+	pop	bc
+
+	ld	ix,IOB1
+	call	FSEEK		; restore prev file position
+	call	c,SYSERR
+
+	pop	hl		; pop start of record
+	call	MFREE		; release storage
+
+	or	0FFh		; NZ
+	ret
+
+;	INCMEM - Increase memory by extending task limits
+
+INCMEM:	push	de		; save lo-ptr
+	push	bc		; save size
+	ld	hl,2048
+	call	EXTEND
+	jr	c,INC1		; return if failed to extend task limits
+
+	ex	de,hl
+	ld	hl,(MAXMEM)
+	push	hl		; save old top of memory
+	ld	(MAXMEM),de	; set new top
+	ld	bc,(DSPTR)
+	or	a
+	sbc	hl,bc
+	pop	de
+	ld	c,l
+	ld	b,h
+	inc	bc		; BC = size of storage
+	ld	hl,(MAXMEM)
+	ex	de,hl		; HL = old memtop, DE = new memtop
+	push	hl
+	push	de
+	lddr
+	inc	de
+	ld	(DSPTR),de
+	pop	hl		; HL = new memtop
+	pop	de		; DE = old memtop
+	or	a
+	sbc	hl,de
+	ld	c,l		; BC = inc size
+	ld	b,h
+	push	bc
+	ld	c,STMEXP	; find macro expansion record
+	call	FNDREC
+	pop	bc
+INC0:	jr	c,INC2
+	push	hl
+	ld	de,9
+	add	hl,de		; point to macptr field
+	ld	e,(hl)
+	inc	hl
+	ld	d,(hl)
+	ex	de,hl
+	add	hl,bc		; fixup pointer
+	ex	de,hl
+	ld	(hl),d
+	dec	hl
+	ld	(hl),e
+	pop	hl
+	push	bc
+	ld	c,STMEXP
+	call	FNDNXT
+	pop	bc
+	jr	INC0
+
+INC2:	pop	bc		; restore size
+	pop	de		; restore lo-ptr
+	ld	hl,(DSPTR)
+	call	CMPHD
+	ccf
+	ret	nc		; return with HL = new top of memory
+	jr	INCMEM
+
+INC1:	pop	bc
+	pop	de
+	ret
+
+EXTEND:	SC	.EXTSK
+	ret	c
+	ld	hl,0
+	ld	de,TSKTCB
+	SC	.GTSK
+	ret	c
+	ld	hl,(TSKTCB+T.END)
+	ret
+
+;-----------------------------------------------------------------------
+
+	dseg
+
+TSKTCB:	ds	TCBSZ
+
+errpfx:	db	CR,LF,'MAC -- ',0
+
+GDAT:	GCML$	CMDBUF,80,'MAC',LUNCML,2
+
+CMDBUF:	ds	82
+
+OPTSW:	ds	1
+FFLAGS:	ds	1
+
+IOB1:	FSR$	IFNAME,<1 SHL FM.RD>,LUNMAC,9
+IOB2:	FSR$	OFNAME,<1 SHL FM.WR>,LUNOBJ,9
+IOB3:	FSR$	LFNAME,<1 SHL FM.WR>,LUNLST,9
+
+IFNAME:	ds	FINFSZ		; FDB for input file name
+OFNAME:	ds	FINFSZ		; FDB for output file name (OBJ)
+LFNAME:	ds	FINFSZ		; FDB for listing file name (LST)
+
+INCLVL:	ds	1		; nested INCLUDE level
+
+	ds	128
+stack	equ	$
+
+	public	$MEMRY
+$MEMRY:	ds	2
+
+	end	START

@@ -1,0 +1,14 @@
+; .RADIX test
+
+	.radix	2
+	db	10	; 02h
+	.radix	8
+	db	10	; 08h
+	.radix	10
+	db	10	; 0Ah
+	.radix	16
+	db	10	; 10h
+	.radix	5	; error
+	.radix	10	; default
+
+	end

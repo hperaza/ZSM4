@@ -1,0 +1,11 @@
+; COMMON data overlap test
+
+	common	/c1/
+aa:	db	0,1,2
+	common	/c1/
+bb:	db	3,4,5
+dd:	dw	1000
+	public	aa,bb,dd
+
+	end
+	

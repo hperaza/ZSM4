@@ -1,0 +1,60 @@
+	.z80
+
+	cseg
+
+			;M80ZSM
+lm0:			; M  M	lbl redef diff seg	- error
+lm1:
+lm1:			;    	lbl redef same addr+seg	- no error
+
+	public	ep1	; 	PUBLIC EQU		+ no error
+	public	p1	; 	PUBLIC defined		+ no error
+	public	up1	; U  U	PUBLIC undef		- error
+	public	xp1	; U  U	PUBLIC EXTRN		- error
+	public	lm0	;	PUBLIC multiple def	- error
+
+	extrn	x1	; 	EXTRN undef		? error
+	extrn	xp1	; M  M	PUBLIC EXTRN		- error
+	extrn	x2	; 	EXTRN referenced	+ no error
+	extrn	ex1	; M  M	EXTRN EQU		- error
+
+e1	equ	1	; 	EQU symbol		+ no error
+ep1	equ	1	; 	PUBLIC EQU		+ no error
+ex1	equ	1	; M  M	EXTRN EQU		- error
+ed1	equ	1	; M  M	EQU DEFL		- error
+e2	equ	1	; M  M	EQU			+ no error
+e2	equ	2	; M  M	EQU redefined		- error
+e3	equ	1	;	EQU			+ no error
+e3	equ	1	;	EQU redefined as same	+ no error
+de1	equ	2	; M  M	DEFL EQU		- error
+el1	equ	1	; M  M	EQU redef as label	- error
+
+d1	defl	1	;	DEFL symbol		+ no error
+d1	defl	2	;	DEFL redefined		+ no error
+ed1	defl	2	; M  M	EQU DEFL		- error
+de1	defl	1	; M  M	DEFL EQU		- error
+
+	dw	x2	; 	EXTRN referenced	+ no error
+	dw	x3##	; 	EXTRN referenced	+ no error
+p1:	dw	1	; 	PUBLIC defined		+ no error
+
+el1:	dw	1	; M  M	EQU redef as label	- error
+
+le1:	dw	1	; M  M	label redef as EQU	- error
+le1	equ	1	; M  M	label redef as EQU	- error
+ld1:	dw	2	; M  M	label redef as DEFL	- error
+ld1	defl	2	; M  M	label redef as DEFL	- error
+
+	dw	up1	; U  U	label undef		- error, unless /U
+
+	dw	zz1	;				- no error
+	dw	zz1##	;				- no error
+
+	dw	zz2##	;				- no error
+	dw	zz2	;				- no error
+
+	dseg
+
+lm0:			; M  M	label redef as diff seg - error
+
+	end

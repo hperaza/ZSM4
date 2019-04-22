@@ -1,0 +1,167 @@
+	cseg
+
+v8	equ	55h
+v16	equ	5555h
+
+reloc	equ	$
+
+	extrn	ext
+
+	.z80
+
+	add	a,v8		; OK
+	add	a,v16		; error
+	add	a,reloc		; error
+	add	a,ext		; error
+
+	adc	a,(ix+v8)	; OK
+	adc	a,(ix+v16)	; error
+	adc	a,(ix+reloc)	; error
+	adc	a,(ix+ext)	; error
+
+	inc	(ix+v8)		; OK
+	inc	(ix+v16)	; error
+	inc	(ix+reloc)	; error
+	inc	(ix+ext)	; error
+
+	ld	a,v8		; OK
+	ld	a,v16		; error
+	ld	a,reloc		; error
+	ld	a,ext		; error
+
+	ld	c,v8		; OK
+	ld	c,v16		; error
+	ld	c,reloc		; error
+	ld	c,ext		; error
+
+	ld	hl,v8		; OK
+	ld	hl,v16		; OK
+	ld	hl,reloc	; OK
+	ld	hl,ext		; OK
+
+	ld	a,(ix+v8)	; OK
+	ld	a,(ix+v16)	; error
+	ld	a,(ix+reloc)	; error
+	ld	a,(ix+ext)	; error
+
+	ld	(ix+v8),a	; OK
+	ld	(ix+v16),a	; error
+	ld	(ix+reloc),a	; error
+	ld	(ix+ext),a	; error
+
+	ld	(ix+v8),v8	; OK
+	ld	(ix+v16),v8	; error
+	ld	(ix+reloc),v8	; error
+	ld	(ix+ext),v8	; error
+
+	ld	(ix+v8),v8	; OK
+	ld	(ix+v8),v16	; error
+	ld	(ix+v8),reloc	; error
+	ld	(ix+v8),ext	; error
+
+	ld	(hl),v8		; OK
+	ld	(hl),-v8	; OK
+	ld	(hl),v16	; error
+	ld	(hl),reloc	; error
+	ld	(hl),ext	; error
+
+	in	a,(v8)		; OK
+	in	a,(v16)		; error
+	in	a,(reloc)	; error
+	in	a,(ext)		; error
+
+	jr	$		; OK
+	jr	v8		; error unless in ASEG or PHASE and in range
+	jr	v16		; error
+	jr	reloc		; OK if in range
+	jr	ext		; error
+
+	.z280
+
+	add	a,v8		; OK
+	add	a,v16		; error
+	add	a,reloc		; error
+	add	a,ext		; error
+
+	adc	a,(ix+v8)	; short
+	adc	a,(ix+v16)	; long
+	adc	a,(ix+reloc)	; long
+	adc	a,(ix+ext)	; long
+
+	inc	(ix+v8)		; short
+	inc	(ix+v16)	; long
+	inc	(ix+reloc)	; long
+	inc	(ix+ext)	; long
+
+	ld	a,v8		; OK
+	ld	a,v16		; error
+	ld	a,reloc		; error
+	ld	a,ext		; error
+
+	ld	c,v8		; OK
+	ld	c,v16		; error
+	ld	c,reloc		; error
+	ld	c,ext		; error
+
+	ld	hl,v8		; OK
+	ld	hl,v16		; OK
+	ld	hl,reloc	; OK
+	ld	hl,ext		; OK
+
+	ld	a,(ix+v8)	; short
+	ld	a,(ix+v16)	; long
+	ld	a,(ix+reloc)	; long
+	ld	a,(ix+ext)	; long
+
+	ld	(ix+v8),a	; short
+	ld	(ix+v16),a	; long
+	ld	(ix+reloc),a	; long
+	ld	(ix+ext),a	; long
+
+	ld	(ix+v8),v8	; short
+	ld	(ix+v8),-v8	; short
+	ld	(ix+v16),v8	; long
+	ld	(ix+reloc),v8	; long
+	ld	(ix+ext),v8	; long
+
+	ld	(ix+v8),v8	; short
+	ld	(ix+v8),-v8	; short
+	ld	(ix+v8),v16	; error
+	ld	(ix+v8),reloc	; error
+	ld	(ix+v8),ext	; error
+
+	ld	(hl),v8		; short
+	ld	(hl),-v8	; short
+	ld	(hl),v16	; long
+	ld	(hl),reloc	; long
+	ld	(hl),ext	; long
+
+	ld	(reloc),v8	; short
+	ld	(reloc),-v8	; short
+	ld	(reloc),v16	; long
+	ld	(reloc),reloc	; long
+	ld	(reloc),ext	; long
+
+	ld	<reloc>,v8	; short
+	ld	<reloc>,-v8	; short
+	ld	<reloc>,v16	; long
+	ld	<reloc>,reloc	; long
+	ld	<reloc>,ext	; long
+
+	in	a,(v8)		; OK
+	in	a,(v16)		; error
+	in	a,(reloc)	; error
+	in	a,(ext)		; error
+
+	di	v8		; OK
+	di	v16		; error
+	di	reloc		; error
+	di	ext		; error
+
+	jr	$		; OK
+	jr	v8		; error unless in ASEG or PHASE and in range
+	jr	v16		; error
+	jr	reloc		; OK if in range
+	jr	ext		; error
+
+	end

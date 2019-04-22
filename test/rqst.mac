@@ -1,0 +1,13 @@
+	.z80
+
+	.request syslib,forlib
+
+	ld	hl,100h
+	ld	de,200h
+	ld	bc,5
+	ldir
+
+	.request extralib
+	.request 0lib		; error - invalid name
+
+	end

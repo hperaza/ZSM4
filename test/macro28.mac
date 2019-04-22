@@ -1,0 +1,15 @@
+t	macro	n
+	local	v
+v	defl	0
+aaaaa&n:rept	n
+	db	v
+v	defl	v+1
+	endm
+	endm
+
+	t	0
+	t	1
+	t	2
+	t	8
+
+	end

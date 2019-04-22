@@ -1,0 +1,3 @@
+	.z80
+	ld	a,xyz
+	end

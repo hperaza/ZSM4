@@ -1,0 +1,4 @@
+	ldw	hl,(hl+0)
+	ld	a,(ix+iy)
+	sc	88
+	end

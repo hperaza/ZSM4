@@ -1,0 +1,9 @@
+	public	pp,qq,rr
+
+	db	33
+
+pp	equ	1234h
+qq	equ	$
+rr:
+
+	end

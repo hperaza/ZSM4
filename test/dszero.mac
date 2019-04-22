@@ -1,0 +1,13 @@
+; Test for /M option
+
+	cseg
+
+test::	ds	10
+	ds	10
+
+	dseg
+
+	ds	100
+
+	end
+	

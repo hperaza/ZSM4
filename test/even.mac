@@ -1,0 +1,17 @@
+; .EVEN pseudo-op test (requires that linker loads the module at word boundary)
+
+	db	0
+	.even
+	db	0,0
+	.even
+	db	0
+	.even
+	db	0
+	.odd
+	db	0
+	.odd
+	db	0,0
+	.odd
+	db	0
+
+	end

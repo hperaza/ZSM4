@@ -1,0 +1,828 @@
+.z80
+		;--------------------------------;
+		; Z80.ASM   set of Z80 mnenomics ;
+;---------------;--------------------------------;--------------;
+; This program was assembled using the Microsoft Assembler	;
+; and linked using the Digital Research linker.			;
+;								;
+; The resulting Z80.COM file was used to test the disassembler	;
+; DISZ80 to confirm all the mnemonics were recreated correctly	;
+;---------------------------------------------------------------;
+	cseg
+
+	call	test1		; single byte operand
+	call	tstjr
+	call	tstjp
+	call	tstret
+	call	tstjph
+
+	call	test2		; double byte operand
+	call	tstjpx
+	call	tstrtn
+	call	tstrti
+	call	tstjpy
+
+	call	test3		; treble byte operand
+
+	ret
+
+test1:		; single byte operand
+
+	nop			;	db	000h
+	ld	bc,$		;	db	001h	!	dw	$-1
+	ld	(bc),a		;	db	002h
+	inc	bc		;	db	003h
+	inc	b		;	db	004h
+	dec	b		;	db	005h
+	ld	b,0		;	db	006h,0
+	rlca			;	db	007h
+	ex	af,af'		;	db	008h
+	add	hl,bc		;	db	009h
+	ld	a,(bc)		;	db	00ah
+	dec	bc		;	db	00bh
+	inc	c		;	db	00ch
+	dec	c		;	db	00dh
+	ld	c,0		;	db	00eh,0
+	rrca			;	db	00fh
+
+	djnz	$		;	db	010h,($-1)-($+1)
+	ld	de,$		;	db	011h	!	dw	$-1
+	ld	(de),a		;	db	012h
+	inc	de		;	db	013h
+	inc	d		;	db	014h
+	dec	d		;	db	015h
+	ld	d,0		;	db	016h,0
+	rla			;	db	017h
+	jr	$		;	db	018h,($-1)-($+1)
+tstjr:
+	add	hl,de		;	db	019h
+	ld	a,(de)		;	db	01ah
+	dec	de		;	db	01bh
+	inc	e		;	db	01ch
+	dec	e		;	db	01dh
+	ld	e,0		;	db	01eh,0
+	rra			;	db	01fh
+
+	jr	nz,$		;	db	020h,($-1)-($+1)
+	ld	hl,$		;	db	021h	!	dw	$-1
+	ld	($),hl		;	db	022h	!	dw	$-1
+	inc	hl		;	db	023h
+	inc	h		;	db	024h
+	dec	h		;	db	025h
+	ld	h,0		;	db	026h,0
+	daa			;	db	027h
+	jr	z,$		;	db	028h,($-1)-($+1)
+	add	hl,hl		;	db	029h
+	ld	hl,($)		;	db	02ah	!	dw	$-1
+	dec	hl		;	db	02bh
+	inc	l		;	db	02ch
+	dec	l		;	db	02dh
+	ld	l,0		;	db	02eh,0
+	cpl			;	db	02fh
+
+	jr	nc,$		;	db	030h,($-1)-($+1)
+	ld	sp,$		;	db	031h	!	dw	$-1
+	ld	($),a		;	db	032h	!	dw	$-1
+	inc	sp		;	db	033h
+	inc	(hl)		;	db	034h
+	dec	(hl)		;	db	035h
+	ld	(hl),0		;	db	036h,0
+	scf			;	db	037h
+	jr	c,$		;	db	038h,($-1)-($+1)
+	add	hl,sp		;	db	039h
+	ld	a,($)		;	db	03ah	!	dw	$-1
+	dec	sp		;	db	03bh
+	inc	a		;	db	03ch
+	dec	a		;	db	03dh
+	ld	a,0		;	db	03eh,0
+	ccf			;	db	03fh
+
+	ld	b,b		;	db	040h
+	ld	b,c		;	db	041h
+	ld	b,d			;	db	042h
+	ld	b,e		;	db	043h
+	ld	b,h		;	db	044h
+	ld	b,l		;	db	045h
+	ld	b,(hl)		;	db	046h
+	ld	b,a		;	db	047h
+	ld	c,b		;	db	048h
+	ld	c,c		;	db	049h
+	ld	c,d		;	db	04ah
+	ld	c,e		;	db	04bh
+	ld	c,h		;	db	04ch
+	ld	c,l		;	db	04dh
+	ld	c,(hl)		;	db	04eh
+	ld	c,a		;	db	04fh
+
+	ld	d,b		;	db	050h
+	ld	d,c		;	db	051h
+	ld	d,d		;	db	052h
+	ld	d,e		;	db	053h
+	ld	d,h		;	db	054h
+	ld	d,l		;	db	055h
+	ld	d,(hl)		;	db	056h
+	ld	d,a		;	db	057h
+	ld	e,b		;	db	058h
+	ld	e,c		;	db	059h
+	ld	e,d		;	db	05ah
+	ld	e,e		;	db	05bh
+	ld	e,h		;	db	05ch
+	ld	e,l		;	db	05dh
+	ld	e,(hl)		;	db	05eh
+	ld	e,a		;	db	05fh
+
+	ld	h,b		;	db	060h
+	ld	h,c		;	db	061h
+	ld	h,d		;	db	062h
+	ld	h,e		;	db	063h
+	ld	h,h		;	db	064h
+	ld	h,l		;	db	065h
+	ld	h,(hl)		;	db	066h
+	ld	h,a		;	db	067h
+	ld	l,b		;	db	068h
+	ld	l,c		;	db	069h
+	ld	l,d		;	db	06ah
+	ld	l,e		;	db	06bh
+	ld	l,h		;	db	06ch
+	ld	l,l		;	db	06dh
+	ld	l,(hl)		;	db	06eh
+	ld	l,a		;	db	06fh
+
+	ld	(hl),b		;	db	070h
+	ld	(hl),c		;	db	071h
+	ld	(hl),d		;	db	072h
+	ld	(hl),e		;	db	073h
+	ld	(hl),h		;	db	074h
+	ld	(hl),l		;	db	075h
+	halt			;	db	076h
+	ld	(hl),a		;	db	077h
+	ld	a,b		;	db	078h
+	ld	a,c		;	db	079h
+	ld	a,d		;	db	07ah
+	ld	a,e		;	db	07bh
+	ld	a,h		;	db	07ch
+	ld	a,l		;	db	07dh
+	ld	a,(hl)		;	db	07eh
+	ld	a,a		;	db	07fh
+
+	add	a,b		;	db	080h
+	add	a,c		;	db	081h
+	add	a,d		;	db	082h
+	add	a,e		;	db	083h
+	add	a,h		;	db	084h
+	add	a,l		;	db	085h
+	add	a,(hl)		;	db	086h
+	add	a,a		;	db	087h
+	adc	a,b		;	db	088h
+	adc	a,c		;	db	089h
+	adc	a,d		;	db	08ah
+	adc	a,e		;	db	08bh
+	adc	a,h		;	db	08ch
+	adc	a,l		;	db	08dh
+	adc	a,(hl)		;	db	08eh
+	adc	a,a		;	db	08fh
+
+	sub	b		;	db	090h
+	sub	c		;	db	091h
+	sub	d		;	db	092h
+	sub	e		;	db	093h
+	sub	h		;	db	094h
+	sub	l		;	db	095h
+	sub	(hl)		;	db	096h
+	sub	a		;	db	097h
+	sbc	a,b		;	db	098h
+	sbc	a,c		;	db	099h
+	sbc	a,d		;	db	09ah
+	sbc	a,e		;	db	09bh
+	sbc	a,h		;	db	09ch
+	sbc	a,l		;	db	09dh
+	sbc	a,(hl)		;	db	09eh
+	sbc	a,a		;	db	09fh
+
+	and	b		;	db	0a0h
+	and	c		;	db	0a1h
+	and	d		;	db	0a2h
+	and	e		;	db	0a3h
+	and	h		;	db	0a4h
+	and	l		;	db	0a5h
+	and	(hl)		;	db	0a6h
+	and	a		;	db	0a7h
+	xor	b		;	db	0a8h
+	xor	c		;	db	0a9h
+	xor	d		;	db	0aah
+	xor	e		;	db	0abh
+	xor	h		;	db	0ach
+	xor	l		;	db	0adh
+	xor	(hl)		;	db	0aeh
+	xor	a		;	db	0afh
+
+	or	b		;	db	0b0h
+	or	c		;	db	0b1h
+	or	d		;	db	0b2h
+	or	e		;	db	0b3h
+	or	h		;	db	0b4h
+	or	l		;	db	0b5h
+	or	(hl)		;	db	0b6h
+	or	a		;	db	0b7h
+	cp	b		;	db	0b8h
+	cp	c		;	db	0b9h
+	cp	d		;	db	0bah
+	cp	e		;	db	0bbh
+	cp	h		;	db	0bch
+	cp	l		;	db	0bdh
+	cp	(hl)		;	db	0beh
+	cp	a		;	db	0bfh
+
+	ret	nz		;	db	0c0h
+	pop	bc		;	db	0c1h
+	jp	nz,$		;	db	0c2h	!	dw	$-1
+	jp	$		;	db	0c3h	!	dw	$-1
+tstjp:
+	call	nz,$		;	db	0c4h	!	dw	$-1
+	push	bc		;	db	0c5h
+	add	a,0		;	db	0c6h,0
+	rst	00		;	db	0c7h
+	ret	z		;	db	0c8h
+	ret			;	db	0c9h
+tstret:
+	jp	z,$		;	db	0cah	!	dw	$-1
+	nop			;	db	0
+	call	z,$		;	db	0cch	!	dw	$-1
+	call	$		;	db	0cdh	!	dw	$-1
+	adc	a,0		;	db	0ceh,0
+	rst	08		;	db	0cfh
+
+	ret	nc		;	db	0d0h
+	pop	de		;	db	0d1h
+	jp	nc,$		;	db	0d2h	!	dw	$-1
+	out	(0),a		;	db	0d3h,0
+	call	nc,$		;	db	0d4h	!	dw	$-1
+	push	de		;	db	0d5h
+	sub	0		;	db	0d6h
+	rst	16		;	db	0d7h
+	ret	c		;	db	0d8h
+	exx			;	db	0d9h
+	jp	c,$		;	db	0dah	!	dw	$-1
+	in	a,(0)		;	db	0dbh,0
+	call	c,$		;	db	0dch	!	dw	$-1
+	nop			;	db	0ddh
+	sbc	a,0		;	db	0deh,0
+	rst	24		;	db	0dfh
+
+	ret	po		;	db	0e0h
+	pop	hl		;	db	0e1h
+	jp	po,$		;	db	0e2h	!	dw	$-1
+	ex	(sp),hl		;	db	0e3h
+	call	po,$		;	db	0e4h	!	dw	$-1
+	push	hl		;	db	0e5h
+	and	0		;	db	0e6h
+	rst	32		;	db	0e7h
+	ret	pe		;	db	0e8h
+	jp	(hl)		;	db	0e9h
+tstjph:
+	jp	pe,$		;	db	0eah	!	dw	$-1
+	ex	de,hl		;	db	0ebh
+	call	pe,$		;	db	0ech	!	dw	$-1
+	nop			;	db	0
+	xor	0		;	db	0eeh
+	rst	40		;	db	0efh
+
+	ret	p		;	db	0f0h
+	pop	af		;	db	0f1h
+	jp	p,$		;	db	0f2h	!	dw	$-1
+	di			;	db	0f3h
+	call	p,$		;	db	0f4h	!	dw	$-1
+	push	af		;	db	0f5h
+	or	0		;	db	0f6h
+	rst	48		;	db	0f7h
+	ret	m		;	db	0f8h
+	ld	sp,hl		;	db	0f9h
+	jp	m,$		;	db	0fah	!	dw	$-1
+	ei			;	db	0fbh
+	call	m,$		;	db	0fch	!	dw	$-1
+	nop			;	db	0
+	cp	0		;	db	0feh
+	rst	56		;	db	0ffh
+
+	ret
+
+
+test2:	;	double byte operand
+
+;	0cbh double byte operand
+	rlc	b		;	db	0cbh,000h
+	rlc	c		;	db	0cbh,001h
+	rlc	d		;	db	0cbh,002h
+	rlc	e		;	db	0cbh,003h
+	rlc	h		;	db	0cbh,004h
+	rlc	l		;	db	0cbh,005h
+	rlc	(hl)		;	db	0cbh,006h
+	rlc	a		;	db	0cbh,007h
+	rrc	b		;	db	0cbh,008h
+	rrc	c		;	db	0cbh,009h
+	rrc	d		;	db	0cbh,00ah
+	rrc	e		;	db	0cbh,00bh
+	rrc	h		;	db	0cbh,00ch
+	rrc	l		;	db	0cbh,00dh
+	rrc	(hl)		;	db	0cbh,00eh
+	rrc	a		;	db	0cbh,00fh
+
+	rl	b		;	db	0cbh,010h
+	rl	c		;	db	0cbh,011h
+	rl	d		;	db	0cbh,012h
+	rl	e		;	db	0cbh,013h
+	rl	h		;	db	0cbh,014h
+	rl	l		;	db	0cbh,015h
+	rl	(hl)		;	db	0cbh,016h
+	rl	a		;	db	0cbh,017h
+	rr	b		;	db	0cbh,018h
+	rr	c		;	db	0cbh,019h
+	rr	d		;	db	0cbh,01ah
+	rr	e		;	db	0cbh,01bh
+	rr	h		;	db	0cbh,01ch
+	rr	l		;	db	0cbh,01dh
+	rr	(hl)		;	db	0cbh,01eh
+	rr	a		;	db	0cbh,01fh
+
+	sla	b		;	db	0cbh,020h
+	sla	c		;	db	0cbh,021h
+	sla	d		;	db	0cbh,022h
+	sla	e		;	db	0cbh,023h
+	sla	h		;	db	0cbh,024h
+	sla	l		;	db	0cbh,025h
+	sla	(hl)		;	db	0cbh,026h
+	sla	a		;	db	0cbh,027h
+	sra	b		;	db	0cbh,028h
+	sra	c		;	db	0cbh,029h
+	sra	d		;	db	0cbh,02ah
+	sra	e		;	db	0cbh,02bh
+	sra	h		;	db	0cbh,02ch
+	sra	l		;	db	0cbh,02dh
+	sra	(hl)		;	db	0cbh,02eh
+	sra	a		;	db	0cbh,02fh
+
+	srl	b		;	db	0cbh,038h
+	srl	c		;	db	0cbh,039h
+	srl	d		;	db	0cbh,03ah
+	srl	e		;	db	0cbh,03bh
+	srl	h		;	db	0cbh,03ch
+	srl	l		;	db	0cbh,03dh
+	srl	(hl)		;	db	0cbh,03eh
+	srl	a		;	db	0cbh,03fh
+
+	bit	0,b		;	db	0cbh,040h
+	bit	0,c		;	db	0cbh,041h
+	bit	0,d		;	db	0cbh,042h
+	bit	0,e		;	db	0cbh,043h
+	bit	0,h		;	db	0cbh,044h
+	bit	0,l		;	db	0cbh,045h
+	bit	0,(hl)		;	db	0cbh,046h
+	bit	0,a		;	db	0cbh,047h
+	bit	1,b		;	db	0cbh,048h
+	bit	1,c		;	db	0cbh,049h
+	bit	1,d		;	db	0cbh,04ah
+	bit	1,e		;	db	0cbh,04bh
+	bit	1,h		;	db	0cbh,04ch
+	bit	1,l		;	db	0cbh,04dh
+	bit	1,(hl)		;	db	0cbh,04eh
+	bit	1,a		;	db	0cbh,04fh
+
+	bit	2,b		;	db	0cbh,050h
+	bit	2,c		;	db	0cbh,051h
+	bit	2,d		;	db	0cbh,052h
+	bit	2,e		;	db	0cbh,053h
+	bit	2,h		;	db	0cbh,054h
+	bit	2,l		;	db	0cbh,055h
+	bit	2,(hl)		;	db	0cbh,056h
+	bit	2,a		;	db	0cbh,057h
+	bit	3,b		;	db	0cbh,058h
+	bit	3,c		;	db	0cbh,059h
+	bit	3,d		;	db	0cbh,05ah
+	bit	3,e		;	db	0cbh,05bh
+	bit	3,h		;	db	0cbh,05ch
+	bit	3,l		;	db	0cbh,05dh
+	bit	3,(hl)		;	db	0cbh,05eh
+	bit	3,a		;	db	0cbh,05fh
+
+	bit	4,b		;	db	0cbh,060h
+	bit	4,c		;	db	0cbh,061h
+	bit	4,d		;	db	0cbh,062h
+	bit	4,e		;	db	0cbh,063h
+	bit	4,h		;	db	0cbh,064h
+	bit	4,l		;	db	0cbh,065h
+	bit	4,(hl)		;	db	0cbh,066h
+	bit	4,a		;	db	0cbh,067h
+	bit	5,b		;	db	0cbh,068h
+	bit	5,c		;	db	0cbh,069h
+	bit	5,d		;	db	0cbh,06ah
+	bit	5,e		;	db	0cbh,06bh
+	bit	5,h		;	db	0cbh,06ch
+	bit	5,l		;	db	0cbh,06dh
+	bit	5,(hl)		;	db	0cbh,06eh
+	bit	5,a		;	db	0cbh,06fh
+
+	bit	6,b		;	db	0cbh,070h
+	bit	6,c		;	db	0cbh,071h
+	bit	6,d		;	db	0cbh,072h
+	bit	6,e		;	db	0cbh,073h
+	bit	6,h		;	db	0cbh,074h
+	bit	6,l		;	db	0cbh,075h
+	bit	6,(hl)		;	db	0cbh,076h
+	bit	6,a		;	db	0cbh,077h
+	bit	7,b		;	db	0cbh,078h
+	bit	7,c		;	db	0cbh,079h
+	bit	7,d		;	db	0cbh,07ah
+	bit	7,e		;	db	0cbh,07bh
+	bit	7,h		;	db	0cbh,07ch
+	bit	7,l		;	db	0cbh,07dh
+	bit	7,(hl)		;	db	0cbh,07eh
+	bit	7,a		;	db	0cbh,07fh
+
+	res	0,b		;	db	0cbh,080h
+	res	0,c		;	db	0cbh,081h
+	res	0,d		;	db	0cbh,082h
+	res	0,e		;	db	0cbh,083h
+	res	0,h		;	db	0cbh,084h
+	res	0,l		;	db	0cbh,085h
+	res	0,(hl)		;	db	0cbh,086h
+	res	0,a		;	db	0cbh,087h
+	res	1,b		;	db	0cbh,088h
+	res	1,c		;	db	0cbh,089h
+	res	1,d		;	db	0cbh,08ah
+	res	1,e		;	db	0cbh,08bh
+	res	1,h		;	db	0cbh,08ch
+	res	1,l		;	db	0cbh,08dh
+	res	1,(hl)		;	db	0cbh,08eh
+	res	1,a		;	db	0cbh,08fh
+
+	res	2,b		;	db	0cbh,090h
+	res	2,c		;	db	0cbh,091h
+	res	2,d		;	db	0cbh,092h
+	res	2,e		;	db	0cbh,093h
+	res	2,h		;	db	0cbh,094h
+	res	2,l		;	db	0cbh,095h
+	res	2,(hl)		;	db	0cbh,096h
+	res	2,a		;	db	0cbh,097h
+	res	3,b		;	db	0cbh,098h
+	res	3,c		;	db	0cbh,099h
+	res	3,d		;	db	0cbh,09ah
+	res	3,e		;	db	0cbh,09bh
+	res	3,h		;	db	0cbh,09ch
+	res	3,l		;	db	0cbh,09dh
+	res	3,(hl)		;	db	0cbh,09eh
+	res	3,a		;	db	0cbh,09fh
+
+	res	4,b		;	db	0cbh,0a0h
+	res	4,c		;	db	0cbh,0a1h
+	res	4,d		;	db	0cbh,0a2h
+	res	4,e		;	db	0cbh,0a3h
+	res	4,h		;	db	0cbh,0a4h
+	res	4,l		;	db	0cbh,0a5h
+	res	4,(hl)		;	db	0cbh,0a6h
+	res	4,a		;	db	0cbh,0a7h
+	res	5,b		;	db	0cbh,0a8h
+	res	5,c		;	db	0cbh,0a9h
+	res	5,d		;	db	0cbh,0aah
+	res	5,e		;	db	0cbh,0abh
+	res	5,h		;	db	0cbh,0ach
+	res	5,l		;	db	0cbh,0adh
+	res	5,(hl)		;	db	0cbh,0aeh
+	res	5,a		;	db	0cbh,0afh
+
+	res	6,b		;	db	0cbh,0b0h
+	res	6,c		;	db	0cbh,0b1h
+	res	6,d		;	db	0cbh,0b2h
+	res	6,e		;	db	0cbh,0b3h
+	res	6,h		;	db	0cbh,0b4h
+	res	6,l		;	db	0cbh,0b5h
+	res	6,(hl)		;	db	0cbh,0b6h
+	res	6,a		;	db	0cbh,0b7h
+	res	7,b		;	db	0cbh,0b8h
+	res	7,c		;	db	0cbh,0b9h
+	res	7,d		;	db	0cbh,0bah
+	res	7,e		;	db	0cbh,0bbh
+	res	7,h		;	db	0cbh,0bch
+	res	7,l		;	db	0cbh,0bdh
+	res	7,(hl)		;	db	0cbh,0beh
+	res	7,a		;	db	0cbh,0bfh
+
+	set	0,b		;	db	0cbh,0c0h
+	set	0,c		;	db	0cbh,0c1h
+	set	0,d		;	db	0cbh,0c2h
+	set	0,e		;	db	0cbh,0c3h
+	set	0,h		;	db	0cbh,0c4h
+	set	0,l		;	db	0cbh,0c5h
+	set	0,(hl)		;	db	0cbh,0c6h
+	set	0,a		;	db	0cbh,0c7h
+	set	1,b		;	db	0cbh,0c8h
+	set	1,c		;	db	0cbh,0c9h
+	set	1,d		;	db	0cbh,0cah
+	set	1,e		;	db	0cbh,0cbh
+	set	1,h		;	db	0cbh,0cch
+	set	1,l		;	db	0cbh,0cdh
+	set	1,(hl)		;	db	0cbh,0ceh
+	set	1,a		;	db	0cbh,0cfh
+
+	set	2,b		;	db	0cbh,0d0h
+	set	2,c		;	db	0cbh,0d1h
+	set	2,d		;	db	0cbh,0d2h
+	set	2,e		;	db	0cbh,0d3h
+	set	2,h		;	db	0cbh,0d4h
+	set	2,l		;	db	0cbh,0d5h
+	set	2,(hl)		;	db	0cbh,0d6h
+	set	2,a		;	db	0cbh,0d7h
+	set	3,b		;	db	0cbh,0d8h
+	set	3,c		;	db	0cbh,0d9h
+	set	3,d		;	db	0cbh,0dah
+	set	3,e		;	db	0cbh,0dbh
+	set	3,h		;	db	0cbh,0dch
+	set	3,l		;	db	0cbh,0ddh
+	set	3,(hl)		;	db	0cbh,0deh
+	set	3,a		;	db	0cbh,0dfh
+
+	set	4,b		;	db	0cbh,0e0h
+	set	4,c		;	db	0cbh,0e1h
+	set	4,d		;	db	0cbh,0e2h
+	set	4,e		;	db	0cbh,0e3h
+	set	4,h		;	db	0cbh,0e4h
+	set	4,l		;	db	0cbh,0e5h
+	set	4,(hl)		;	db	0cbh,0e6h
+	set	4,a		;	db	0cbh,0e7h
+	set	5,b		;	db	0cbh,0e8h
+	set	5,c		;	db	0cbh,0e9h
+	set	5,d		;	db	0cbh,0eah
+	set	5,e		;	db	0cbh,0ebh
+	set	5,h		;	db	0cbh,0ech
+	set	5,l		;	db	0cbh,0edh
+	set	5,(hl)		;	db	0cbh,0eeh
+	set	5,a		;	db	0cbh,0efh
+
+	set	6,b		;	db	0cbh,0f0h
+	set	6,c		;	db	0cbh,0f1h
+	set	6,d		;	db	0cbh,0f2h
+	set	6,e		;	db	0cbh,0f3h
+	set	6,h		;	db	0cbh,0f4h
+	set	6,l		;	db	0cbh,0f5h
+	set	6,(hl)		;	db	0cbh,0f6h
+	set	6,a		;	db	0cbh,0f7h
+	set	7,b		;	db	0cbh,0f8h
+	set	7,c		;	db	0cbh,0f9h
+	set	7,d		;	db	0cbh,0fah
+	set	7,e		;	db	0cbh,0fbh
+	set	7,h		;	db	0cbh,0fch
+	set	7,l		;	db	0cbh,0fdh
+	set	7,(hl)		;	db	0cbh,0feh
+	set	7,a		;	db	0cbh,0ffh
+
+;	0ddh double byte operand
+	add	ix,bc		;	db	0ddh,009h
+	add	ix,de		;	db	0ddh,019h
+
+	ld	ix,$		;	db	0ddh,021h	!	dw	$-2
+	ld	($),ix		;	db	0ddh,022h	!	dw	$-2
+	inc	ix		;	db	0ddh,023h
+	add	ix,ix		;	db	0ddh,029h
+	ld	ix,($)		;	db	0ddh,02ah	!	dw	$-2
+	dec	ix		;	db	0ddh,02bh
+
+	inc	(ix+0ffh)	;	db	0ddh,034h,-1
+	dec	(ix+0ffh)	;	db	0ddh,035h,-1
+	ld	(ix+0ffh),0	;	db	0ddh,036h,-1,0
+	add	ix,sp		;	db	0ddh,039h
+
+	ld	b,(ix+0ffh)	;	db	0ddh,046h,-1
+	ld	c,(ix+0ffh)	;	db	0ddh,04eh,-1
+
+	ld	d,(ix+0ffh)	;	db	0ddh,056h,-1
+	ld	e,(ix+0ffh)	;	db	0ddh,05eh,-1
+
+	ld	h,(ix+0ffh)	;	db	0ddh,066h,-1
+	ld	l,(ix+0ffh)	;	db	0ddh,06eh,-1
+
+	ld	(ix+0ffh),b	;	db	0ddh,070h,-1
+	ld	(ix+0ffh),c	;	db	0ddh,071h,-1
+	ld	(ix+0ffh),d	;	db	0ddh,072h,-1
+	ld	(ix+0ffh),e	;	db	0ddh,073h,-1
+	ld	(ix+0ffh),h	;	db	0ddh,074h,-1
+	ld	(ix+0ffh),l	;	db	0ddh,075h,-1
+	ld	(ix+0ffh),a	;	db	0ddh,077h,-1
+	ld	a,(ix+0ffh)	;	db	0ddh,07eh,-1
+
+	add	a,(ix+0ffh)	;	db	0ddh,086h,-1
+	adc	a,(ix+0ffh)	;	db	0ddh,08eh,-1
+
+	sub	(ix+0ffh)	;	db	0ddh,096h,-1
+	sbc	a,(ix+0ffh)	;	db	0ddh,09eh,-1
+
+	and	(ix+0ffh)	;	db	0ddh,0a6h,-1
+	xor	(ix+0ffh)	;	db	0ddh,0aeh,-1
+
+	or	(ix+0ffh)	;	db	0ddh,0b6h,-1
+	cp	(ix+0ffh)	;	db	0ddh,0beh,-1
+
+	nop			;	db	0	; triple operand 0ddh,0cbh
+
+	pop	ix		;	db	0ddh,0e1h
+	ex	(sp),ix		;	db	0ddh,0e3h
+	push	ix		;	db	0ddh,0e5h
+	jp	(ix)		;	db	0ddh,0e9h
+tstjpx:
+	ld	sp,ix		;	db	0ddh,0f9h
+
+; 0edh double byte operand
+	in	b,(c)		;	db	0edh,040h
+	out	(c),b		;	db	0edh,041h
+	sbc	hl,bc		;	db	0edh,042h
+	ld	($),bc		;	db	0edh,043h	!	dw	$-2
+	neg			;	db	0edh,044h
+	retn			;	db	0edh,045h
+tstrtn:
+	im	0		;	db	0edh,046h
+	ld	i,a		;	db	0edh,047h
+	in	c,(c)		;	db	0edh,048h
+	out	(c),c		;	db	0edh,049h
+	adc	hl,bc		;	db	0edh,04ah
+	ld	bc,($)		;	db	0edh,04bh	!	dw	$-2
+	reti			;	db	0edh,04dh
+tstrti:
+	ld	r,a		;	db	0edh,04fh
+
+	in	d,(c)		;	db	0edh,050h
+	out	(c),d		;	db	0edh,051h
+	sbc	hl,de		;	db	0edh,052h
+	ld	($),de		;	db	0edh,053h	!	dw	$-2
+	im	1		;	db	0edh,056h
+	ld	a,i		;	db	0edh,057h
+	in	e,(c)		;	db	0edh,058h
+	out	(c),e		;	db	0edh,059h
+	adc	hl,de		;	db	0edh,05ah
+	ld	de,($)		;	db	0edh,05bh	!	dw	$-2
+	im	2		;	db	0edh,05eh
+	ld	a,r		;	db	0edh,05fh
+
+	in	h,(c)		;	db	0edh,060h
+	out	(c),h		;	db	0edh,061h
+	sbc	hl,hl		;	db	0edh,062h
+	rrd			;	db	0edh,067h
+	in	l,(c)		;	db	0edh,068h
+	out	(c),l		;	db	0edh,069h
+	adc	hl,hl		;	db	0edh,06ah
+	rld			;	db	0edh,06fh
+
+	sbc	hl,sp		;	db	0edh,072h
+	ld	($),sp		;	db	0edh,073h	!	dw	$-2
+	in	a,(c)		;	db	0edh,078h
+	out	(c),a		;	db	0edh,079h
+	adc	hl,sp		;	db	0edh,07ah
+	ld	sp,($)		;	db	0edh,07bh	!	dw	$-2
+
+	ldi			;	db	0edh,0a0h
+	cpi			;	db	0edh,0a1h
+	ini			;	db	0edh,0a2h
+	outi			;	db	0edh,0a3h
+	ldd			;	db	0edh,0a8h
+	cpd			;	db	0edh,0a9h
+	ind			;	db	0edh,0aah
+	outd			;	db	0edh,0abh
+
+	ldir			;	db	0edh,0b0h
+	cpir			;	db	0edh,0b1h
+	inir			;	db	0edh,0b2h
+	otir			;	db	0edh,0b3h
+	lddr			;	db	0edh,0b8h
+	cpdr			;	db	0edh,0b9h
+	indr			;	db	0edh,0bah
+	otdr			;	db	0edh,0bbh
+
+;	0fdh double byte operand
+	add	iy,bc		;	db	0fdh,009h
+	add	iy,de		;	db	0fdh,019h
+
+	ld	iy,$		;	db	0fdh,021h	!	dw	$-2
+	ld	($),iy		;	db	0fdh,022h	!	dw	$-2
+	inc	iy		;	db	0fdh,023h
+	add	iy,iy		;	db	0fdh,029h
+	ld	iy,($)		;	db	0fdh,02ah	!	dw	$-2
+	dec	iy		;	db	0fdh,02bh
+
+	inc	(iy+0ffh)	;	db	0fdh,034h,-1
+	dec	(iy+0ffh)	;	db	0fdh,035h,-1
+	ld	(iy+0ffh),0	;	db	0fdh,036h,-1,0
+	add	iy,sp		;	db	0fdh,039h
+
+	ld	b,(iy+0ffh)	;	db	0fdh,046h,-1
+	ld	c,(iy+0ffh)	;	db	0fdh,04eh,-1
+
+	ld	d,(iy+0ffh)	;	db	0fdh,056h,-1
+	ld	e,(iy+0ffh)	;	db	0fdh,05eh,-1
+
+	ld	h,(iy+0ffh)	;	db	0fdh,066h,-1
+	ld	l,(iy+0ffh)	;	db	0fdh,06eh,-1
+
+	ld	(iy+0ffh),b	;	db	0fdh,070h,-1
+	ld	(iy+0ffh),c	;	db	0fdh,071h,-1
+	ld	(iy+0ffh),d	;	db	0fdh,072h,-1
+	ld	(iy+0ffh),e	;	db	0fdh,073h,-1
+	ld	(iy+0ffh),h	;	db	0fdh,074h,-1
+	ld	(iy+0ffh),l	;	db	0fdh,075h,-1
+	ld	(iy+0ffh),a	;	db	0fdh,077h,-1
+	ld	a,(iy+0ffh)	;	db	0fdh,07eh,-1
+
+	add	a,(iy+0ffh)	;	db	0fdh,086h,-1
+	adc	a,(iy+0ffh)	;	db	0fdh,08eh,-1
+
+	sub	(iy+0ffh)	;	db	0fdh,096h,-1
+	sbc	a,(iy+0ffh)	;	db	0fdh,09eh,-1
+
+	and	(iy+0ffh)	;	db	0fdh,0a6h,-1
+	xor	(iy+0ffh)	;	db	0fdh,0aeh,-1
+
+	or	(iy+0ffh)	;	db	0fdh,0b6h,-1
+	cp	(iy+0ffh)	;	db	0fdh,0beh,-1
+
+	nop			;	db	0	; triple operand 0fdh,0cbh
+
+	pop	iy		;	db	0fdh,0e1h
+	ex	(sp),iy		;	db	0fdh,0e3h
+	push	iy		;	db	0fdh,0e5h
+	jp	(iy)		;	db	0fdh,0e9h
+tstjpy:
+	ld	sp,iy		;	db	0fdh,0f9h
+
+	ret
+
+
+test3:	; treble byte operand
+
+; triple operand 0ddh,0cbh
+	rlc	(ix+0ffh)	;	db	0ddh,0cbh,0ffh,006h
+	rrc	(ix+0ffh)	;	db	0ddh,0cbh,0ffh,00eh
+	rl	(ix+0ffh)	;	db	0ddh,0cbh,0ffh,016h
+	rr	(ix+0ffh)	;	db	0ddh,0cbh,0ffh,01eh
+	sla	(ix+0ffh)	;	db	0ddh,0cbh,0ffh,026h
+	sra	(ix+0ffh)	;	db	0ddh,0cbh,0ffh,02eh
+	srl	(ix+0ffh)	;	db	0ddh,0cbh,0ffh,03eh
+	bit	0,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,046h
+	bit	1,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,04eh
+	bit	2,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,056h
+	bit	3,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,05eh
+	bit	4,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,066h
+	bit	5,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,06eh
+	bit	6,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,076h
+	bit	7,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,07eh
+	res	0,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,086h
+	res	1,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,08eh
+	res	2,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,096h
+	res	3,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,09eh
+	res	4,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0a6h
+	res	5,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0aeh
+	res	6,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0b6h
+	res	7,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0beh
+	set	0,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0c6h
+	set	1,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0ceh
+	set	2,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0d6h
+	set	3,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0deh
+	set	4,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0e6h
+	set	5,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0eeh
+	set	6,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0f6h
+	set	7,(ix+0ffh)	;	db	0ddh,0cbh,0ffh,0feh
+
+; triple operand 0fdh,0cbh
+	rlc	(iy+0ffh)	;	db	0fdh,0cbh,0ffh,006h
+	rrc	(iy+0ffh)	;	db	0fdh,0cbh,0ffh,00eh
+	rl	(iy+0ffh)	;	db	0fdh,0cbh,0ffh,016h
+	rr	(iy+0ffh)	;	db	0fdh,0cbh,0ffh,01eh
+	sla	(iy+0ffh)	;	db	0fdh,0cbh,0ffh,026h
+	sra	(iy+0ffh)	;	db	0fdh,0cbh,0ffh,02eh
+	srl	(iy+0ffh)	;	db	0fdh,0cbh,0ffh,03eh
+	bit	0,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,046h
+	bit	1,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,04eh
+	bit	2,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,056h
+	bit	3,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,05eh
+	bit	4,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,066h
+	bit	5,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,06eh
+	bit	6,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,076h
+	bit	7,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,07eh
+	res	0,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,086h
+	res	1,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,08eh
+	res	2,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,096h
+	res	3,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,09eh
+	res	4,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0a6h
+	res	5,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0aeh
+	res	6,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0b6h
+	res	7,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0beh
+	set	0,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0c6h
+	set	1,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0ceh
+	set	2,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0d6h
+	set	3,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0deh
+	set	4,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0e6h
+	set	5,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0eeh
+	set	6,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0f6h
+	set	7,(iy+0ffh)	;	db	0fdh,0cbh,0ffh,0feh
+
+	ret
+
+;-----------completed test of 696 Zylog Z80 mnemonics-----------;
+;---------------------------------------------------------------;
+	end
+

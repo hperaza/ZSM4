@@ -1,0 +1,50 @@
+	.xlist
+
+	ld	a,1
+
+	.list
+
+	ld	a,5
+	stc
+	ret
+
+	if 	1
+a	equ	1
+	else
+a	equ	2
+	endif
+
+	if	0
+b	equ	1
+	else
+b	equ	2
+	else
+b	equ	3
+	endif
+
+tta	macro	a
+	db	a
+	endm
+tt1	macro
+	db	1
+	endm
+
+cc
+	equ	8
+dd:
+	equ	9
+
+dd1:	ld	hl,dd1
+dd2	ld	hl,dd2
+dd3:
+	ld	hl,dd3
+dd4
+	ld	hl,dd4
+
+	tta	1
+	tt1
+
+ee1	tt1
+ee2:	tt1
+
+	end

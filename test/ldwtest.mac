@@ -1,0 +1,19 @@
+	.z280
+	extrn	ee
+	ldw	ix,(ix+0)
+	ldw	ix,(ix+ee)
+	ldw	ix,(ix)
+	ldw	ix,(ix+5)
+	ldw	hl,(ix+0)
+cc	equ	0
+	ldw	ix,(ix+cc)
+	cpw	hl		; ok
+	cpw	hl
+	ld	ix,(ix+0)
+	ld	ix,(ix)
+	ld	a,(ix)
+	ld	ix,(ix)
+	.z80
+	ld	a,(ix)
+	ld	a,(ix+2)
+	end

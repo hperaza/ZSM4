@@ -1,0 +1,28 @@
+; .LALL/.SALL/.XALL + .LIST/.XLIST test
+
+	.xlist
+	include	QIO.INC
+	.list
+
+lun	equ	1
+efn	equ	3
+
+test	macro
+	db	'abcdefghijk',0,0,0,0,0,0,0,0,0
+	ds	140
+	endm
+
+	.lall
+	QIOW$	IO.RLB,lun,efn,iosb,<buf,512>
+	test
+	.sall
+	QIOW$	IO.RLB,lun,efn,iosb,<buf,512>
+	test
+	.xall
+	QIOW$	IO.RLB,lun,efn,iosb,<buf,512>
+	test
+
+iosb:	ds	4
+buf:	ds	512
+
+	end

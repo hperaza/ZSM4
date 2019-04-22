@@ -1,0 +1,43 @@
+tstless	macro	a,b
+	if1
+	if	a less b
+	.printx	/a less b/
+	else
+	.printx	/b less= a/
+	endif
+	if	a lt b
+	.printx	/a lt b/
+	else
+	.printx	/b le a/
+	endif
+	endif
+	endm
+
+	tstless	-32768,-32767
+	tstless -30000,-1000
+	tstless -1000,-10
+	tstless	-10,0
+	tstless -10,-1
+	tstless -10,10
+	tstless -10,32767
+	tstless -10000,-10001
+	tstless -10001,-10000
+	tstless -10000,10000
+	tstless	1234,1235
+	tstless -10001,-10000
+	tstless -10000,-10001
+	tstless 10000,-10000
+	tstless	1235,1234
+	tstless -1000,1000
+	tstless	1000,-1000
+	tstless	-1,-1
+	tstless	-256,-256
+	tstless	1,1
+	tstless	256,256
+	tstless 0,0
+	tstless -32767,-32767
+	tstless -32768,-32768
+	tstless 32768,32768
+
+	end
+	

@@ -1,0 +1,6 @@
+	dw	1,2,3,4
+	db	1
+	.xlist
+	if	0
+	db	2
+	end

@@ -1,0 +1,9 @@
+	cseg
+
+t1	macro	str
+	db	str
+	endm
+
+	t1	<'Hello, world!',0Dh,0Ah,0>
+
+	end

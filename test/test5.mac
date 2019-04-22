@@ -1,0 +1,7 @@
+	public	p1
+	extrn	e1
+
+p1:
+l1:
+	dw	e1
+	end

@@ -1,0 +1,60 @@
+	cseg
+
+	if	1
+	list	nocond,macros
+	else
+	.lfcond
+	.lall
+	endif
+
+test	macro	arg1,arg2
+	if2
+	if	nul arg1
+	.printx	'arg1 is null'
+	endif
+	if	nul arg2
+	.printx	'arg2 is null'
+	endif
+	endif
+	endm
+
+test2	macro	arg1,arg2
+	if2
+	.printx	'arg1=&arg1, arg2=&arg2'
+	if	arg1 and not nul arg2
+	.printx	'arg1<>0 and arg2 is not null'
+	endif
+	.printx	''
+	endif
+	endm
+
+	test
+	test	,
+	test	1
+	test	1,2
+	test	,2
+	test	1,
+	test	<>,2
+	test	1,<>
+
+	test			; comment
+	test	,		; comment
+	test	1		; comment
+	test	1,2		; comment
+	test	,2		; comment
+	test	1,		; comment
+	test	<>,2		; comment
+	test	1,<>		; comment
+
+	test2	0
+	test2	1
+	test2	0,2
+	test2	1,2
+	test2	0,<>
+	test2	1,<>
+	test2	0,
+	test2	1,
+
+	test2			; error
+
+	end

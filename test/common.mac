@@ -1,0 +1,15 @@
+; COMMON segment test: second /ABC/ must overlap first (not concatenate)
+
+	common	/ABC/
+
+aa:	db	1
+
+	dseg
+
+dd:	db	1
+
+	common	/ABC/
+
+bb:	db	1
+
+	end

@@ -1,0 +1,18 @@
+	.z80
+	extrn	e1
+	extrn	e4
+	public	p1
+	ld	hl,e1
+	ld	hl,e1##
+c1:	ld	hl,e2##
+	ld	hl,e2
+	ld	hl,e2##
+	ld	hl,e3
+	ld	hl,e3##
+	ld	hl,e3
+	ld	hl,p1
+	ld	hl,p1##
+	ld	hl,c1
+	ld	hl,c1##
+	ld	hl,e5
+	end

@@ -1,0 +1,143 @@
+	.z280
+
+; Z280 relative address test: <word offset> must be zero for all
+; the instructions below.
+
+	adc	a,<x1>
+x1:
+	adc	<x2>
+x2:
+	add	a,<x3>
+x3:
+	add	<x4>
+x4:
+	addw	hl,<x5>
+x5:
+	addw	<x6>
+x6:
+	and	a,<x7>
+x7:
+	and	<x8>
+x8:
+	call	z,<x9>
+x9:
+	call	<x10>
+x10:
+	cp	a,<x11>
+x11:
+	cp	<x12>
+x12:
+	cpw	hl,<x13>
+x13:
+	cpw	<x14>
+x14:
+	dec	<x15>
+x15:
+	decw	<x16>
+x16:
+	div	hl,<x17>
+x17:
+	div	<x18>
+x18:
+	divu	hl,<x19>
+x19:
+	divu	<x20>
+x20:
+	divuw	dehl,<x21>
+x21:
+	divuw	<x22>
+x22:
+	divw	dehl,<x23>
+x23:
+	divw	<x24>
+x24:
+	ex	a,<x25>
+x25:
+	in	<x26>,(c)
+x26:
+	inc	<x27>
+x27:
+	incw	<x28>
+x28:
+	jp	nz,<x29>
+x29:
+	jp	<x30>
+x30:
+	ld	a,<x31>
+x31:
+	ld	<x32>,a
+x32:
+	ld	<x33>,5
+x33:
+	lda	hl,<x34>
+x34:
+	lda	ix,<x35>
+x35:
+	ldw	hl,<x36>
+x36:
+	ldw	ix,<x37>
+x37:
+	ldw	<x38>,hl
+x38:
+	ldw	<x39>,ix
+x39:
+	ldw	<x40>,5
+x40:
+	ld	hl,<x41>
+x41:
+	ld	ix,<x42>
+x42:
+	ld	<x43>,hl
+x43:
+	ld	<x44>,ix
+x44:
+	ld	<x45>,12345
+x45:
+	mult	a,<x46>
+x46:
+	mult	<x47>
+x47:
+	multu	a,<x48>
+x48:
+	multu	<x49>
+x49:
+	multuw	hl,<x50>
+x50:
+	multuw	<x51>
+x51:
+	multw	hl,<x52>
+x52:
+	multw	<x53>
+x53:
+	or	a,<x54>
+x54:
+	or	<x55>
+x55:
+	out	(c),<x56>
+x56:
+	pop	<x57>
+x57:
+	push	<x58>
+x58:
+	sbc	a,<x59>
+x59:
+	sbc	<x60>
+x60:
+	sub	a,<x61>
+x61:
+	sub	<x62>
+x62:
+	subw	hl,<x63>
+x63:
+	subw	<x64>
+x64:
+	xor	a,<x65>
+x65:
+	xor	<x66>
+x66:
+	epum	<x67>
+x67:
+	mepu	<x68>
+x68:
+
+	end

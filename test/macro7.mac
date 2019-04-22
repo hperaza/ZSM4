@@ -1,0 +1,22 @@
+	cseg
+
+test1	macro
+	db	1
+	exitm
+	db	2
+	endm
+
+test2	macro
+	db	10
+	test1
+	db	11
+	exitm
+	test1
+	db	12
+	endm
+
+	test1
+
+	test2
+
+	end

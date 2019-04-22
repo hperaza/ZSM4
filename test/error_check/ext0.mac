@@ -1,0 +1,6 @@
+	extrn	foobar
+	aseg
+	org	0
+	dw	foobar/1
+	end
+

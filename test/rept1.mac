@@ -1,0 +1,20 @@
+	cseg
+
+	rept	0
+	db	0
+	endm
+
+	rept	10
+	db	8	; this comment should appear in the expansion
+	db	9	;; but not this one
+	endm
+
+	rept	2
+	db	2
+	rept	5
+	db	15	; comment
+	endm
+	db	3
+	endm
+
+	end

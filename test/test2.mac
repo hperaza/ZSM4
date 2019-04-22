@@ -1,0 +1,100 @@
+	ld	a,(b)
+	jr	$+1
+offs	equ	-5
+	ld	a,(ix+offs)
+	ld	a,(ix-offs)
+	extrn	rec
+	call	rec
+	cseg
+	public	idx
+	ld	hl,idx
+aaa:	ld	hl,aaa
+bbb:	ld	hl,1
+idx:	ds	1
+	ld	hl,'SY'
+	ld	hl,"SY"
+
+	.z80
+	.z180
+	.z280
+	ld	a,-1
+	org	83h
+a1234	equ	1234h
+a1234	equ	1234h
+;a1234	equ	1234
+a234	equ	xxx
+
+	jp	$
+
+	dw	L1
+	dw	L2
+	dw	L3
+	dw	L4
+	dw	L5
+L1	equ	L2	; should be undefined!
+	db	0
+L2	equ	L1	; should be undefined!
+	db	0
+L3	equ	L5
+	db	0
+L4	equ	5
+	db	0
+L5:	db	0
+
+a:
+b	equ	5
+	ld	hl,a1234
+	org	100h
+	add	a, b
+	add	a,b
+	add	a,a
+	ld	a,'a'
+	ld	a,"A"
+	ld	a,'"'
+	ld	a,''''
+	ld	a,"'"
+	ld	a,""""
+	ld	a,';'
+	ld	a," ; "
+	db	'ABCDEF'
+	db	"ABCDEF"
+	db	'ABC"DE'
+	db	"ABC'DE"
+	db	'ABC''DE'
+	db	"ABC""DE"
+	db	'ABC'''
+	db	'''ABC'
+	db	''''
+	db	'a'
+	db	''
+	db	'	;'	; embedded tab
+	ds	100
+	db	'abc
+	jp	z,a1234
+	db	a,b,c,z
+	ld	c, ( hl )	; opcode = 4Eh
+	ld	a , i
+	ld	a,i
+	ld	i , a
+	ld	i,a
+	ld	i,1
+	ld	a,(ix+5)
+	ld	a,(ix + 5)
+	ld	a, ( ix + 5 )
+	ex	af , af'
+	ex	af,af '
+	ld	c,(de)
+	ld	a,(sp)
+	ld	(de),c
+	ld	(sp),a
+	dc
+	dc	''
+	dc	'''
+	dc	''''
+	dc	'a'
+	dc	'abc'
+	dc	'abc','def'
+	dc	'''abc'
+	dc	'abc'''
+	end	a1234
+

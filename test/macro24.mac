@@ -1,0 +1,43 @@
+	CSEG
+
+MOVE	MACRO	SOURCE,DEST,COUNT
+	LOCAL	PASTSUB		;; label at end of subroutine
+	; Move data from address gyven by 'SOURCE'
+	; to address given by 'DEST' for 'COUNT' bytes
+	JR	PASTSUB		;; jump around inline subroutine
+@MOVE:	;; inline subroutine to perform move operation
+	; HL is source, DE is destination, BC is count
+	LD	A,C		;; low order count
+	OR	B		;; zero count?
+	RET	Z		;; stop move if zero remainder
+	LD	A,(HL)		;; get next source character
+	LD	(DE),A		;; put next dest character
+	INC	HL		;; address following source
+	INC	DE		;; address following dest
+	DEC	BC		;; count = count-1
+	JR	@MOVE		;; for another byte to move
+PASTSUB:
+	; Arrive here on first invocation - redefine MOVE
+MOVE	MACRO	?S,?D,?C	;; change parm names
+	LD	HL,?S		;; address the source string
+	LD	DE,?D		;; address the dest string
+	LD	BC,?C		;; prepare the count
+	CALL	@MOVE		;; move the string
+	ENDM
+	; Continue here on the first invocation to use
+	; the redefined macro to perform the first move
+	MOVE	SOURCE,DEST,COUNT
+	ENDM
+
+	.LALL
+
+	MOVE	X1,X2,5			; move 5 chars from X1 to X2
+	MOVE	3000h,1000h,1500h	; big mover
+	RET
+
+	DSEG
+
+X1:	DB	'here is some data to move'
+X2:	DB	'xxxxxwe are!'
+
+	END

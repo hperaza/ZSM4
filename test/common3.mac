@@ -1,0 +1,21 @@
+; COMMON segment switching and referencing test
+
+	cseg
+
+	dw	a1
+	dw	a2
+	dw	a3
+	dw	a4
+	db	0
+
+	common	/c1/
+a1::	db	1
+
+	common	/c2/
+a2::	db	2
+
+	common	/c3/
+a3::	db	3
+a4::	db	4
+
+	end	a1
