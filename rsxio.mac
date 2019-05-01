@@ -342,7 +342,7 @@ def0:	ld	(VAL##),hl
 	ld	(SYMMOD##),a
 	call	ADDSYM##	; enter symbol
 ;	jp	c,...		; error - can't enter symbol (unlikely)
-;	jp	z,...		; error - multiple defines (ignore/redefine)
+;	jp	z,...		; error - multiple defined (ignore/redefine)
 	ld	hl,(IDADR##)
 	ld	a,(hl)
 	and	0Fh		; clear undef bit
