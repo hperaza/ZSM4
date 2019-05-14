@@ -50,10 +50,11 @@ E.PRIV	equ	-46	; Privileged command
 E.PBIG	equ	-47	; Program too big
 E.QEMP	equ	-48	; Queue empty
 E.BADFL	equ	-49	; Invalid flag number
-E.SSNF	equ	-50	; Session not found
-E.SSNA	equ	-51	; Session not active
-E.NLI	equ	-52	; Not logged in
-E.ULI	equ	-53	; Already (Other user) logged in
+E.PNF	equ	-50	; Partition not found
+E.SSNF	equ	-51	; Session not found
+E.SSNA	equ	-52	; Session not active
+E.NLI	equ	-53	; Not logged in
+E.ULI	equ	-54	; Already (Other user) logged in
 
 ; Task exit status codes (lo-byte, hi-byte is reserved for user codes)
 

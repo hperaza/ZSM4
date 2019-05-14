@@ -34,9 +34,10 @@
 .ALTPR	equ	31	; change task priority
 .SUPER	equ	32	; enter/exit supervisor mode
 .GTSK	equ	33	; get task info
-.GIN	equ	34	; get general info
+.GTPAR	equ	34	; get partition info
+.GIN	equ	35	; get general info
 
-MAXFN	equ	34
+MAXFN	equ	35
 
 SYSRST	equ	20h	; system call RST is RST 4
 DBGRST	equ	30h	; debug breakpoint RST is RST 6
