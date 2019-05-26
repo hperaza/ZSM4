@@ -45,7 +45,7 @@
 
 	extrn	GCML,RCML,UCASE,PERROR,TTFLSH,PUTCH,PUTSTR
 	extrn	PFN,FOPEN,FCREAT,FGETCH,FPUTCH,FCLOSE,FPOS
-	extrn	INIFCB,FSEEK,HLDEC,BCD2BIN
+	extrn	INIFCB,FSEEK,HLDEC,BCD2BIN,RCTRLO
 
 ESC	equ	1Bh
 
@@ -141,6 +141,7 @@ ckd2:	pop	hl
 
 CMDERR:	ld	hl,snerr
 ERROR:	push	hl
+	call	RCTRLO
 	ld	hl,errpfx
 	call	PUTSTR
 	pop	hl

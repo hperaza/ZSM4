@@ -49,6 +49,7 @@ TA.AST	equ	2		; AST recognition enabled
 TA.FIX	equ	3		; task fixed in memory
 TA.MCR	equ	4		; task is external MCR function
 TA.CLI	equ	5		; task is a CLI
+TA.ACP	equ	6		; task is an ACP
 
 ; Status bit numbers
 
