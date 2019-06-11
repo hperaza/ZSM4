@@ -17,29 +17,24 @@ T.ASTL	equ	T.OCBL + 2	; pointer to list of AST events (2 bytes)
 T.AST	equ	T.ASTL + 2	; AST handler routine address (2 bytes)
 T.ASTP	equ	T.AST + 2	; AST parameter block address (2 bytes)
 T.SAST	equ	T.ASTP + 2	; specified ASTs bit mask (1 byte)
-T.FLGS	equ	T.SAST + 1	; task event flags (4 bytes = 32 flags)
+T.SVST	equ	T.SAST + 1	; saved task status during AST (1 byte)
+T.FLGS	equ	T.SVST + 1	; task event flags (4 bytes = 32 flags)
 T.WAIT	equ	T.FLGS + 4	; flag wait mask (4 bytes)
-T.USR	equ	T.WAIT + 4	; user number (1 byte)
-T.GRP	equ	T.USR + 1	; group number (1 byte)
-T.LUNT	equ	T.GRP + 1	; pointer to LUN translation table (2 bytes)
-T.CON	equ	T.LUNT + 2	; console device and unit (3 bytes)
+T.CTX	equ	T.WAIT + 4	; pointer to Context Block (2 bytes)
+T.CON	equ	T.CTX + 2	; console device and unit (3 bytes)
 T.LIB	equ	T.CON + 3	; task load device and unit (3 bytes)
 T.SBLK	equ	T.LIB + 3	; task starting disk block number (4 bytes)
 T.NBLK	equ	T.SBLK + 4	; task size in disk blocks (2 bytes)
-T.LCB	equ	T.NBLK + 2	; address of LCB (2 bytes)
-T.PCB	equ	T.LCB + 2	; pointer to PCB (2 bytes)
+T.PCB	equ	T.NBLK + 2	; pointer to PCB (2 bytes)
 T.STRT	equ	T.PCB + 2	; start address (2 bytes)
 T.DEND	equ	T.STRT + 2	; default end address (2 bytes)
 T.END	equ	T.DEND + 2	; current end address (2 bytes)
 T.EPT	equ	T.END + 2	; entry point (2 bytes)
 T.SP	equ	T.EPT + 2	; task SP (2 bytes)
-T.SVPC	equ	T.SP + 2	; saved PC during AST execution (2 bytes)
-T.SVST	equ	T.SVPC + 2	; saved task status during AST (1 byte)
-T.SVWF	equ	T.SVST + 1	; saved flag wait mask during AST (4 bytes)
 
 ; TCB size
 
-TCBSZ	equ	T.SVWF + 4
+TCBSZ	equ	T.SP + 2
 
 ; Attribute bit numbers
 
@@ -65,6 +60,19 @@ TS.OUT	equ	6		; task is out of memory
 
 TM.RUN	equ	(1 SHL TS.STP) OR (1 SHL TS.IOW) OR (1 SHL TS.WTD) OR (1 SHL TS.OUT)
 
+; Task Context Block structure
+
+TX.UID	equ	0		; protection user ID (1 byte)
+TX.GID	equ	TX.UID + 1	; protection group ID (1 byte)
+TX.DIR	equ	TX.GID + 1	; task's current directory (9 bytes)
+TX.PC	equ	TX.DIR + 9	; saved PC during AST execution (2 bytes)
+TX.SWM	equ	TX.PC + 2	; saved flag wait mask during AST (4 bytes)
+TX.LUT	equ	TX.SWM + 4	; LUN translation table (64 bytes)
+
+; Context Block size
+
+CTXSZ	equ	TX.LUT + 64
+
 ; Task Descriptor Block
 
 TD.NAME	equ	0		; task name (6 characters)
@@ -79,8 +87,7 @@ TD.CON	equ	TD.GRP + 1	; console device and unit (3 bytes)
 TD.LIB	equ	TD.CON + 3	; task load device and unit (3 bytes)
 TD.SBLK	equ	TD.LIB + 3	; task starting disk block number (4 bytes)
 TD.NBLK	equ	TD.SBLK + 4	; task size in disk blocks (2 bytes)
-TD.LCB	equ	TD.NBLK + 2	; address of LCB (2 bytes)
-TD.BANK	equ	TD.LCB + 2	; task page (BBR) (1 byte)
+TD.BANK	equ	TD.NBLK + 2	; task page (BBR) (1 byte)
 TD.SIZE	equ	TD.BANK + 1	; allocated memory pages (1 byte)
 TD.STR	equ	TD.SIZE + 1	; start address (2 bytes)
 TD.END	equ	TD.STR + 2	; end address (2 bytes)

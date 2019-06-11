@@ -42,6 +42,17 @@ MAXFN	equ	35
 SYSRST	equ	20h	; system call RST is RST 4
 DBGRST	equ	30h	; debug breakpoint RST is RST 6
 
+; .GDIR subfunction codes
+
+GD.TSK	equ	0	; get task's current directory
+GD.TI	equ	1	; get terminal's current directory
+GD.LOG	equ	2	; get terminal's login directory
+
+; .SDIR subfunction codes
+
+SD.TSK	equ	0	; set task's current directory
+SD.TI	equ	1	; set terminal's current directory
+
 ; .GIN subfunction codes
 
 I.VERS	equ	0	; get system version
