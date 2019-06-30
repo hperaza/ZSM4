@@ -33,23 +33,23 @@ E.TNF	equ	-29	; Task not found
 E.TNU	equ	-30	; Task name in use
 E.FNC	equ	-31	; File not contiguous
 E.NCSPC	equ	-32	; No contiguous space on device
-E.NOTCB	equ	-33	; Not enough memory for new TCB
-E.NOMEM	equ	-34	; Not enough room
-E.TRUN	equ	-35	; Task already running
-E.TSTP	equ	-36	; Task already stopped
-E.TDLY	equ	-37	; Task already delayed
-E.TFIX	equ	-38	; Task already fixed
-E.TNFIX	equ	-39	; Task not fixed
-E.TACT	equ	-40	; Task active
-E.TNAC	equ	-41	; Task not active
-E.TNIU	equ	-42	; Task name in use
-E.FAIL	equ	-43	; Operation failed
-E.ABOP	equ	-44	; Operation aborted
-E.TMO	equ	-45	; Operation timed out
-E.PRIV	equ	-46	; Privileged command
-E.PBIG	equ	-47	; Program too big
-E.QEMP	equ	-48	; Queue empty
-E.BADFL	equ	-49	; Invalid flag number
+E.NOMEM	equ	-33	; Not enough room
+E.TRUN	equ	-34	; Task already running
+E.TSTP	equ	-35	; Task already stopped
+E.TDLY	equ	-36	; Task already delayed
+E.TFIX	equ	-37	; Task already fixed
+E.TNFIX	equ	-38	; Task not fixed
+E.TACT	equ	-39	; Task active
+E.TNAC	equ	-40	; Task not active
+E.TNIU	equ	-41	; Task name in use
+E.FAIL	equ	-42	; Operation failed
+E.ABOP	equ	-43	; Operation aborted
+E.TMO	equ	-44	; Operation timed out
+E.PRIV	equ	-45	; Privileged command
+E.PBIG	equ	-46	; Program too big
+E.QEMP	equ	-47	; Queue empty
+E.BADFL	equ	-48	; Invalid flag number
+E.PBSY	equ	-49	; Partition busy
 E.PNF	equ	-50	; Partition not found
 E.SSNF	equ	-51	; Session not found
 E.SSNA	equ	-52	; Session not active
