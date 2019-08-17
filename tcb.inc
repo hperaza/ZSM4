@@ -78,7 +78,8 @@ CTXSZ	equ	TX.LUT + 64
 
 TD.NAME	equ	0		; task name (6 characters)
 TD.CMD	equ	TD.NAME + 6	; address of command line block (2 bytes)
-TD.ATTR	equ	TD.CMD + 2	; initial attributes (1 byte)
+TD.CML	equ	TD.CMD + 2	; length of command (2 bytes)
+TD.ATTR	equ	TD.CML + 2	; initial attributes (1 byte)
 TD.USR	equ	TD.ATTR + 1	; user number (1 byte)
 TD.GRP	equ	TD.USR + 1	; group number (1 byte)
 TD.CON	equ	TD.GRP + 1	; console device and unit (3 bytes)
