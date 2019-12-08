@@ -1,10 +1,11 @@
 ; Task Control Block structure
 
-T.LNK	equ	0		; link to next TCB in priority list (2 bytes)
+T.LNK	equ	0		; utility link field (2 bytes)
 T.TCBL	equ	T.LNK + 2	; link to next TCB in directory list (2 bytes)
-T.ATTR	equ	T.TCBL + 2	; attributes (1 byte)
-T.ST	equ	T.ATTR + 1	; status (1 byte)
-T.DPRI	equ	T.ST + 1	; default priority (1 byte)
+T.ACTL	equ	T.TCBL + 2	; link to next TCB in active task list (2 bytes)
+T.ATTR	equ	T.ACTL + 2	; attributes (1 byte)
+T.ST	equ	T.ATTR + 1	; status (2 bytes)
+T.DPRI	equ	T.ST + 2	; default priority (1 byte)
 T.PRI	equ	T.DPRI + 1	; current priority (1 byte)
 T.NAME	equ	T.PRI + 1	; task name (6 characters)
 T.VID	equ	T.NAME + 6	; task version identification (6 characters)
@@ -16,8 +17,8 @@ T.ASTL	equ	T.OCBL + 2	; pointer to list of AST events (2 bytes)
 T.AST	equ	T.ASTL + 2	; AST handler routine address (2 bytes)
 T.ASTP	equ	T.AST + 2	; AST parameter block address (2 bytes)
 T.SAST	equ	T.ASTP + 2	; specified ASTs bit mask (1 byte)
-T.SVST	equ	T.SAST + 1	; saved task status during AST (1 byte)
-T.FLGS	equ	T.SVST + 1	; task event flags (4 bytes = 32 flags)
+T.SVST	equ	T.SAST + 1	; saved task status during AST (2 bytes)
+T.FLGS	equ	T.SVST + 2	; task event flags (4 bytes = 32 flags)
 T.WAIT	equ	T.FLGS + 4	; flag wait mask (4 bytes)
 T.CTX	equ	T.WAIT + 4	; pointer to Context Block (2 bytes)
 T.TI	equ	T.CTX + 2	; UCB of terminal device (2 bytes)
@@ -46,20 +47,21 @@ TA.FIX	equ	3		; task fixed in memory
 TA.MCR	equ	4		; task is external MCR function
 TA.CLI	equ	5		; task is a CLI
 TA.ACP	equ	6		; task is an ACP
+TA.CKD	equ	7		; checkpointing disabled
 
 ; Status bit numbers
 
 TS.ACT	equ	0		; task active
-TS.STP	equ	1		; stopped
-TS.IOW	equ	2		; I/O waiting / flag waiting
-TS.WTD	equ	3		; waiting for data
-TS.AST	equ	4		; task is executing an AST
-TS.SUP	equ	5		; task is in supervisor mode
-TS.OUT	equ	6		; task is out of memory
+TS.AST	equ	1		; task is executing an AST
+TS.SUP	equ	2		; task is in supervisor mode
+TS.CKR	equ	3		; checkpoint requested
 
-; Mask for task running bits
-
-TM.RUN	equ	(1 SHL TS.STP) OR (1 SHL TS.IOW) OR (1 SHL TS.WTD) OR (1 SHL TS.OUT)
+T2.STP	equ	0		; stopped               \
+T2.EFW	equ	1		; event flag waiting     | "running" bits:
+T2.WTD	equ	2		; waiting for data       | all zero means
+T2.OUT	equ	3		; task is out of memory  | task is executing
+T2.CKP	equ	4		; task is checkpointed   |
+T2.ABO	equ	5		; task is being aborted /
 
 ; Task Context Block structure
 
