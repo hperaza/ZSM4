@@ -42,19 +42,20 @@ E.TNFIX	equ	-38	; Task not fixed
 E.TACT	equ	-39	; Task active
 E.TNAC	equ	-40	; Task not active
 E.TNIU	equ	-41	; Task name in use
-E.FAIL	equ	-42	; Operation failed
-E.ABOP	equ	-43	; Operation aborted
-E.TMO	equ	-44	; Operation timed out
-E.PRIV	equ	-45	; Privileged command
-E.PBIG	equ	-46	; Program too big
-E.QEMP	equ	-47	; Queue empty
-E.BADFL	equ	-48	; Invalid flag number
-E.PBSY	equ	-49	; Partition busy
-E.PNF	equ	-50	; Partition not found
-E.SSNF	equ	-51	; Session not found
-E.SSNA	equ	-52	; Session not active
-E.NLI	equ	-53	; Not logged in
-E.ULI	equ	-54	; Already (Other user) logged in
+E.TABO	equ	-42	; Task abort in progress
+E.FAIL	equ	-43	; Operation failed
+E.ABOP	equ	-44	; Operation aborted
+E.TMO	equ	-45	; Operation timed out
+E.PRIV	equ	-46	; Privileged command
+E.PBIG	equ	-47	; Program too big
+E.QEMP	equ	-48	; Queue empty
+E.BADFL	equ	-49	; Invalid flag number
+E.PBSY	equ	-50	; Partition busy
+E.PNF	equ	-51	; Partition not found
+E.SSNF	equ	-52	; Session not found
+E.SSNA	equ	-53	; Session not active
+E.NLI	equ	-54	; Not logged in
+E.ULI	equ	-55	; Already (Other user) logged in
 
 ; Task exit status codes (lo-byte, hi-byte is reserved for user codes)
 
