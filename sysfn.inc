@@ -60,6 +60,8 @@ I.SMEM	equ	1	; get system memory info
 I.USCB	equ	2	; get user's SCB
 I.TSCB	equ	3	; get SCB of terminal device
 I.HOST	equ	4	; get host name
+I.TCKS	equ	5	; get ticks per second
+I.FEAT	equ	6	; get feature bits
 
 ; Macro to call system services
 
