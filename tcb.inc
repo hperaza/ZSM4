@@ -58,7 +58,7 @@ TS.SUP	equ	2		; task is in supervisor mode
 TS.CKR	equ	3		; checkpoint requested
 
 T2.STP	equ	0		; stopped               \
-T2.EFW	equ	1		; event flag waiting     | "running" bits:
+T2.EFW	equ	1		; event flag waiting     | "blocking" bits:
 T2.WTD	equ	2		; waiting for data       | all zero means
 T2.OUT	equ	3		; task is out of memory  | task is executing
 T2.CKP	equ	4		; task is checkpointed   |
