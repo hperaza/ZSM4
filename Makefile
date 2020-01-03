@@ -1,10 +1,10 @@
 # Path to Linux utilities
-ZXCC    = zxcc
-MKTASK  = ../../Tools/linux/mktask/mktask
+ZXCC   = zxcc
 
 # Path to CP/M utilities
-ZSM4    = ../../Tools/cpm/zsm4.com
-DRLINK  = ../../Tools/cpm/drlink.com
+ZSM4   = ../../Tools/cpm/zsm4.com
+DRLINK = ../../Tools/cpm/drlink.com
+TKB    = ../../Tools/cpm/tkb.com
 
 .PREFIX:
 .PREFIX: .mac .rel
@@ -29,11 +29,10 @@ $(OBJS): %.rel: %.mac *.inc
 _zsm4.com: $(OBJS)
 	$(ZXCC) $(DRLINK) -"_zsm4=zsm,symbols,listing,alloc,eval,macros,genrel,cpmio"
 
-mac.bin: $(OBJS) syslib.lib fcslib.lib
-	$(ZXCC) $(DRLINK) -"mac.bin=zsm,symbols,listing,alloc,eval,macros,genrel,rsxio,fcslib.lib[s],syslib.lib[s]"
-
-mac.tsk: mac.bin
-	$(MKTASK) $< -o $@ -name "...MAC" -id "ZSM4.1" -inc 8000 -asg "TI:5,SY:1-4:6-11"
+mac.tsk: $(OBJS) syslib.lib fcslib.lib
+	@echo -e "    fcslib/lb,syslib/lb/task=...MAC/ext=8000/asg=TI:5,SY:1-4:6-11\r" > build.cmd
+	$(ZXCC) $(TKB) -"mac,mac,mac=zsm/of=t,symbols,listing,alloc,eval,macros,genrel,rsxio,&" < build.cmd
+	@rm build.cmd
 
 selftest: _zsm4.com
 	$(ZXCC) _zsm4 -"_z=zsm/l/s7"
@@ -50,5 +49,5 @@ selftest: _zsm4.com
 	ls -l comp_z_zsm4
 
 clean:
-	rm -f _zsm4.com mac.bin mac.tsk *.rel *.sym *.prn *.crf *.dmp core *~ *.\$$\$$\$$
+	rm -f _zsm4.com mac.tsk *.rel *.sym *.prn *.crf *.map *.dmp core *~ *.\$$\$$\$$
 	rm -f _z.com comp_z_zsm4
