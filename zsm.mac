@@ -2,7 +2,7 @@
 ;                                                                      ;
 ;   This file is part of ZSM4, a Z80/Z180/Z280 relocatable macro-      ;
 ;   assembler written in Z80 assembly.                                 ;
-;   Copyright (C) 2017-2019, Hector Peraza.                            ;
+;   Copyright (C) 2017-2020, Hector Peraza.                            ;
 ;                                                                      ;
 ;   This work is derived from Z80ASM, originally written by Michael    ;
 ;   G. Lehman (1977) and with modifications by Ray Halls (1992) and    ;
@@ -205,6 +205,8 @@
 ;-----------------------------------------------------------------------
 
 	.Z80
+
+	ident	'ZSM4.1'
 
 	include	ZSM.INC
 
