@@ -106,9 +106,9 @@ m3:	call	TTFLSH
 ; Get task name and setup default prompt
 
 INIT:	ld	hl,0
-	ld	de,TSKTCB
+	ld	de,GTKBUF
 	SC	.GTSK		; get task info
-	ld	hl,TSKTCB+T.NAME
+	ld	hl,GTKBUF+GT.NAME
 	call	ckdots		; skip initial 3 dots if present
 	push	hl
 	ld	de,(GDAT+G.PRM)	; set prompt to our task name
@@ -398,7 +398,7 @@ chkeq:	ld	hl,(PTR1)
 PROCESS:
 	; initialize variables
 
-	ld	hl,(TSKTCB+T.END)
+	ld	hl,(GTKBUF+GT.END)
 ;;	dec	hl
 	ld	(MAXMEM),hl	; save max memory address
 	ld	hl,($MEMRY)
@@ -956,17 +956,17 @@ INC1:	pop	bc
 EXTEND:	SC	.EXTSK
 	ret	c
 	ld	hl,0
-	ld	de,TSKTCB
+	ld	de,GTKBUF
 	SC	.GTSK
 	ret	c
-	ld	hl,(TSKTCB+T.END)
+	ld	hl,(GTKBUF+GT.END)
 	ret
 
 ;-----------------------------------------------------------------------
 
 	dseg
 
-TSKTCB:	ds	TCBSZ
+GTKBUF:	ds	GTKSZ
 
 errpfx:	db	CR,LF,'MAC -- ',0
 
