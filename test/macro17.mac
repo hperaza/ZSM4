@@ -13,13 +13,13 @@ test	macro
 	endm
 
 	.lall
-	QIOW$	IO.RLB,lun,efn,iosb,<buf,512>
+	QIOW$	IO.RLB,lun,efn,iosb,,<buf,512>
 	test
 	.sall
-	QIOW$	IO.RLB,lun,efn,iosb,<buf,512>
+	QIOW$	IO.RLB,lun,efn,iosb,,<buf,512>
 	test
 	.xall
-	QIOW$	IO.RLB,lun,efn,iosb,<buf,512>
+	QIOW$	IO.RLB,lun,efn,iosb,,<buf,512>
 	test
 
 iosb:	ds	4

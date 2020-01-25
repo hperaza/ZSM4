@@ -5,14 +5,16 @@ Q.SUBF	equ	Q.FUNC + 1	; subfunction (1 byte)
 Q.LUN	equ	Q.SUBF + 1	; logical unit number (1 byte)
 Q.EFN	equ	Q.LUN + 1	; event flag number (1 byte)
 Q.WAIT	equ	Q.EFN + 1	; wait flag (1 byte)
-Q.IOSB	equ	Q.WAIT + 1	; user I/O Status Block address (2 bytes)
-Q.P1	equ	Q.IOSB + 2	; function-dependent param 1 (2 bytes)
+Q.IOSB	equ	Q.WAIT + 1	; I/O Status Block address (2 bytes)
+Q.AST	equ	Q.IOSB + 2	; AST routine address (2 bytes)
+Q.P1	equ	Q.AST + 2	; function-dependent param 1 (2 bytes)
 Q.P2	equ	Q.P1 + 2	; function-dependent param 2 (2 bytes)
 Q.P3	equ	Q.P2 + 2	; function-dependent param 3 (2 bytes)
 Q.P4	equ	Q.P3 + 2	; function-dependent param 4 (2 bytes)
 Q.P5	equ	Q.P4 + 2	; function-dependent param 5 (2 bytes)
+Q.P6	equ	Q.P5 + 2	; function-dependent param 6 (2 bytes)
 
-QDBSZ	equ	Q.P5 + 2	; QDB size
+QDBSZ	equ	Q.P6 + 2	; QDB size
 
 ; Standard parameter mapping
 
@@ -69,22 +71,27 @@ IO.UNL	equ	27		; unlock file
 IO.DEL	equ	28		; delete file
 IO.REN	equ	29		; rename file
 IO.CLN	equ	30		; cleanup file
-IO.MNT	equ	31		; mount device
-IO.DSM	equ	32		; dismount device
-IO.FFS	equ	33		; flush all disk buffers
+IO.EXT	equ	31		; extend file
+IO.TRN	equ	32		; truncate file
+IO.MNT	equ	33		; mount device
+IO.DSM	equ	34		; dismount device
+IO.FFS	equ	35		; flush all disk buffers
 
 ; File I/O subfunctions (can be ORed)
 
 SF.ACR	equ	01h		; access (open) for read
 SF.ACW	equ	02h		; access (open) for write
 SF.SHR	equ	08h		; open in shared mode
+SF.FID	equ	10h		; access (open) by file ID
 SF.TMP	equ	20h		; create temporary file (delete on close)
 SF.DIR	equ	40h		; create directory
 SF.CTG	equ	80h		; create contiguous file
 
+SF.TRU	equ	20h		; truncate unused blocks
+
 ; RSX-11M style QIO macros
 
-QIO$	macro	func,lun,efn,wait,iosb,args
+QIO$	macro	func,lun,efn,wait,iosb,ast,args
 	dw	func		;; note: 16-bit Q.FUNC + Q.SUBF
 	db	lun,efn		;; Q.LUN, Q.EFN
 	ifb	<wait>
@@ -92,17 +99,22 @@ QIO$	macro	func,lun,efn,wait,iosb,args
 	else
 	db	wait		;; Q.WAIT
 	endif
-	dw	iosb
+	dw	iosb		;; Q.IOSB
+	ifb	<ast>
+	dw	0		;; Q.AST = 0
+	else
+	dw	ast		;; Q.AST
+	endif
 	irp	arg,<args>
 	ifb	<arg>
 	dw	0
 	else
-	dw	arg		;; Q.P1..P5
+	dw	arg		;; Q.P1..P6
 	endif
 	endm
 	endm
 
-QIO$S	macro	func,lun,efn,wait,iosb,args
+QIO$S	macro	func,lun,efn,wait,iosb,ast,args
 	local	n
 	push	ix
 	ld	ix,-QDBSZ
@@ -120,6 +132,13 @@ QIO$S	macro	func,lun,efn,wait,iosb,args
 	ld	hl,iosb
 	ld	(ix+Q.IOSB),l
 	ld	(ix+Q.IOSB+1),h
+	ifb	<ast>
+	ld	hl,0
+	else
+	ld	hl,ast
+	endif
+	ld	(ix+Q.AST),l
+	ld	(ix+Q.AST+1),h
 n	defl	0
 	irp	arg,<args>
 	ifb	<arg>
@@ -142,11 +161,11 @@ n	defl	n+2
 	rra			;; (works since all errors are negative)
 	endm
 
-QIOW$	macro	func,lun,efn,iosb,args
-	QIO$	func,lun,efn,1,iosb,<args>
+QIOW$	macro	func,lun,efn,iosb,ast,args
+	QIO$	func,lun,efn,1,iosb,ast,<args>
 	endm
 
-QIOW$S	macro	func,lun,efn,iosb,args
-	QIO$S	func,lun,efn,1,iosb,<args>
+QIOW$S	macro	func,lun,efn,iosb,ast,args
+	QIO$S	func,lun,efn,1,iosb,ast,<args>
 	endm
 
