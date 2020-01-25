@@ -20,11 +20,10 @@ T.SVST	equ	T.ASTL + 2	; saved task status during AST (2 bytes)
 T.FLGS	equ	T.SVST + 2	; task event flags (4 bytes = 32 flags)
 T.WAIT	equ	T.FLGS + 4	; flag wait mask (4 bytes)
 T.CTX	equ	T.WAIT + 4	; pointer to Context Block (2 bytes)
-T.TI	equ	T.CTX + 2	; UCB of terminal device (2 bytes)
-T.CON	equ	T.TI + 2	; console device and unit (3 bytes)
-T.LD	equ	T.CON + 3	; UCB of load device (2 bytes)
-T.LIB	equ	T.LD + 2	; task load device and unit (3 bytes)
-T.SBLK	equ	T.LIB + 3	; task starting disk block number (4 bytes)
+T.CON	equ	T.CTX + 2	; console device and unit (3 bytes)
+T.TI	equ	T.CON + 3	; UCB of terminal device (2 bytes)
+T.LDEV	equ	T.TI + 2	; UCB of load device (2 bytes)
+T.SBLK	equ	T.LDEV + 2	; task starting disk block number (4 bytes)
 T.NBLK	equ	T.SBLK + 4	; task size in disk blocks (2 bytes)
 T.PCB	equ	T.NBLK + 2	; pointer to PCB (2 bytes)
 T.CPCB	equ	T.PCB + 2	; pointer to checkpoint PCB (2 bytes)
@@ -102,4 +101,26 @@ O.ST	equ	O.ESB + 2	; status (2 bytes)
 ; OCB size
 
 OCBSZ	equ	O.ST + 2
+
+; Structure returned by the .GTSK Get Task Info system call
+
+GT.ATTR	equ	0		; task attributes (1 byte)
+GT.ST	equ	GT.ATTR + 1	; task status (2 bytes)
+GT.DPRI	equ	GT.ST + 2	; default priority (1 byte)
+GT.PRI	equ	GT.DPRI + 1	; current priority (1 byte)
+GT.NAME	equ	GT.PRI + 1	; task name (6 characters)
+GT.VID	equ	GT.NAME + 6	; task version identification (6 characters)
+GT.TI	equ	GT.VID + 6	; console device and unit (3 bytes)
+GT.LDEV	equ	GT.TI + 3	; load device and unit (3 bytes)
+GT.SBLK	equ	GT.LDEV + 3	; task starting disk block number (4 bytes)
+GT.NBLK	equ	GT.SBLK + 4	; task size in disk blocks (2 bytes)
+GT.PAR	equ	GT.NBLK + 2	; partition name (6 bytes)
+GT.STRT	equ	GT.PAR + 6	; start address (2 bytes)
+GT.DEND	equ	GT.STRT + 2	; default end address (2 bytes)
+GT.END	equ	GT.DEND + 2	; end address (2 bytes)
+GT.EPT	equ	GT.END + 2	; entry point (2 bytes)
+
+; GTIB size
+
+GTKSZ	equ	GT.EPT + 2
 
