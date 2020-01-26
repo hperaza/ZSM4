@@ -14,10 +14,10 @@ E.CHOPN	equ	-10	; Channel already in use
 E.IO	equ	-11	; Channel I/O error
 E.PERM	equ	-12	; Access denied
 E.INV	equ	-13	; Invalid value (FCB/LUN)
-E.NOFCB	equ	-14	; Not enough memory for new FCB
-E.NOBUF	equ	-15	; No free disk buffers available
-E.DEVNM	equ	-16	; Device not mounted
-E.DEVAM	equ	-17	; Device already mounted
+E.NOBUF	equ	-14	; Out of disk buffers
+E.DEVNM	equ	-15	; Device not mounted
+E.DEVAM	equ	-16	; Device already mounted
+E.DMOP	equ	-17	; Dismount in progress
 E.OFL	equ	-18	; Unit offline
 E.BADVT	equ	-19	; Invalid volume type
 E.UNA	equ	-20	; Reading unallocated block (unwritten data)
@@ -54,8 +54,9 @@ E.PBSY	equ	-50	; Partition busy
 E.PNF	equ	-51	; Partition not found
 E.SSNF	equ	-52	; Session not found
 E.SSNA	equ	-53	; Session not active
-E.NLI	equ	-54	; Not logged in
-E.ULI	equ	-55	; Already (Other user) logged in
+E.DMOI	equ	-54	;- Dismount initiated
+E.NLI	equ	-55	;- Not logged in
+E.ULI	equ	-56	;- Already (Other user) logged in
 
 ; Task exit status codes (lo-byte, hi-byte is reserved for user codes)
 
