@@ -55,12 +55,13 @@ TS.SUP	equ	2		; task is in supervisor mode
 TS.CKR	equ	3		; checkpoint requested
 
 T2.STP	equ	0		; stopped               \
-T2.EFW	equ	1		; event flag waiting     |
-T2.WTD	equ	2		; waiting for data       | "blocking" bits:
-T2.OUT	equ	3		; task is out of memory  | all zero means
-T2.CKP	equ	4		; task is checkpointed   | task is executing
-T2.LDR	equ	5		; task is being loaded   |
-T2.ABO	equ	6		; task is being aborted /
+T2.SEF	equ	1		; stopped for event flag |
+T2.EFW	equ	2		; event flag waiting     | "blocking" bits:
+T2.WTD	equ	3		; waiting for data       |  all zero means
+T2.OUT	equ	4		; task is out of memory  | task is executing
+T2.CKP	equ	5		; task is checkpointed   |
+T2.LDR	equ	6		; task is being loaded   |
+T2.ABO	equ	7		; task is being aborted /
 
 ; Task Context Block structure
 
