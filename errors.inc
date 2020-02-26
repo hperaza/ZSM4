@@ -34,29 +34,30 @@ E.TNU	equ	-30	; Task name in use
 E.FNC	equ	-31	; File not contiguous
 E.NCSPC	equ	-32	; No contiguous space on device
 E.NOMEM	equ	-33	; Not enough room
-E.TRUN	equ	-34	; Task already running
-E.TSTP	equ	-35	; Task already stopped
-E.TDLY	equ	-36	; Task already delayed
-E.TFIX	equ	-37	; Task already fixed
-E.TNFIX	equ	-38	; Task not fixed
-E.TACT	equ	-39	; Task active
-E.TNAC	equ	-40	; Task not active
-E.TNIU	equ	-41	; Task name in use
-E.TABO	equ	-42	; Task abort in progress
-E.FAIL	equ	-43	; Operation failed
-E.ABOP	equ	-44	; Operation aborted
-E.TMO	equ	-45	; Operation timed out
-E.PRIV	equ	-46	; Privileged command
-E.PBIG	equ	-47	; Program too big
-E.QEMP	equ	-48	; Queue empty
-E.BADFL	equ	-49	; Invalid flag number
-E.PBSY	equ	-50	; Partition busy
-E.PNF	equ	-51	; Partition not found
-E.SSNF	equ	-52	; Session not found
-E.SSNA	equ	-53	; Session not active
-E.DMOI	equ	-54	;- Dismount initiated
-E.NLI	equ	-55	;- Not logged in
-E.ULI	equ	-56	;- Already (Other user) logged in
+E.PEND	equ	-34	; I/O request pending
+E.TRUN	equ	-35	; Task already running
+E.TSTP	equ	-36	; Task already stopped
+E.TDLY	equ	-37	; Task already delayed
+E.TFIX	equ	-38	; Task already fixed
+E.TNFIX	equ	-39	; Task not fixed
+E.TACT	equ	-40	; Task active
+E.TNAC	equ	-41	; Task not active
+E.TNIU	equ	-42	; Task name in use
+E.TABO	equ	-43	; Task abort in progress
+E.FAIL	equ	-44	; Operation failed
+E.ABOP	equ	-45	; Operation aborted
+E.TMO	equ	-46	; Operation timed out
+E.PRIV	equ	-47	; Privileged command
+E.PBIG	equ	-48	; Program too big
+E.QEMP	equ	-49	; Queue empty
+E.BADFL	equ	-50	; Invalid flag number
+E.PBSY	equ	-51	; Partition busy
+E.PNF	equ	-52	; Partition not found
+E.SSNF	equ	-53	; Session not found
+E.SSNA	equ	-54	; Session not active
+E.DMOI	equ	-55	;- Dismount initiated
+E.NLI	equ	-56	;- Not logged in
+E.ULI	equ	-57	;- Already (Other user) logged in
 
 ; Task exit status codes (lo-byte, hi-byte is reserved for user codes)
 
