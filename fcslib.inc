@@ -39,7 +39,7 @@ FSR$	MACRO	fdb,mode,lun,efn,buf
 	else
 	dw	lbuf
 	endif
-	dw	0,0,0
+	dw	0,0,0,0
 	ifb	<fdb>
 lfdb:	ds	FINFSZ
 	endif

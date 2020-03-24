@@ -484,7 +484,8 @@ proc3:	ld	a,(OFNAME+F.ATTR)
 proc4:	ld	ix,IOB2
 	ld	(ix+FC.MODE),1 SHL FM.WR
 	ld	de,0
-	ld	c,0		; non-contiguous file
+	ld	c,0
+	xor	a		; non-contiguous file
 	call	FCREAT		; create the file
 	jp	c,SYSERR
 
@@ -534,7 +535,8 @@ proc7:	ld	a,(LFNAME+F.ATTR)
 proc8:	ld	ix,IOB3
 	ld	(ix+FC.MODE),1 SHL FM.WR
 	ld	de,0
-	ld	c,0		; non-contiguous file
+	ld	c,0
+	xor	a		; non-contiguous file
 	call	FCREAT
 	jp	c,SYSERR
 
