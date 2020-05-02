@@ -67,7 +67,10 @@ ID7:	ld	a,(hl)
 	jr	ID7
 ;
 ID4:	ld	(PTR1),hl
-ID6:	ld	c,a
+ID6:	cp	';'
+	jr	nz,ID9
+ID8:	xor	a
+ID9:	ld	c,a
 	ld	a,IDMAX
 	sub	b
 	ld	(IDLEN),a	; store symbol length
@@ -79,7 +82,7 @@ ID6:	ld	c,a
 ;
 LERROR:	ld	a,'L'
 	ld	(ERRFLG),a
-	jr	ID6
+	jr	ID8
 ;
 VALID:	call	ISDIG
 	ret	nc
