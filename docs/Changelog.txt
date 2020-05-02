@@ -900,3 +900,9 @@ Changelog
   an invalid option switch or option argument is specified, just like the
   RSX180 version does.
 
+
+02/05/20
+
+- Bug fix: a semicolon immediately following a label, instruction mnemonic
+  or a pseudo-operator resulted in a bogus 'N' error.
+
