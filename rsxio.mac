@@ -861,6 +861,7 @@ CLSLIB:	ld	a,(INCLVL)
 	ld	d,(hl)
 	inc	hl
 	ld	a,(hl)		; get FC.MODE
+	res	FS.BV,a		; buffer is no longer valid
 	ld	(IOB1+FC.MODE),a
 	inc	hl
 	ld	a,(hl)		; get LUN
