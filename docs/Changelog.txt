@@ -906,3 +906,10 @@ Changelog
 - Bug fix: a semicolon immediately following a label, instruction mnemonic
   or a pseudo-operator resulted in a bogus 'N' error.
 
+
+22/05/20
+
+- RSX180: invalidate the (shared) input buffer after closing an include
+  file.
+
+
