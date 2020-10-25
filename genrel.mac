@@ -131,11 +131,14 @@ WCSIZE:	ld	c,9Ah		; 1 00 1101 - special item: define cseg size
 	jp	WR16B		; output size
 ;
 ;	WDSIZE - Write DSEG size: HL = size
+;	Note: L80 wants an 'absolute' argument and not a 'data-relative' one
+;	as one would expect. DR LINK does not care.
 ;
 WDSIZE:	ld	c,94h		; 1 00 1010 - special item: define dseg size
 	ld	b,7
 	call	WRBITS
-	ld	c,80h		; data relative value follows
+;--	ld	c,80h		; data relative value follows
+	ld	c,00h		; absolute value follows (L80 wants it that way)
 	ld	b,2
 	call	WRBITS
 	ld	c,l

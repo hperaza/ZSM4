@@ -206,7 +206,7 @@
 
 	.Z80
 
-	ident	'ZSM4.1'
+	ident	'ZSM4.2'
 
 	include	ZSM.INC
 
@@ -470,13 +470,13 @@ S418B:	inc	hl
 	ex	de,hl
 	jr	S418
 
-S419:	ld	hl,(CSSIZE)
-	call	WCSIZE		; set size of code segment
-	ld	hl,(DSSIZE)
-	call	WDSIZE		; set size of data segment
+S419:	ld	hl,(DSSIZE)
+	call	WDSIZE		; set size of data segment (L80 wants this first)
+	ld	hl,(CSSIZE)
+	ld	a,h
+	or	l
+	call	nz,WCSIZE	; set size of code segment
 	call	RESETP		; reset variables
-	ld	e,40h		; CSEG
-	call	WLOC		; set initial loc
 	jp	NEXT		; process all records again
 ;
 ;	End of assembly
@@ -598,6 +598,7 @@ RESETP:	xor	a
 	dec	a
 	ld	(hl),a		; we always start true
 	ld	(LSTOPT),a	; set all list option bits
+	ld	(LOCFLG),a	; set loc counter pending flag (L80 quirk fix)
 	ld	hl,10
 	ld	(RADIX),hl	; reset radix
 	ld	hl,0
@@ -959,6 +960,7 @@ S16B:	ld	e,(hl)
 	cp	27		; if pseudo-op
 	jr	nz,S17		; just test state if not
 	ld	a,(OPCODE)	; get opcode
+	ld	c,a
 	cp	8		; is it IF?
 	jr	z,S17A		; let through always
 	cp	9		; is it ELSE?
@@ -971,7 +973,8 @@ S17:	ld	de,(CONDSP)	; get conditional state
 	jr	c,S17A		; if true, process the opcode
 	jp	GNC		; go past separator and finish if false
 ;
-S17A:	ld	a,(hl)		; get type byte
+S17A:	call	SETLOC		; output pending loc counter
+	ld	a,(hl)		; get type byte
 	dec	a		; -1
 	ld	hl,TYPTBL
 SWITCH:	add	a,a		; double for table index
@@ -983,6 +986,30 @@ SWITCH:	add	a,a		; double for table index
 	ld	h,(hl)
 	ld	l,a
 	jp	(hl)		; dispatch to proper instruction type
+;
+SETLOC:	ld	a,(hl)		; get type byte
+	cp	27		; pseudo-op?
+	jr	nz,STLOC	; output pending loc counter if not
+	ld	a,c
+	cp	2		; check for DB, DW, DS opcode
+	ret	c		; return if anything else
+	cp	4+1
+	ret	nc
+STLOC:	ld	a,(LOCFLG)
+	or	a		; loc counter is pending output?
+	ret	z		; return if not
+	xor	a
+	ld	(LOCFLG),a	; clear flag
+	ld	a,(PASSNO)
+	or	a
+	ret	z		; return if pass 1
+	push	hl
+	ld	a,(CURSEG)
+	ld	e,a
+	ld	hl,(PC)
+	call	WLOC		; else output current loc counter
+	pop	hl
+	ret
 
 ;-----------------------------------------------------------------------
 ;
@@ -5126,7 +5153,9 @@ S323:	ld	a,(PHFLAG)
 	ld	a,(CURSEG)
 	ld	e,a
 	call	nz,WLOC
-	ld	a,1
+	xor	a
+	ld	(LOCFLG),a
+	inc	a
 	ld	(EQUFLG),a
 	ret
 ;
@@ -5562,6 +5591,8 @@ S374:	cp	c
 S380:	ld	a,(PHFLAG)
 	or	a
 	jp	nz,PERROR	; not allowed within .PHASE
+	dec	a
+	ld	(LOCFLG),a	; set loc pending flag
 	ld	a,(CURSEG)
 	or	a
 	ret	z		; current segment is Absolute, ignore
@@ -5569,12 +5600,8 @@ S380:	ld	a,(PHFLAG)
 	call	SAVEPC		; save PC for current segment
 	ld	hl,(ASEGPC)
 	ld	(PC),hl		; and load PC with latest Absolute PC
-	ld	a,(PASSNO)
-	or	a
-	ld	a,0
+	ld	a,00h
 	ld	(CURSEG),a	; set current segment type to Absolute
-	ld	e,a
-	call	nz,WLOC		; if Pass 2, write loc counter
 	ret
 ;
 ;	CSEG
@@ -5582,40 +5609,36 @@ S380:	ld	a,(PHFLAG)
 S390:	ld	a,(PHFLAG)
 	or	a
 	jp	nz,PERROR	; not allowed within .PHASE
+	ld	a,(LOCFLG)
+	or	a
 	ld	a,(CURSEG)
+	jr	nz,S390A
 	cp	40h
 	ret	z		; current segment is Code, ignore
-	call	UPDSIZ		; update current segment size
+S390A:	call	UPDSIZ		; update current segment size
 	call	SAVEPC		; save PC for current segment
 	ld	hl,(CSEGPC)
 	ld	(PC),hl		; and load PC with latest Code PC
-	ld	a,(PASSNO)
-	or	a
-	ld	a,40h
-	ld	(CURSEG),a	; set current segment type to Code
-	ld	e,a
-	call	nz,WLOC		; if Pass 2, write loc counter
-	ret
+	ld	e,40h		; segment type = Code
+	jr	S396		; set segment type and loc counter
 ;
 ;	DSEG
 ;
 S391:	ld	a,(PHFLAG)
 	or	a
 	jp	nz,PERROR	; not allowed within .PHASE
+	ld	a,(LOCFLG)
+	or	a
 	ld	a,(CURSEG)
+	jr	nz,S391A
 	cp	80h
 	ret	z		; current segment is Data, ignore
-	call	UPDSIZ		; update current segment size
+S391A:	call	UPDSIZ		; update current segment size
 	call	SAVEPC		; save PC for current segment
 	ld	hl,(DSEGPC)
 	ld	(PC),hl		; and load PC with latest Data PC
-	ld	a,(PASSNO)
-	or	a
-	ld	a,80h
-	ld	(CURSEG),a	; set current segment type to Data
-	ld	e,a
-	call	nz,WLOC		; if Pass 2, write loc counter
-	ret
+	ld	e,80h		; segment type = Data
+	jr	S396		; set segment type and loc counter
 ;
 ;	COMMON
 ;
@@ -5663,12 +5686,15 @@ S395:	ld	(hl),CMNSYM	; mode is COMMON
 	ld	hl,(CURCMN)
 	call	SELCMN		; select COMMON block
 	pop	hl
+
+	ld	e,0C0h		; segment type = COMMON
+S396:	ld	a,e
+	ld	(CURSEG),a	; set current segment type
 	ld	a,(PASSNO)
 	or	a
-	ld	a,0C0h
-	ld	(CURSEG),a	; set current segment type to COMMON
-	ld	e,a
 	call	nz,WLOC		; if Pass 2, write loc counter
+	xor	a
+	ld	(LOCFLG),a
 	ret
 
 S394:	ld	de,(IDADR)
@@ -6610,6 +6636,7 @@ EQUFLG:	ds	1	; if non-zero VAL is used instead of PC for print
 LBLFLG:	ds	1	; if non-zero, force PC output to listing
 DSFLAG:	ds	1	; if non-zero LENDS is used for print
 DBWFLG:	ds	1	; DB/DC/DW flag
+LOCFLG:	ds	1	; if non-zero, loc counter is pending output
 NEWSYM:	ds	1	; new symbol flag
 ENDADR:	ds	2	; expression value on END statement
 ENDMOD:	ds	1	; expression result mode on END statement
