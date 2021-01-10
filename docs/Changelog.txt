@@ -913,3 +913,42 @@ Changelog
   file.
 
 
+21/10/20 (V4.2)
+
+- Working around certain Microsoft's L80 quirks:
+  * L80 wants the special link item 10 (define size of data area) to appear
+    *before* special link item 13 (define program size) in the REL file.
+    Normally the order should not matter.
+  * L80 wants the A-field of the special link item 10 to have the address
+    type bits cleared (meaning "absolute") instead of set to "data-relative"
+    as one would normally expect (at least for consistency with special link
+    item 13, which sets the bits to "program-relative"). Normally the address
+    type bits are pretty much useless in both cases and should be ignored by
+    the linker (like Digital Research's LINK does).
+
+
+25/10/20
+
+- More L80-compatibility fixes:
+  * ZSM4 used to emit a special item 11 (set loading counter to the
+    specified segment and address) every time an ASEG statement is
+    encountered like RMAC does, while M80 apparently delays it until code
+    is actually generated or an ORG statement is encountered. The ZSM4
+    behavior does not seems to be a problem for Digital Research's LINK,
+    but confuses L80 which thinks that the Absolute segment starts at
+    address 0000h and therefore generates an invalid COM file. ZSM4 now
+    delays emiting the Absolute segment start like M80 does.
+
+
+31/12/20
+
+- CP/M version: fixed a bug in the date conversion code that caused the
+  month computation routine to loop foerever on Dec 31st.
+
+
+09/01/20
+
+- RSX version: added /Iddn:[dir] switch to specify an alternate include file
+  search path.
+
+
