@@ -599,11 +599,11 @@ CY1:	ld	de,365		; year length
 	jr	nz,CY2
 	inc	de		; year length = 366
 CY2:	push	hl
-	dec	de
+	inc	de
 	sbc	hl,de		; remaining days - year length (note CY was clear)
 	jr	c,CY3		; return if <= 0
 	pop	af
-	dec	hl
+	inc	hl
 	inc	bc		; ++year
 	jr	CY1
 CY3:	pop	hl
@@ -612,8 +612,8 @@ CY3:	pop	hl
 ; Compute month from remaining days in HL, C = leap bias.
 ; Returns month in DE, C = leap bias
 
-CMONTH:	push	hl
-	ld	de,11		; E = month, D = 0
+CMONTH:	ld	de,11		; E = month, D = 0
+	push	hl
 	ld	b,d		; B = 0
 CM1:	ld	a,e
 	cp	2		; jan or feb?
@@ -637,7 +637,7 @@ CM2:	ld	hl,MDAYS
 	ex	de,hl
 	jr	c,CM3
 	dec	e
-	jr	cm1
+	jr	nz,cm1
 CM3:	pop	hl
 	ret
 
