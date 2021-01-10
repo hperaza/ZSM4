@@ -75,6 +75,7 @@ LUNMAC	equ	6		; LUN 6 is used for source file
 ;	    /M		initialize DEFS data areas to zero
 ;	    /Zn		set initial processor type to Z80, Z180 or Z280
 ;			(n=0, 1 or 2 respectively; defaults to 0 = Z80)
+;	    /Iddn:[dir] define an include file search path
 ;	    /Dsym[=val]	define symbol and optionally assign a value to it
 
 START:	ld	sp,STACK
@@ -252,6 +253,7 @@ PARSE:	ld	hl,(SYMTBL)
 	ld	(ZERODS),a	; no DS zeroing
 	ld	(DEFCPU),a	; CPU is Z80
 	ld	(OPTSW),a
+	ld	(INCDIR),a	; no additional include dir
 	ld	a,6
 	ld	(NAMLEN),a	; REL symbol length = 6
 	ld	hl,10
@@ -369,9 +371,52 @@ swzds:	ld	a,1
 	ld	(ZERODS),a
 	jp	par1
 
-swinc:
-	;...
-	jp	par1
+swinc:	ld	a,(INCDIR)
+	or	a		; additional include path already specified?
+	jp	nz,CMDERR	; error if yes
+	ld	ix,-FNSZ
+	add	ix,sp		; create temporary storage on stack
+	ld	sp,ix		; for PFN call
+	ex	de,hl
+	call	PFN		; parse filespec
+	ld	(PTR1),hl	; remember where we stopped
+	ld	a,(ix+F.ATTR)
+	ld	c,a
+	and	NOT (FN.DEV OR FN.DIR)
+	jr	nz,swinc3	; only device name and/or directory are allowed
+	ld	a,c
+	and	FN.DEV OR FN.DIR
+	jr	z,swinc3	; and at least one of the two must be present
+	ld	a,c
+	ld	(INCDIR),a	; store flags
+	and	FN.DEV		; device name specified?
+	ld	a,c
+	jr	z,swinc1	; no, skip
+	push	ix
+	pop	hl
+	ld	de,F.DEV
+	add	hl,de
+	ld	de,INCDIR+1
+	ld	bc,3
+	ldir			; copy device name
+swinc1:	and	FN.DIR		; directory specified?
+	jr	z,swinc2	; no, return
+	push	ix
+	pop	hl
+	ld	de,F.DIR
+	add	hl,de
+	ld	de,INCDIR+1+3
+	ld	bc,9
+	ldir			; copy directory name
+swinc2:	ld	hl,FNSZ		; restore stack
+	add	hl,sp
+	ld	sp,hl
+	jp	par1		; and continue
+
+swinc3:	ld	hl,FNSZ
+	add	hl,sp
+	ld	sp,hl		; restore stack
+	jp	CMDERR		; and report error
 
 swxrf:
 	;...
@@ -438,7 +483,7 @@ proc1:	ld	ix,IOB1
 	ld	hl,CLSFIL
 	push	hl
 
-	set	0,(iy)
+	set	0,(iy)		; input file successfully open
 
 	; create object file
 
@@ -489,7 +534,7 @@ proc4:	ld	ix,IOB2
 	call	FCREAT		; create the file
 	jp	c,SYSERR
 
-	set	1,(iy)
+	set	1,(iy)		; object file successfully created
 
 	; create listing file
 
@@ -540,7 +585,7 @@ proc8:	ld	ix,IOB3
 	call	FCREAT
 	jp	c,SYSERR
 
-	set	2,(iy)
+	set	2,(iy)		; listing file successfully created
 
 	; header line message
 
@@ -602,17 +647,17 @@ dt1:	ld	hl,8
 				;  file close functions
 	jp	Z80ASM		; call the assembler and return
 
-CLSFIL:	bit	0,(iy)
+CLSFIL:	bit	0,(iy)		; input file open?
 	jr	z,clsf1
-	ld	ix,IOB1
+	ld	ix,IOB1		; yes, close it
 	call	FCLOSE
-clsf1:	bit	1,(iy)
+clsf1:	bit	1,(iy)		; object file open?
 	jr	z,clsf2
-	ld	ix,IOB2
+	ld	ix,IOB2		; yes, close it
 	call	FCLOSE
-clsf2:	bit	2,(iy)
+clsf2:	bit	2,(iy)		; listing file open?
 	ret	z
-	ld	ix,IOB3
+	ld	ix,IOB3		; yes, close it
 	call	FCLOSE
 	ret
 
@@ -757,7 +802,7 @@ OPNLIB:	ld	a,(INCLVL)
 	call	FPOS
 	call	c,SYSERR
 
-	ld	(hl),c		; store file position
+	ld	(hl),c		; store source file position
 	inc	hl
 	ld	(hl),b
 	inc	hl
@@ -796,10 +841,45 @@ OPNLIB:	ld	a,(INCLVL)
 
 OPN1:	ld	ix,IOB1
 	ld	(ix+FC.MODE),1 SHL FM.RD
-	call	FOPEN
-	jr	c,FNERR
+	call	FOPEN		; open file
+	jr	nc,OPN4		; branch on success
 
-	pop	hl
+	ld	a,(IFNAME+F.ATTR)
+	and	FN.DEV OR FN.DIR ; include file with explicit device and/or dir?
+	jr	nz,FNERR	 ; yes, error
+
+	ld	a,(INCDIR)
+	or	a		; search include path specified?
+	jr	z,FNERR		; no, return error
+	ld	c,a
+	and	FN.DEV		; search path specifies a device?
+	ld	a,c
+	jr	z,OPN2		; no, try directory
+	ld	hl,INCDIR+1
+	ld	de,IFNAME+F.DEV
+	ld	bc,3
+	ldir			; else copy device name
+	ld	c,a
+	ld	hl,IFNAME+F.ATTR
+	ld	a,(hl)
+	or	FN.DEV		; set bit in attributes field
+	ld	(hl),a
+	ld	a,c
+OPN2:	and	FN.DIR		; search path specifies a directory?
+	jr	z,OPN3		; no, skip
+	ld	hl,INCDIR+1+3
+	ld	de,IFNAME+F.DIR
+	ld	bc,9
+	ldir			; else copy directory name
+	ld	hl,IFNAME+F.ATTR
+	ld	a,(hl)
+	or	FN.DIR		; set bit in attributes field
+	ld	(hl),a
+OPN3:	ld	(ix+FC.MODE),1 SHL FM.RD
+	call	FOPEN		; try again
+	jr	c,FNERR		; no can do
+
+OPN4:	pop	hl
 	ex	(sp),hl		; drop block address, save record pointer
 	ld	hl,INCLVL
 	inc	(hl)
@@ -987,6 +1067,8 @@ IOB3:	FSR$	LFNAME,<1 SHL FM.WR>,LUNLST,9
 IFNAME:	ds	FINFSZ		; FDB for input file name
 OFNAME:	ds	FINFSZ		; FDB for output file name (OBJ)
 LFNAME:	ds	FINFSZ		; FDB for listing file name (LST)
+INCDIR:	ds	1+3+9		; additional path to search for include files
+				;  first byte contains FN.DEV and FN.DIR bits
 
 INCLVL:	ds	1		; nested INCLUDE level
 
