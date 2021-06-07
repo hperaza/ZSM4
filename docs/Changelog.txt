@@ -937,7 +937,7 @@ Changelog
     behavior does not seems to be a problem for Digital Research's LINK,
     but confuses L80 which thinks that the Absolute segment starts at
     address 0000h and therefore generates an invalid COM file. ZSM4 now
-    delays emiting the Absolute segment start like M80 does.
+    delays emitting the Absolute segment start like M80 does.
 
 
 31/12/20
@@ -956,4 +956,10 @@ Changelog
 
 - Bug fix: 'LD I,A' and 'LD R,A' instructions generated an 'O' error when
   the /U switch was specified.
+
+- Bug fix: if a .PHASE statement appears before any ORG, CSEG, DSEG or
+  COMMON in the code, the object code location counter was erroneously
+  set to the .PHASE argument type (normally Absolute), instead of to the
+  default Code type (bug from the 21/10/20 changes).
+
 

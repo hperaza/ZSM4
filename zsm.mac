@@ -1004,6 +1004,11 @@ STLOC:	ld	a,(LOCFLG)
 	or	a
 	ret	z		; return if pass 1
 	push	hl
+	ld	a,(PHFLAG)
+	or	a
+	jr	nz,STLC
+	ld	a,(CURSEG)
+STLC:	and	0C0h
 	ld	a,(CURSEG)
 	ld	e,a
 	ld	hl,(PC)
