@@ -952,3 +952,8 @@ Changelog
   search path.
 
 
+07/06/21
+
+- Bug fix: 'LD I,A' and 'LD R,A' instructions generated an 'O' error when
+  the /U switch was specified.
+

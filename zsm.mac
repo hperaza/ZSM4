@@ -206,7 +206,7 @@
 
 	.Z80
 
-	ident	'ZSM4.2'
+	ident	'ZSM4.3'
 
 	include	ZSM.INC
 
@@ -1940,12 +1940,11 @@ CL8:	call	GNC
 	cp	'<'
 	jp	z,S186		; or <>
 	call	BACKUP
-	call	EVALREG
+	call	S117		; try special I,A and R,A cases first
+	jp	nc,S120		; branch to process I and R
+	call	EVALREG		; else get first operand
 	call	REQCHR
 	db	','
-	ld	a,(UFLAG)	; valid name?
-	or	a
-	jp	nz,S120		; jump if not - try special cases
 	ld	a,(EVFLGS)
 	cp	RPNAME
 	jp	z,S147		; branch if rpair name
@@ -1964,23 +1963,26 @@ CL8:	call	GNC
 	cp	'<'
 	jp	z,S130
 	call	BACKUP
-	call	EVALREG		; get second operand
+	ld	a,(SAVVAL)
+	cp	7		; register A?
+	jr	nz,S116A	; branch if not
+	call	S117		; else check for special cases
+	jr	c,S116A
+	dec	c
+	ld	c,57h		; LD A,I
+	jp	z,S171
+	ld	c,5Fh		; LD A,R
+	jp	S171
+
+S116A:	call	EVALREG		; get second operand
 	cp	RNAME
 	jp	z,S128		; branch if single reg
 	cp	RPNAME
 	jp	z,OERROR	; register pair is illegal here
-	ld	a,(IDLEN)
-	dec	a		; check for special cases
-	jr	nz,S116B
-	ld	a,(IDBUF)
-	cp	'I'
-	jp	z,S171		; LD A,I
-	cp	'R'
-	jp	z,S173		; LD A,R
 S116B:	ld	hl,(SAVVAL)
 	ld	a,h
 	or	a
-	jp	z,S116C
+	jr	z,S116C
 	ld	a,(CPU)
 	dec	a
 	jp	z,OERROR	; IXH,IXL,IYH,IYL not supported by Z180
@@ -1998,22 +2000,32 @@ S116C:	ld	a,l
 	ld	a,l
 	jp	EMITB		; immed operand
 ;
+S117:	ld	de,(PTR1)	; save record pointer
+	ld	hl,ERRFLG
+	ld	c,(hl)		; and old error flag
+	call	ID		; get identifier
+	ld	(hl),c		; ignore errors from ID
+	ld	a,(IDLEN)
+	dec	a		; one char?
+	jr	nz,S118		; return with carry set if not
+	ld	a,(IDBUF)
+	ld	c,1
+	cp	'I'
+	ret	z
+	inc	c
+	cp	'R'
+	ret	z
+S118:	ld	(PTR1),de	; restore record pointer
+	scf
+	ret
+;
 ;	LD	I,A
 ;	LD	R,A
 ;
-S120:	call	NOLDW		; can't be LDW
-	ld	a,(IDLEN)
-	dec	a
-	jp	nz,OERROR
-	ld	(UFLAG),a
-	ld	a,(IDBUF)
-	cp	'I'
-	ld	c,47h		; LD I,A
-	jr	z,S121
-	cp	'R'
-	jp	nz,OERROR
-	ld	c,4Fh		; LD R,A
-S121:	push	bc
+S120:	push	bc
+	call	NOLDW		; can't be LDW
+	call	REQCHR
+	db	','
 	call	EVALREG
 	pop	bc
 	cp	RNAME
@@ -2021,7 +2033,14 @@ S121:	push	bc
 	ld	a,l
 	cp	7		; only A allowed
 	jp	nz,OERROR
-	jp	S171A
+	dec	c
+	ld	c,47h		; ld I,A
+	jr	z,S171
+	ld	c,4Fh		; ld R,A
+S171:	ld	a,0EDh
+	call	EMITB
+	ld	a,c
+	jp	EMITB
 ;
 ;	LD	r,r
 ;
@@ -2240,17 +2259,6 @@ S170:	ld	a,(SAVVAL)
 	or	a
 	call	nz,EMITB
 	ld	a,0F9h
-	jp	EMITB
-;
-S173:	ld	c,5Fh		; LD A,R
-	jr	S171A
-;
-S171:	ld	c,57h		; LD A,I
-S171A:	xor	a
-	ld	(UFLAG),a
-	ld	a,0EDh
-	call	EMITB
-	ld	a,c
 	jp	EMITB
 ;
 ;	LD	rp,(...)
