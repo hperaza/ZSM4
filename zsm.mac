@@ -2,7 +2,7 @@
 ;                                                                      ;
 ;   This file is part of ZSM4, a Z80/Z180/Z280 relocatable macro-      ;
 ;   assembler written in Z80 assembly.                                 ;
-;   Copyright (C) 2017-2020, Hector Peraza.                            ;
+;   Copyright (C) 2017-2021, Hector Peraza.                            ;
 ;                                                                      ;
 ;   This work is derived from Z80ASM, originally written by Michael    ;
 ;   G. Lehman (1977) and with modifications by Ray Halls (1992) and    ;
@@ -2089,7 +2089,7 @@ S128C:	ld	a,b
 ;
 ;	LD	r,(...)
 ;
-S130:	call	EVBRKT		; evaluate ()
+S130::	call	EVBRKT		; evaluate ()
 	ld	hl,LDTBL1
 	jp	SWITCH
 ;
@@ -6259,7 +6259,7 @@ EMTV1:	ld	a,(ix+2)	; get mode
 	ld	a,h		; test for zero
 	or	l
 	ld	e,(ix+2)
-	call	nz,WEOFFS	; if zero, output 'ext+offset' reloc item
+	call	nz,WEOFFS	; if not zero, output 'ext+offset' reloc item
 	ld	hl,(PC)
 	ld	a,(LEN)
 	ld	e,a
@@ -6297,7 +6297,8 @@ EMTV7:	and	0C0h
 	ld	c,CMNSYM
 EMTV5:	ex	de,hl
 	call	WOBJ16		; output chain address
-	ld	hl,0		; External always appears as 0000 on listing
+	ld	l,(ix+0)	; External displays offset value on listing
+	ld	h,(ix+1)
 	jr	EMTV4
 
 EMTV3:	push	bc

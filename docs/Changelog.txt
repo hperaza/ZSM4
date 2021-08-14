@@ -963,3 +963,16 @@ Changelog
   default Code type (bug from the 21/10/20 changes).
 
 
+08/08/21
+
+- Show on the listing the offset value for "external+offset" expressions.
+
+
+14/08/21
+
+- CP/M version: allow TTY: to be specified as input device on command line.
+
+- Don't output the same error code multiple times on continuation listing
+  lines.
+
+
