@@ -234,9 +234,12 @@ S402:	call	LSTPRE		; prepare the line
 
 	IF	LNGERR
 
-	ld	a,(ERRFLG)	; any errors?
-	cp	' '		; space means no
+	ld	hl,ERRFLG	; any errors?
+	ld	a,' '
+	cp	(hl)		; space means no
 	ret	z		; so nothing else to print
+	ld	(hl),a		; don't report the same error twice
+	
 ;
 ;	Print extended error message
 ;
@@ -273,6 +276,11 @@ ERRMDN:	ex	de,hl		; DE points to output buffer
 	ld	bc,ERRH2L
 	ldir
 	call	PLINE		; output error message
+
+	ELSE
+
+	ld	a,' '
+	ld	(ERRFLG),a	; don't report the same error twice
 
 	ENDIF
 
