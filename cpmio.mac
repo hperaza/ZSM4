@@ -97,13 +97,7 @@ S1:	call	CRLF
 	ld	e,'*'
 	ld	c,2
 	call	ENTRY		; display prompt
-
-	ld	hl,CPMBUF-1
-	ld	(hl),126
-	ex	de,hl
-	ld	c,10
-	call	ENTRY		; get command line
-	call	CRLF
+	call	GETLN		; get command line
 
 S2:	call	PROCESS		; parse and process the command
 
@@ -205,6 +199,10 @@ PR3:	cp	'='
 	call	GETOPT
 	call	TSTFCB
 	jp	c,CMDERR
+	cp	'Y'
+	ld	hl,SM5
+	jp	z,CLINE		; input device can't be LPT:
+	ld	(IFLAG),a
 	ld	hl,ASMEXT
 	call	ADDEXT		; set up extension
 
@@ -213,7 +211,7 @@ PR3:	cp	'='
 	jr	nz,PR5
 
 	ld	hl,FCB1
-	ld	de,FCB2
+	ld	de,FCB2		; setup implicit REL output file
 	ld	bc,36
 	ldir
 	ld	hl,RELEXT
@@ -305,12 +303,15 @@ PR6:	ld	de,TOD
 
 ;	Open/create files
 
-PR7:	ld	de,FCB1
+PR7:	ld	a,(IFLAG)
+	cp	'X'
+	jr	z,PR71
+	ld	de,FCB1
 	call	OPNFIL		; open source file
 	ld	hl,SM1		; source file not found
 	jp	z,CLINE		; on error, msg and return
 
-	ld	de,FCB3
+PR71:	ld	de,FCB3
 	ld	a,(LFLAG)
 	cp	'@'
 	jr	nz,PR8
@@ -326,9 +327,9 @@ PR8:	ld	de,FCB2
 	ld	hl,SM2		; can't create object file
 	jp	z,CLINE		; on error, msg and return
 
-PR9:	ld	hl,INBUF+IBUFSZ
-	ld	(IBP),hl	; init pointers
-	ld	hl,0
+PR9:	ld	hl,0
+	ld	(IBCNT),hl	; init char counters
+	ld	(IBLEN),hl
 	ld	(IOB2+BUFCNT),hl
 	ld	(IOB3+BUFCNT),hl
 	xor	a
@@ -347,6 +348,7 @@ SM1:	db	'Source file not found',0
 SM2:	db	'Unable to create object file',0
 SM3:	db	'Unable to create listing file',0
 SM4:	db	'Command syntax error',0
+SM5:	db	'Illegal input device',0
 
 ASMEXT:	db	'MAC'
 RELEXT:	db	'REL'
@@ -766,14 +768,16 @@ UCASE:	cp	'a'
 
 GNB:	push	hl
 	push	de
-	ld	hl,(IBP)
-	ld	de,INBUF+IBUFSZ
+	ld	hl,(IBLEN)
+	ld	de,(IBCNT)
 	call	CMPHD		; see if end of buffer
 	call	z,REFILL	; refill buffer if necessary
+	ld	hl,INBUF
+	add	hl,de
 	ld	a,(hl)		; get byte
 	and	7Fh		; strip parity bit
-	inc	hl
-	ld	(IBP),hl
+	inc	de
+	ld	(IBCNT),de
 	pop	de	
 	pop	hl
 	ret
@@ -781,6 +785,9 @@ GNB:	push	hl
 ;	REFILL - (Re)fill input buffer
 
 REFILL:	push	bc
+	ld	a,(IFLAG)
+	cp	'X'
+	jr	z,RE4
 	ld	hl,(FCB1+33)
 	ld	(IRECNO),hl
 	ld	de,INBUF	; set up pointer for DMASET
@@ -808,10 +815,46 @@ RE2:	ex	de,hl
 	ld	a,h
 	or	l
 	jr	nz,RE1		; branch back if more to do
-RE3:	ld	hl,INBUF
-	ld	(IBP),hl	; set up next data pointer
-	pop	bc
+RE3:	ex	de,hl
+	ld	hl,IBUFSZ
+	or	a
+	sbc	hl,de
+	ld	(IBLEN),hl
+RE6:	ld	de,0
+	ld	(IBCNT),de	; set up next data pointer
+	pop	bc		; note: returns DE = 0
 	ret
+
+RE4:	call	GETLN
+	ld	hl,CPMBUF
+	ld	de,INBUF
+	ld	c,(hl)
+	ld	b,0
+	push	bc
+	inc	hl
+	ld	a,b
+	or	c
+	jr	z,RE5
+	ldir
+RE5:	ex	de,hl
+	ld	(hl),CR
+	inc	hl
+	ld	(hl),LF
+	inc	hl
+	ld	(hl),0
+	pop	bc
+	inc	bc
+	inc	bc
+	ld	(IBLEN),bc
+	jr	RE6
+
+GETLN:	ld	hl,CPMBUF-1
+	ld	(hl),126
+	ex	de,hl
+	ld	c,10
+	call	ENTRY		; get command line
+	jp	CRLF
+
 
 ;	REWIND - Rewind input file
 
@@ -822,15 +865,19 @@ REWIND:	ld	a,(INCLVL)
 	jr	REWIND
 REW1:	ld	hl,0
 	ld	(FCB1+33),hl	; reset r0,r1
-	ld	hl,INBUF+IBUFSZ
-	ld	(IBP),hl	; reset char pointer
+	ld	hl,0
+	ld	(IBCNT),hl	; reset char pointer
+	ld	(IBLEN),hl
 	ret
 
 ;	CLSINP - Close input file
 
-CLSINP:	ld	de,FCB1
+CLSINP:	ld	a,(IFLAG)
+	sub	'X'
+	ret	z
+	ld	de,FCB1
 	jp	CLSFIL		; !!!TODO: close include files?
-				; (is there any still open?)
+				; (are there any still open?)
 
 ;	WNB - Write next byte (PRN)
 ;	Byte in A reg
@@ -896,7 +943,7 @@ WNB1:	ld	(ix+BUFCNT),e
 	pop	hl
 	ret
 
-WRERR:	ld	hl,SM5		; file write error
+WRERR:	ld	hl,SM6		; file write error
 	call	CLINE		; msg and return
 	pop	bc
 	pop	de
@@ -904,7 +951,7 @@ WRERR:	ld	hl,SM5		; file write error
 	scf
 	ret
 
-SM5:	db	'Output file write error',0
+SM6:	db	'Output file write error',0
 
 ;	CLOSE1 - Close PRN file
 
@@ -939,6 +986,7 @@ CLS1:	ld	e,(ix+FCBADR)
 ;
 ;	db	STINPF		; type = include/input file state
 ;	dw	len		; total length of the following fields:
+;	db	iflag		;  input device code
 ;	dw	recno		;  current record number
 ;	dw	ci		;  current char index
 ;	ds	36		;  current FCB
@@ -948,7 +996,7 @@ OPNLIB:	ld	a,(INCLVL)
 	jp	nc,FNERR1	; error if above maximum
 
 	push	hl
-	ld	bc,2+2+36	; recno + char index + FCB
+	ld	bc,1+2+2+36	; iflag + recno + char index + FCB
 	ld	e,STINPF	; type = file
 	call	MALLOC		; allocate block
 	pop	de
@@ -956,20 +1004,15 @@ OPNLIB:	ld	a,(INCLVL)
 
 	push	hl		; save block address
 	push	de		; save pointer to file name
+	ld	a,(IFLAG)
+	ld	(hl),a		; store input device code
+	inc	hl
 	ld	bc,(IRECNO)
 	ld	(hl),c		; store starting record number
 	inc	hl
 	ld	(hl),b
 	inc	hl
-
-	push	hl
-	ld	hl,(IBP)
-	ld	bc,INBUF
-	or	a
-	sbc	hl,bc
-	ld	c,l
-	ld	b,h
-	pop	hl
+	ld	bc,(IBCNT)
 	ld	(hl),c		; store char index
 	inc	hl
 	ld	(hl),b
@@ -992,8 +1035,11 @@ OPNLIB:	ld	a,(INCLVL)
 	jr	z,FNERR		; file not found
 
 	ex	(sp),hl		; drop block address
-	ld	hl,INBUF+IBUFSZ
-	ld	(IBP),hl	; init pointers
+	ld	hl,0
+	ld	(IBCNT),hl	; init pointers
+	ld	(IBLEN),hl
+	ld	a,'@'
+	ld	(IFLAG),a
 	ld	hl,INCLVL
 	inc	(hl)
 	pop	hl		; restore record pointer
@@ -1002,7 +1048,7 @@ OPNLIB:	ld	a,(INCLVL)
 
 FNERR:	ex	(sp),hl		; restore block address, save record pointer
 	push	hl
-	ld	de,2+2
+	ld	de,1+2+2
 	add	hl,de
 	ld	de,FCB1
 	ld	bc,36
@@ -1118,6 +1164,10 @@ CLSLIB:	ld	a,(INCLVL)
 	inc	hl
 	inc	hl
 
+	ld	a,(hl)		; get input device code
+	ld	(IFLAG),a
+	inc	hl
+
 	ld	e,(hl)		; get starting record number
 	inc	hl
 	ld	d,(hl)
@@ -1128,6 +1178,7 @@ CLSLIB:	ld	a,(INCLVL)
 	inc	hl
 	ld	d,(hl)
 	inc	hl
+	ld	(IBLEN),de	; in case we were reading from terminal
 	push	de
 
 	ld	de,FCB1
@@ -1136,20 +1187,21 @@ CLSLIB:	ld	a,(INCLVL)
 
 	pop	hl		; get char index into HL
 	pop	de		; and starting record number in DE
+	cp	'X'		; IFLAG still in A
+	jr	z,ICLS2
+
 	ld	bc,-128
 ICLS1:	add	hl,bc		; reduce starting record number
 	inc	de
 	jr	c,ICLS1
 	dec	de
 	ld	(FCB1+33),de
-	ld	bc,INBUF+128
+	ld	bc,128
 	add	hl,bc
 	push	hl
-
 	call	REFILL		; refill input buffer
-
 	pop	hl
-	ld	(IBP),hl	; set input char pointer
+ICLS2:	ld	(IBCNT),hl	; set input char pointer
 
 	pop	hl		; pop start of record
 	call	MFREE		; release storage
@@ -1183,9 +1235,11 @@ IOB3:	ds	2		; buffer char counter
 	dw	FCB3		; FCB address (PRN)
 	dw	BUF3		; buffer address
 
+IFLAG:	ds	1		; input device code
 FCB1:	ds	36		; file control block (source)
 INBUF:	ds	IBUFSZ		; .MAC input buffer
-IBP:	ds	2		; pointer to next char in input buffer
+IBCNT:	ds	2		; index of next char in input buffer
+IBLEN:	ds	2		; number of valid bytes in input buffer
 IRECNO:	ds	2		; starting record number of input buffer
 
 FCB2:	ds	36		; file control block (REL)
