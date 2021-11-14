@@ -39,9 +39,11 @@
 .SUPER	equ	36	; enter/exit supervisor mode
 .GTSK	equ	37	; get task info
 .GTPAR	equ	38	; get partition info
-.GIN	equ	39	; get general info
+.GCII	equ	39	; get command interpreter info
+.GIN	equ	40	; get general info
+.SVTBL	equ	41	; specify SST vector table
 
-MAXFN	equ	39
+MAXFN	equ	41
 
 SYSRST	equ	20h	; system call RST is RST 4
 DBGRST	equ	30h	; debug breakpoint RST is RST 6
@@ -69,8 +71,14 @@ I.FEAT	equ	6	; get feature bits
 
 ; Macro to call system services
 
+	IFZ280
+	ELSE
 SC	MACRO	func
+	IF	0
 	rst	SYSRST
 	db	func
+	ELSE
+	dw	71EDh,func
+	ENDIF
 	ENDM
-
+	ENDIF

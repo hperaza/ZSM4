@@ -2089,7 +2089,7 @@ S128C:	ld	a,b
 ;
 ;	LD	r,(...)
 ;
-S130::	call	EVBRKT		; evaluate ()
+S130:	call	EVBRKT		; evaluate ()
 	ld	hl,LDTBL1
 	jp	SWITCH
 ;

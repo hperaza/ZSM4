@@ -70,10 +70,12 @@ TX.GID	equ	TX.UID + 1	; protection group ID (1 byte)
 TX.DIR	equ	TX.GID + 1	; task's current directory (9 bytes)
 TX.SWM	equ	TX.DIR + 9	; saved flag wait mask during AST (4 bytes)
 TX.LUT	equ	TX.SWM + 4	; LUN translation table (64 bytes)
+TX.SST	equ	TX.LUT + 64	; user SST vector table (2 bytes)
+TX.REGS	equ	TX.SST + 2	; saved registers (28 bytes)
 
 ; Context Block size
 
-CTXSZ	equ	TX.LUT + 64
+CTXSZ	equ	TX.REGS + 28
 
 ; Task Descriptor Block
 

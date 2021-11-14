@@ -56,9 +56,10 @@ E.PBSY	equ	-52	; Partition busy
 E.PNF	equ	-53	; Partition not found
 E.SSNF	equ	-54	; Session not found
 E.SSNA	equ	-55	; Session not active
-E.DMOI	equ	-56	;- Dismount initiated
-E.NLI	equ	-57	;- Not logged in
-E.ULI	equ	-58	;- Already (Other user) logged in
+E.CLNF	equ	-56	;- CLI not found
+E.DMOI	equ	-57	;- Dismount initiated
+E.NLI	equ	-58	;- Not logged in
+E.ULI	equ	-59	;- Already (Other user) logged in
 
 ; Task exit status codes (lo-byte, hi-byte is reserved for user codes)
 
