@@ -1,7 +1,7 @@
 FALSE	equ	0		; fiction
 TRUE	equ	NOT FALSE	; stranger than fiction
 
-VER	equ	44		; version number
+VER	equ	45		; version number
 
 VER1	equ	VER/10+'0'	; most significant version digit
 VER2	equ	VER MOD 10+'0'	; least significant version digit

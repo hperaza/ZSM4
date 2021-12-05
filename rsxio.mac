@@ -41,7 +41,7 @@
 	extrn	Z80ASM,HOFNAM,LFLAG,OFLAG,QFLAG,ERRFLG,CMPHD
 	extrn	MAXMEM,SYMTBL,VALID,MALLOC,MFREE,FNDREC,NAMLEN
 	extrn	FNDNXT,DSPTR,PTR1,HOFDAT,HOFTIM,CNV2HX,UMODE
-	extrn	ZERODS,DEFCPU,RADIX,CMNPTR
+	extrn	ZERODS,DEFCPU,RADIX,CMNPTR,ERRCNT
 
 	extrn	GCML,RCML,UCASE,PERROR,TTFLSH,PUTCH,PUTSTR
 	extrn	PFN,FOPEN,FCREAT,FGETCH,FPUTCH,FCLOSE,FPOS
@@ -88,9 +88,10 @@ m1:	call	TTFLSH
 
 	ld	(PTR1),hl	; save pointer to command tail
 	call	PROCESS		; process the command
+	call	UPDEXC		; update program exit code
 	jr	m1		; loop for more
 
-m2:	cp	E.EOF		; end of file?
+m2:	cp	E.EOF		; end of command file?
 	jr	z,m3		; exit normally if yes
 
 	call	CMLERR		; else display error
@@ -99,7 +100,7 @@ m2:	cp	E.EOF		; end of file?
 	jr	m1		; and loop
 	
 m3:	call	TTFLSH
-	ld	hl,EX.SUC
+	ld	hl,(EXITC)	; fetch exit code
 	SC	.EXIT		; exit
 
 ;-----------------------------------------------------------------------
@@ -121,6 +122,8 @@ INIT:	ld	hl,0
 	ld	de,errpfx+2	; set task name in error message prefix
 	ld	bc,3
 	ldir
+	ld	hl,EX.SUC
+	ld	(EXITC),hl	; default to 'success' exit code
 	ret
 
 ckdots:	ld	b,3
@@ -142,14 +145,15 @@ ckd2:	pop	hl
 
 CMDERR:	ld	hl,snerr
 ERROR:	push	hl
-	call	RCTRLO
+	call	RCTRLO		; resume output, if suspended
 	ld	hl,errpfx
-	call	PUTSTR
+	call	PUTSTR		; output program name
 	pop	hl
-	call	PUTSTR
+	call	PUTSTR		; output message
 	call	ATLINE
 	ld	c,CR
 	call	PUTCH
+	call	UPDERR		; update exit code
 	scf
 	ret
 
@@ -159,12 +163,14 @@ snerr:	db	'Command syntax error',0
 
 SYSERR:	push	af
 	ld	hl,errpfx
-	call	PUTSTR
+	call	PUTSTR		; output program name
 	pop	af
-	call	PERROR
-	call	ATLINE
+	call	PERROR		; output system error message
+	call	ATLINE		; and line number of command file
 	ld	c,CR
 	call	PUTCH
+	ld	hl,EX.SEV	; system errors are always 'severe'
+	ld	(EXITC),hl
 	scf
 	ret
 
@@ -207,10 +213,23 @@ ATLINE:	ld	hl,GDAT+G.ST
 	call	PUTSTR
 	pop	hl
 	xor	a
-	call	HLDEC
-	ret
+	jp	HLDEC		; display line number and return
 
 atln:	db	' at line ',0
+
+; Update exit code
+
+UPDEXC:	ld	hl,(ERRCNT)	; get error count
+	ld	a,h
+	or	l		; any errors?
+	ret	z		; no, return
+UPDERR:	ld	hl,(EXITC)	; else get current exit code
+	ld	a,l
+	cp	EX.SEV		; severe error?
+	ret	nc		; yes, return
+	ld	hl,EX.ERR	; else set to error
+	ld	(EXITC),hl
+	ret
 
 ;-----------------------------------------------------------------------
 
@@ -1059,6 +1078,7 @@ CMDBUF:	ds	82
 
 OPTSW:	ds	1
 FFLAGS:	ds	1
+EXITC:	ds	2
 
 IOB1:	FSR$	IFNAME,<1 SHL FM.RD>,LUNMAC,9
 IOB2:	FSR$	OFNAME,<1 SHL FM.WR>,LUNOBJ,9

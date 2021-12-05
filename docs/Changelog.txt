@@ -976,3 +976,11 @@ Changelog
   lines.
 
 
+05/12/21
+
+- RSX180/280 version: set exit code to 'error' if errors were found during
+  assembly, or to 'severe' in case of I/O errors. When assembling multiple
+  files via a command file, the exit code will be set if errors occurred
+  in at least one of the files; ZSM4 will continue processing the rest of
+  the files in the list.
+
