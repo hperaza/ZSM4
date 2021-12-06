@@ -984,3 +984,9 @@ Changelog
   in at least one of the files; ZSM4 will continue processing the rest of
   the files in the list.
 
+
+06/12/21
+
+- Output file write error message only once per file.
+
+

@@ -162,6 +162,7 @@ snerr:	db	'Command syntax error',0
 ; Like the above one, but displays a standard error message.
 
 SYSERR:	push	af
+	call	RCTRLO		; resume output, if suspended
 	ld	hl,errpfx
 	call	PUTSTR		; output program name
 	pop	af
@@ -759,22 +760,32 @@ CLS0:	ld	ix,IOB1
 ;	WNB - Write next byte (LST)
 ;	Byte in A reg
 
-WNB:	push	ix
+WNB:	ld	iy,FFLAGS
+	bit	2,(iy)
+	scf
+	ret	z
+	push	ix
 	and	7Fh		; strip parity bit
 	ld	ix,IOB3
 	call	FPUTCH
-	call	c,SYSERR
 	pop	ix
-	ret
+	ret	nc
+	res	2,(iy)
+	jp	SYSERR
 
 ;	WNB2 - Write next byte (OBJ)
 
-WNB2:	push	ix
+WNB2:	ld	iy,FFLAGS
+	bit	1,(iy)
+	scf
+	ret	z
+	push	ix
 	ld	ix,IOB2
 	call	FPUTCH
-	call	c,SYSERR
 	pop	ix
-	ret
+	ret	nc
+	res	1,(iy)
+	jp	SYSERR
 
 ;	CLOSE1 - Close LST file
 

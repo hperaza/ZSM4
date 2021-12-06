@@ -335,6 +335,7 @@ PR9:	ld	hl,0
 	xor	a
 	ld	(INCLVL),a
 	ld	(QFLAG),a
+	ld	(EFLAG),a
 	call	Z80ASM		; assemble file
 	ld	hl,ENDMSG	; sign off
 	jp	CLINE		; msg and return
@@ -882,19 +883,31 @@ CLSINP:	ld	a,(IFLAG)
 ;	WNB - Write next byte (PRN)
 ;	Byte in A reg
 
-WNB:	push	ix
+WNB:	ld	iy,EFLAG
+	bit	2,(iy)
+	scf
+	ret	nz
+	push	ix
 	and	7Fh		; strip parity bit
 	ld	ix,IOB3
 	call	FWRITE
 	pop	ix
+	ret	nc
+	set	2,(iy)
 	ret
 
 ;	WNB2 - Write next byte (REL)
 
-WNB2:	push	ix
+WNB2:	ld	iy,EFLAG
+	bit	1,(iy)
+	scf
+	ret	nz
+	push	ix
 	ld	ix,IOB2
 	call	FWRITE
 	pop	ix
+	ret	nc
+	set	1,(iy)
 	ret
 
 ;	FWRITE - Write byte to file
@@ -941,6 +954,7 @@ WNB1:	ld	(ix+BUFCNT),e
 	pop	bc
 	pop	de
 	pop	hl
+	or	a
 	ret
 
 WRERR:	ld	hl,SM6		; file write error
@@ -1251,6 +1265,7 @@ BUF3:	ds	OBUFSZ		; .PRN output buffer
 INCLVL:	ds	1		; nested INCLUDE level
 
 MODE:	ds	1		; 0=interactive command mode
+EFLAG:	ds	1		; I/O error output flag
 
 TOD	equ	$
 DAYS:	ds	2		; days (1 = 1-Jan-1978)
