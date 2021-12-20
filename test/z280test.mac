@@ -1245,8 +1245,8 @@ VAL	equ	1234h
 	EX	H,L		; ED EF
 
 	EX	DE,HL		; EB
-	EX	DE,IX		; DD EB
-	EX	DE,IY		; FD EB
+	EX	IX,HL		; DD EB
+	EX	IY,HL		; FD EB
 
 	EX	A,A		; ED 3F
 	EX	A,B		; ED 07

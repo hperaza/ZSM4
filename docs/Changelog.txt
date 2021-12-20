@@ -990,3 +990,8 @@ Changelog
 - Output file write error message only once per file.
 
 
+19/12/21
+
+- Fixed Z280 exchange instructions 'ex ix,hl' and 'ex iy,hl' (there are no
+  'ex de,ix' or 'ex de,iy')
+

@@ -3057,25 +3057,28 @@ CL10:	call	GNC
 	call	EVALSRG		; get first operand, include special regs
 	cp	RPNAME
 	jr	nz,S230		; branch if not rpair
-	ld	a,l
-	cp	2		; must be DE
+	ld	a,h
+	or	a
+	jr	z,S231
+	ld	a,(CPU)		; index register allowed only for Z280
+	cp	2
 	jp	nz,OERROR
-	call	REQCHR
+	ld	a,h
+	call	EMITB
+	jr	S232
+S231:	ld	a,l
+	cp	2		; else must be DE
+	jp	nz,OERROR
+S232:	call	REQCHR
 	db	','
 	call	EVALREG		; get second operand
 	cp	RPNAME
 	jp	nz,OERROR	; must be rpair
+	ld	a,l
+	cp	4		; must be HL
+	jp	nz,OERROR
 	ld	a,h
 	or	a
-	ld	c,a
-	jr	z,S231		; index register allowed only for Z280
-	ld	a,(CPU)
-	cp	2
-	jp	nz,OERROR
-	ld	a,c
-	call	EMITB
-S231:	ld	a,(VAL)
-	cp	4		; must be HL
 	jp	nz,OERROR
 	ld	a,0EBh
 	jp	EMITB
