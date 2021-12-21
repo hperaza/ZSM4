@@ -995,3 +995,9 @@ Changelog
 - Fixed Z280 exchange instructions 'ex ix,hl' and 'ex iy,hl' (there are no
   'ex de,ix' or 'ex de,iy')
 
+
+21/12/21
+
+- Fixed 'ident' in the code to reflect the new version (thanks, Tony!)
+
+

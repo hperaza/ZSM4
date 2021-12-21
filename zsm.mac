@@ -206,7 +206,7 @@
 
 	.Z80
 
-	ident	'ZSM4.5'
+	ident	'ZSM4.6'
 
 	include	ZSM.INC
 
