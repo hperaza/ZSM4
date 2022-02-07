@@ -30,8 +30,9 @@ _zsm4.com: $(OBJS)
 	$(ZXCC) $(DRLINK) -"_zsm4=zsm,symbols,listing,alloc,eval,macros,genrel,cpmio"
 
 mac.tsk: $(OBJS) syslib.lib fcslib.lib
-	@echo -e "    fcslib/lb,syslib/lb/task=...MAC/ext=8000/asg=TI:5,SY:1-4:6-11\r" > build.cmd
-	$(ZXCC) $(TKB) -"mac,mac,mac=zsm/of=t,symbols,listing,alloc,eval,macros,genrel,rsxio,&" < build.cmd
+	@echo -e "mac,mac,mac=zsm/of:tsk,symbols,listing,alloc,eval,macros,genrel,rsxio,&\r" > build.cmd
+	@echo -e "fcslib/lb,syslib/lb/task=...MAC/ext=8000/asg=TI:5,SY:1-4:6-11\r" >> build.cmd
+	$(ZXCC) $(TKB) -"@build"
 	@rm build.cmd
 
 selftest: _zsm4.com

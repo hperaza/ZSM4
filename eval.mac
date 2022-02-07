@@ -711,10 +711,12 @@ INT6:	pop	hl		; get saved pointer to string
 	jr	c,INT7
 	add	a,9		; for A-F
 INT7:	and	0Fh
-	push	af		; get binary value of this digit
+	push	af		; save digit
 	ld	hl,(BASE)
-	call	MULT
-	pop	af
+	cp	l		; ensure that digit value is < BASE
+	call	nc,VALERR	; else set error flag, but continue anyway
+	call	MULT		; HL = accumulator * BASE
+	pop	af		; restore digit
 	ld	e,a
 	ld	d,0
 	add	hl,de		; add in new digit

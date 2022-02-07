@@ -1001,3 +1001,8 @@ Changelog
 - Fixed 'ident' in the code to reflect the new version (thanks, Tony!)
 
 
+07/02/22
+
+- Numeric parsing: report error if a digit is above the numeric base (thanks
+  to Ladislau, who reported it).
+
