@@ -709,8 +709,8 @@ INT6:	pop	hl		; get saved pointer to string
 	call	UCASE
 	cp	'A'
 	jr	c,INT7
-	add	a,9		; for A-F
-INT7:	and	0Fh
+	sub	7		; for A-F
+INT7:	sub	'0'
 	push	af		; save digit
 	ld	hl,(BASE)
 	cp	l		; ensure that digit value is < BASE
