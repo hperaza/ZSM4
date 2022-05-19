@@ -13,53 +13,54 @@ E.BADOP	equ	-9	; Invalid operation
 E.CHOPN	equ	-10	; Channel already in use
 E.IO	equ	-11	; Channel I/O error
 E.PERM	equ	-12	; Access denied
-E.INV	equ	-13	; Invalid value (FCB/LUN)
-E.NOBUF	equ	-14	; Out of disk buffers
-E.DEVNM	equ	-15	; Device not mounted
-E.DEVAM	equ	-16	; Device already mounted
-E.DMOP	equ	-17	; Dismount in progress
-E.OFL	equ	-18	; Unit offline
-E.BADVT	equ	-19	; Invalid volume type
-E.UNA	equ	-20	; Reading unallocated block (unwritten data)
-E.FLCK	equ	-21	; File access is locked
-E.NODEV	equ	-22	; No such device
-E.EXIST	equ	-23	; File exists
-E.DNE	equ	-24	; Directory not empty
-E.VLIM	equ	-25	; File version limit reached
-E.BADFN	equ	-26	; Invalid system call
-E.BADTH	equ	-27	; Invalid task header
-E.TCKS	equ	-28	; Task image checksum error
-E.BADTF	equ	-29	; Invalid or corrupt task image file
-E.TNF	equ	-30	; Task not found
-E.TNU	equ	-31	; Task name in use
-E.FNC	equ	-32	; File not contiguous
-E.NCSPC	equ	-33	; No contiguous space on device
-E.NOMEM	equ	-34	; Not enough room
-E.PEND	equ	-35	; I/O request pending
-E.TRUN	equ	-36	; Task already running
-E.TSTP	equ	-37	; Task already stopped
-E.TDLY	equ	-38	; Task already delayed
-E.TFIX	equ	-39	; Task already fixed
-E.TNFIX	equ	-40	; Task not fixed
-E.TACT	equ	-41	; Task active
-E.TNAC	equ	-42	; Task not active
-E.TNIU	equ	-43	; Task name in use
-E.TABO	equ	-44	; Task abort in progress
-E.FAIL	equ	-45	; Operation failed
-E.ABOP	equ	-46	; Operation aborted
-E.TMO	equ	-47	; Operation timed out
-E.PRIV	equ	-48	; Privileged command
-E.PBIG	equ	-49	; Program too big
-E.QEMP	equ	-50	; Queue empty
-E.BADFL	equ	-51	; Invalid flag number
-E.PBSY	equ	-52	; Partition busy
-E.PNF	equ	-53	; Partition not found
-E.SSNF	equ	-54	; Session not found
-E.SSNA	equ	-55	; Session not active
-E.CLNF	equ	-56	;- CLI not found
-E.DMOI	equ	-57	;- Dismount initiated
-E.NLI	equ	-58	;- Not logged in
-E.ULI	equ	-59	;- Already (Other user) logged in
+E.INV	equ	-13	; Invalid value
+E.LUN	equ	-14	; Invalid LUN
+E.NOBUF	equ	-15	; Out of disk buffers
+E.DEVNM	equ	-16	; Device not mounted
+E.DEVAM	equ	-17	; Device already mounted
+E.DMOP	equ	-18	; Dismount in progress
+E.OFL	equ	-19	; Unit offline
+E.BADVT	equ	-20	; Invalid volume type
+E.UNA	equ	-21	; Reading unallocated block (unwritten data)
+E.FLCK	equ	-22	; File access is locked
+E.NODEV	equ	-23	; No such device
+E.EXIST	equ	-24	; File exists
+E.DNE	equ	-25	; Directory not empty
+E.VLIM	equ	-26	; File version limit reached
+E.BADFN	equ	-27	; Invalid system call
+E.BADTH	equ	-28	; Invalid task header
+E.TCKS	equ	-29	; Task image checksum error
+E.BADTF	equ	-30	; Invalid or corrupt task image file
+E.TNF	equ	-31	; Task not found
+E.TNU	equ	-32	; Task name in use
+E.FNC	equ	-33	; File not contiguous
+E.NCSPC	equ	-34	; No contiguous space on device
+E.NOMEM	equ	-35	; Not enough room
+E.PEND	equ	-36	; I/O request pending
+E.TRUN	equ	-37	; Task already running
+E.TSTP	equ	-38	; Task already stopped
+E.TDLY	equ	-39	; Task already delayed
+E.TFIX	equ	-40	; Task already fixed
+E.TNFIX	equ	-41	; Task not fixed
+E.TACT	equ	-42	; Task active
+E.TNAC	equ	-43	; Task not active
+E.TNIU	equ	-44	; Task name in use
+E.TABO	equ	-45	; Task abort in progress
+E.FAIL	equ	-46	; Operation failed
+E.ABOP	equ	-47	; Operation aborted
+E.TMO	equ	-48	; Operation timed out
+E.PRIV	equ	-49	; Privileged command
+E.PBIG	equ	-50	; Program too big
+E.QEMP	equ	-51	; Queue empty
+E.BADFL	equ	-52	; Invalid flag number
+E.PBSY	equ	-53	; Partition busy
+E.PNF	equ	-54	; Partition not found
+E.SSNF	equ	-55	; Session not found
+E.SSNA	equ	-56	; Session not active
+E.CLNF	equ	-57	;- CLI not found
+E.DMOI	equ	-58	;- Dismount initiated
+E.NLI	equ	-59	;- Not logged in
+E.ULI	equ	-60	;- Already (Other user) logged in
 
 ; Task exit status codes (lo-byte, hi-byte is reserved for user codes)
 
