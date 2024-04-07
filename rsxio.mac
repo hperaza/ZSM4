@@ -2,7 +2,7 @@
 ;                                                                      ;
 ;   This file is part of ZSM4, a Z80/Z180/Z280 relocatable macro-      ;
 ;   assembler written in Z80 assembly.                                 ;
-;   Copyright (C) 2017-2021, Hector Peraza.                            ;
+;   Copyright (C) 2017-2023, Hector Peraza.                            ;
 ;                                                                      ;
 ;   This program is free software; you can redistribute it and/or      ;
 ;   modify it under the terms of the GNU General Public License as     ;
@@ -1002,7 +1002,7 @@ CLSLIB:	ld	a,(INCLVL)
 
 INCMEM:	push	de		; save lo-ptr
 	push	bc		; save size
-	ld	hl,2048
+	ld	hl,2048/16	; increment is in 16-byte units
 	call	EXTEND
 	jr	c,INC1		; return if failed to extend task limits
 
